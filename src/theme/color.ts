@@ -5,4 +5,5 @@ export const color = {
   error: '#cd0046',
   menu: '#f0f8ff',
   background: '#fafafa',
+  text: '#444445',
 }

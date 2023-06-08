@@ -1,28 +1,42 @@
 'use client'
-import React, {useState} from 'react'
+import React from 'react'
 import Image from 'next/image'
 import styled from 'styled-components'
-import Search from '@/components/SearchBar'
+import {useRouter} from 'next/navigation'
+import {Link, Typography} from '@mui/material'
 import Button from '@/components/Button'
 import logo from '@/assets/images/logo.png'
+import {menu} from '@/constants'
+import useResponsive from '@/hooks/useResponsive'
+import MobileMenu from './MobileMenu'
 
 const MenuBar = () => {
-  const [search, onSearch] = useState('')
+  const router = useRouter()
+  const {isMobile} = useResponsive()
+
   return (
     <Container>
       <Left>
-        <WrapImage
-          src={logo}
-          alt="Feastta"
-          width={55}
-          height={55}
-          // blurDataURL="data:..." automatically provided
-          // placeholder="blur" // Optional blur-up while loading
-          onClick={() => alert()}
-        />
+        {isMobile && <MobileMenu />}
+        {!isMobile && (
+          <WrapImage
+            src={logo}
+            alt="Feastta"
+            width={55}
+            height={55}
+            // blurDataURL="data:..." automatically provided
+            // placeholder="blur" // Optional blur-up while loading
+            onClick={() => router.push('/')}
+          />
+        )}
       </Left>
       <Middle>
-        <Search />
+        {!isMobile &&
+          menu.map(item => (
+            <CustomLink href={item.path} underline="hover" key={item.key}>
+              <Text variant="h6">{item.label}</Text>
+            </CustomLink>
+          ))}
       </Middle>
       <Right>
         <Button title="Login" onClick={() => alert()} />
@@ -57,6 +71,7 @@ const Middle = styled('div')`
   justify-content: center;
   align-items: center;
   width: 50%;
+  gap: 15px;
 `
 
 const Right = styled('div')`
@@ -71,13 +86,19 @@ const Right = styled('div')`
 const WrapImage = styled(Image)`
   &:hover {
     cursor: pointer;
-    /* Set the desired cursor style */
   }
 `
 
-const Text = styled('p')`
-  font-size: ${({theme}) => theme.font.size.s};
-  font-weight: bold;
+export const Text = styled(Typography)`
+  font-weight: 400;
+  font-size: 14px;
+  color: ${({theme}) => theme.color.primaryDark};
+`
+
+export const CustomLink = styled(Link)`
+  &:hover {
+    text-decoration-color: ${({theme}) => theme.color.primaryDark};
+  }
 `
 
 export default MenuBar

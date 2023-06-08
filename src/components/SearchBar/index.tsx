@@ -10,7 +10,7 @@ const SearchBar = () => {
   return (
     <Container>
       <WrapperSearch
-        placeholder="search text"
+        placeholder="search restaurants"
         onSearch={onSearch}
         enterButton
       />

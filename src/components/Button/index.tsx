@@ -1,6 +1,6 @@
 'use client'
 import React, {useState} from 'react'
-import {Button as AButton, Space} from 'antd'
+import {Button as MButton} from '@mui/material'
 import styled from 'styled-components'
 
 interface IButton {
@@ -11,16 +11,18 @@ interface IButton {
 const Button = ({title, onClick}: IButton) => {
   const [search, onSearch] = useState('')
   return (
-    <Container type="primary" onClick={onClick}>
+    <Container variant="contained" size="medium" onClick={onClick}>
       <Text>{title}</Text>
     </Container>
   )
 }
 
-const Container = styled(AButton)`
+const Container = styled(MButton)`
   display: flex;
+  height: 60%;
   justify-content: center;
   align-items: center;
+  text-transform: none;
 `
 const Text = styled('p')`
   font-size: ${({theme}) => theme.font.size.m};
