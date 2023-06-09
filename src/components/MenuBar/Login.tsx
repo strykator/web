@@ -44,7 +44,7 @@ const Login = ({onCloseModal}: ILogin) => {
       <FormControl sx={{m: 1, width: '25ch'}} variant="filled">
         <InputLabel htmlFor="filled-adornment-password">Email</InputLabel>
         <FilledInput
-          id="filled-adornment-password"
+          id="filled-adornment-email"
           type="text"
           value={email}
           onChange={handleEmailInput}

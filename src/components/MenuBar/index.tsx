@@ -1,8 +1,8 @@
-'use client'
 import React, {useState} from 'react'
 import Image from 'next/image'
 import styled from 'styled-components'
 import {useRouter} from 'next/navigation'
+import {useDispatch, useSelector} from 'react-redux'
 import {Link, Typography} from '@mui/material'
 import Button from '@/components/Button'
 import logo from '@/assets/images/logo.png'
@@ -11,13 +11,30 @@ import useResponsive from '@/hooks/useResponsive'
 import Modal from '@/components/Modal'
 import MobileMenu from './MobileMenu'
 import Login from './Login'
+import {selectUserUid, updateUser} from '@/redux/user/userSlice'
+import {RootState} from '@/redux'
 
 const MenuBar = () => {
   const router = useRouter()
   const {isMobile} = useResponsive()
   const [isOpenModal, setOpenModal] = useState<boolean>(false)
-
+  const state = useSelector((state: RootState) => state)
+  const dispatch = useDispatch()
+  const userId = selectUserUid(state)
   const handleCloseModal = () => setOpenModal(false)
+
+  const handleUpdateUser = () => {
+    const payload = {
+      uid: 'id',
+      firstName: 'First',
+      lastName: 'Last',
+      email: 'email@gmail.com',
+      mobile: '123-456-4789',
+      roles: ['Admin'],
+      authenticated: true,
+    }
+    dispatch(updateUser(payload))
+  }
 
   return (
     <Container>
@@ -48,7 +65,7 @@ const MenuBar = () => {
           title="Account"
           width="70px"
           height="30px"
-          onClick={() => setOpenModal(true)}
+          onClick={handleUpdateUser}
         />
       </Right>
       <Modal isOpen={isOpenModal} onClose={handleCloseModal}>

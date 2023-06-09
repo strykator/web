@@ -2,6 +2,8 @@
 
 import './globals.css'
 import {Inter} from 'next/font/google'
+import {Provider} from 'react-redux'
+import {store} from '@/redux'
 import ThemeProvider from '@/theme'
 import Footer from '@/components/Footer'
 
@@ -16,10 +18,12 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       />
       <title>Feastta</title>
       <body className={inter.className}>
-        <ThemeProvider>
-          {children}
-          <Footer />
-        </ThemeProvider>
+        <Provider store={store}>
+          <ThemeProvider>
+            {children}
+            <Footer />
+          </ThemeProvider>
+        </Provider>
       </body>
     </html>
   )
