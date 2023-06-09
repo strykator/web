@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, ChangeEvent} from 'react'
 import styled from 'styled-components'
 import {
   Typography,
@@ -12,8 +12,14 @@ import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import Button from '@/components/Button'
 
-const Login = () => {
+interface ILogin {
+  onCloseModal: () => void
+}
+
+const Login = ({onCloseModal}: ILogin) => {
   const [showPassword, setShowPassword] = React.useState(false)
+  const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
 
   const handleClickShowPassword = () => setShowPassword(show => !show)
   const handleMouseDownPassword = (
@@ -21,13 +27,28 @@ const Login = () => {
   ) => {
     event.preventDefault()
   }
+  const handleEmailInput = (event: ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target?.value)
+  }
+  const handlePasswordInput = (event: ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target?.value)
+  }
+  const handleSubmit = () => {
+    alert(`email: ${email} - password: ${password}`)
+    onCloseModal && onCloseModal()
+  }
 
   return (
     <Container>
       <Title>Login</Title>
       <FormControl sx={{m: 1, width: '25ch'}} variant="filled">
         <InputLabel htmlFor="filled-adornment-password">Email</InputLabel>
-        <FilledInput id="filled-adornment-password" type="text" />
+        <FilledInput
+          id="filled-adornment-password"
+          type="text"
+          value={email}
+          onChange={handleEmailInput}
+        />
       </FormControl>
       <FormControl sx={{m: 1, width: '25ch'}} variant="filled">
         <InputLabel htmlFor="filled-adornment-password">Password</InputLabel>
@@ -45,15 +66,12 @@ const Login = () => {
               </IconButton>
             </InputAdornment>
           }
+          value={password}
+          onChange={handlePasswordInput}
         />
       </FormControl>
       <Space />
-      <Button
-        title="Submit"
-        onClick={() => alert()}
-        width="47%"
-        height="36px"
-      />
+      <Button title="Submit" onClick={handleSubmit} width="47%" height="36px" />
     </Container>
   )
 }

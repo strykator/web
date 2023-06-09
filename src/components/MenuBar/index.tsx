@@ -17,6 +17,8 @@ const MenuBar = () => {
   const {isMobile} = useResponsive()
   const [isOpenModal, setOpenModal] = useState<boolean>(false)
 
+  const handleCloseModal = () => setOpenModal(false)
+
   return (
     <Container>
       <Left>
@@ -49,8 +51,8 @@ const MenuBar = () => {
           onClick={() => setOpenModal(true)}
         />
       </Right>
-      <Modal isOpen={isOpenModal} onClose={() => setOpenModal(false)}>
-        <Login />
+      <Modal isOpen={isOpenModal} onClose={handleCloseModal}>
+        <Login onCloseModal={handleCloseModal} />
       </Modal>
     </Container>
   )

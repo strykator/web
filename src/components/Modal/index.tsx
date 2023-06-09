@@ -33,7 +33,7 @@ const Modal = ({isOpen, onClose, children, backdropClickDisabled}: IModal) => {
             <CloseIcon />
           </IconButton>
         </Header>
-        <Body isMobile={isMobile}>{children}</Body>
+        <Body>{children}</Body>
         <Footer />
       </Container>
     </ModalContainer>
@@ -73,7 +73,7 @@ const Header = styled('div')`
   width: 99%;
   height: 50px;
 `
-const Body = styled('div')<{isMobile: boolean}>`
+const Body = styled('div')`
   display: flex;
   flex-direction: column;
 `
