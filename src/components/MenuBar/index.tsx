@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, {useState} from 'react'
 import Image from 'next/image'
 import styled from 'styled-components'
 import {useRouter} from 'next/navigation'
@@ -8,11 +8,14 @@ import Button from '@/components/Button'
 import logo from '@/assets/images/logo.png'
 import {menu} from '@/constants'
 import useResponsive from '@/hooks/useResponsive'
+import Modal from '@/components/Modal'
 import MobileMenu from './MobileMenu'
+import Login from './Login'
 
 const MenuBar = () => {
   const router = useRouter()
   const {isMobile} = useResponsive()
+  const [isOpenModal, setOpenModal] = useState<boolean>(false)
 
   return (
     <Container>
@@ -39,9 +42,16 @@ const MenuBar = () => {
           ))}
       </Middle>
       <Right>
-        <Button title="Login" onClick={() => alert()} />
-        <Button title="Signup" onClick={() => alert()} />
+        <Button
+          title="Account"
+          width="70px"
+          height="30px"
+          onClick={() => setOpenModal(true)}
+        />
       </Right>
+      <Modal isOpen={isOpenModal} onClose={() => setOpenModal(false)}>
+        <Login />
+      </Modal>
     </Container>
   )
 }

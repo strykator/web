@@ -1,5 +1,6 @@
 'use client'
 
+import React, {useState} from 'react'
 import Image from 'next/image'
 import MenuBar from '@/components/MenuBar'
 import styled from 'styled-components'
