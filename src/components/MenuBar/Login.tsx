@@ -10,7 +10,11 @@ import {
 } from '@mui/material'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
+import {useDispatch, useSelector} from 'react-redux'
 import Button from '@/components/Button'
+import {loginWithEmailAndPassword} from '@/libs/firebase'
+import {buildUserPayload} from './utils'
+import {selectUserUid, updateUser} from '@/redux/user/userSlice'
 
 interface ILogin {
   onCloseModal: () => void
@@ -20,6 +24,7 @@ const Login = ({onCloseModal}: ILogin) => {
   const [showPassword, setShowPassword] = React.useState(false)
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
+  const dispatch = useDispatch()
 
   const handleClickShowPassword = () => setShowPassword(show => !show)
   const handleMouseDownPassword = (
@@ -33,15 +38,19 @@ const Login = ({onCloseModal}: ILogin) => {
   const handlePasswordInput = (event: ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target?.value)
   }
-  const handleSubmit = () => {
-    alert(`email: ${email} - password: ${password}`)
+  const handleSubmit = async () => {
     onCloseModal && onCloseModal()
+    const user = await loginWithEmailAndPassword(email, password)
+    if (user) {
+      const payload = buildUserPayload(user)
+      dispatch(updateUser(payload))
+    }
   }
 
   return (
     <Container>
       <Title>Login</Title>
-      <FormControl sx={{m: 1, width: '25ch'}} variant="filled">
+      <FormControl sx={{m: 1, width: '50%'}} variant="filled">
         <InputLabel htmlFor="filled-adornment-password">Email</InputLabel>
         <FilledInput
           id="filled-adornment-email"
@@ -50,7 +59,7 @@ const Login = ({onCloseModal}: ILogin) => {
           onChange={handleEmailInput}
         />
       </FormControl>
-      <FormControl sx={{m: 1, width: '25ch'}} variant="filled">
+      <FormControl sx={{m: 1, width: '50%'}} variant="filled">
         <InputLabel htmlFor="filled-adornment-password">Password</InputLabel>
         <FilledInput
           id="filled-adornment-password"
@@ -71,7 +80,13 @@ const Login = ({onCloseModal}: ILogin) => {
         />
       </FormControl>
       <Space />
-      <Button title="Submit" onClick={handleSubmit} width="47%" height="36px" />
+      <Button
+        title="Submit"
+        onClick={handleSubmit}
+        width="50%"
+        height="40px"
+        disabled={!email || !password}
+      />
     </Container>
   )
 }

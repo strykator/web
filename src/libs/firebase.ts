@@ -28,7 +28,8 @@ export const loginWithEmailAndPassword = async (
     const user = userCredential.user
     return user
   } catch (error) {
-    throw error
+    console.log(error)
+    return null
   }
 }
 
@@ -45,6 +46,7 @@ export const SignupWithEmailAndPassword = async (
     const user = userCredential.user
     return user
   } catch (error) {
-    throw error
+    console.log(error)
+    return null
   }
 }

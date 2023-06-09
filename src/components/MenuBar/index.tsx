@@ -11,8 +11,9 @@ import useResponsive from '@/hooks/useResponsive'
 import Modal from '@/components/Modal'
 import MobileMenu from './MobileMenu'
 import Login from './Login'
-import {selectUserUid, updateUser} from '@/redux/user/userSlice'
+import {selectUserUid} from '@/redux/user/userSlice'
 import {RootState} from '@/redux'
+import UserMenu from './UserMenu'
 
 const MenuBar = () => {
   const router = useRouter()
@@ -23,24 +24,11 @@ const MenuBar = () => {
   const userId = selectUserUid(state)
   const handleCloseModal = () => setOpenModal(false)
 
-  const handleUpdateUser = () => {
-    const payload = {
-      uid: 'id',
-      firstName: 'First',
-      lastName: 'Last',
-      email: 'email@gmail.com',
-      mobile: '123-456-4789',
-      roles: ['Admin'],
-      authenticated: true,
-    }
-    dispatch(updateUser(payload))
-  }
-
   return (
     <Container>
       <Left>
-        {isMobile && <MobileMenu />}
-        {!isMobile && (
+        {isMobile ? <MobileMenu /> : null}
+        {!isMobile ? (
           <WrapImage
             src={logo}
             alt="Feastta"
@@ -50,23 +38,28 @@ const MenuBar = () => {
             // placeholder="blur" // Optional blur-up while loading
             onClick={() => router.push('/')}
           />
-        )}
+        ) : null}
       </Left>
       <Middle>
-        {!isMobile &&
-          menu.map(item => (
-            <CustomLink href={item.path} underline="hover" key={item.key}>
-              <Text variant="h6">{item.label}</Text>
-            </CustomLink>
-          ))}
+        {!isMobile
+          ? menu.map(item => (
+              <CustomLink href={item.path} underline="hover" key={item.key}>
+                <Text variant="h6">{item.label}</Text>
+              </CustomLink>
+            ))
+          : null}
       </Middle>
       <Right>
-        <Button
-          title="Account"
-          width="70px"
-          height="30px"
-          onClick={handleUpdateUser}
-        />
+        {userId ? (
+          <UserMenu />
+        ) : (
+          <Button
+            title="Account"
+            width="70px"
+            height="30px"
+            onClick={() => setOpenModal(true)}
+          />
+        )}
       </Right>
       <Modal isOpen={isOpenModal} onClose={handleCloseModal}>
         <Login onCloseModal={handleCloseModal} />

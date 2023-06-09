@@ -3,7 +3,7 @@ import {ThemeProvider as StyledThemeProvider} from 'styled-components'
 import {color} from './color'
 import {font} from './font'
 
-const theme = {
+export const theme = {
   color,
   font,
 }

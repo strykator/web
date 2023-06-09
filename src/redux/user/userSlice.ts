@@ -10,7 +10,9 @@ interface IUserState {
   email: string
   mobile: string
   roles: string[]
-  authenticated: boolean
+  accessToken: string
+  refreshToken: string
+  expirationTime?: number
 }
 
 // Define the initial state using that type
@@ -21,7 +23,9 @@ const initialState: IUserState = {
   email: '',
   mobile: '',
   roles: [],
-  authenticated: false,
+  accessToken: '',
+  refreshToken: '',
+  expirationTime: 0,
 }
 
 export const userSlice = createSlice({
@@ -37,13 +41,26 @@ export const userSlice = createSlice({
       state.email = action.payload.email ?? ''
       state.mobile = action.payload.mobile ?? ''
       state.roles = action.payload.roles ?? []
-      state.authenticated = action.payload.authenticated ?? false
+      state.accessToken = action.payload.accessToken ?? ''
+      state.refreshToken = action.payload.refreshToken ?? ''
+      state.expirationTime = action.payload.expirationTime ?? 0
+    },
+    resetUser: state => {
+      state.uid = initialState.uid
+      state.firstName = initialState.firstName
+      state.lastName = initialState.lastName
+      state.email = initialState.email
+      state.mobile = initialState.mobile
+      state.roles = initialState.roles
+      state.accessToken = initialState.accessToken
+      state.refreshToken = initialState.refreshToken
+      state.expirationTime = initialState.expirationTime
     },
   },
 })
 
 // dispatch actions
-export const {updateUser} = userSlice.actions
+export const {updateUser, resetUser} = userSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectUserUid = (state: RootState) => state.user.uid
@@ -52,7 +69,11 @@ export const selectUserLastName = (state: RootState) => state.user.lastName
 export const selectUserEmail = (state: RootState) => state.user.email
 export const selectUserMobile = (state: RootState) => state.user.mobile
 export const selectUserRoles = (state: RootState) => state.user.roles
-export const selectUserAuthenticated = (state: RootState) =>
-  state.user.authenticated
+export const selectUserAccessToken = (state: RootState) =>
+  state.user.accessToken
+export const selectUserRefreshToken = (state: RootState) =>
+  state.user.refreshToken
+export const selectUserExpirationTime = (state: RootState) =>
+  state.user.expirationTime
 
 export default userSlice.reducer
