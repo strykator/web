@@ -3,11 +3,12 @@
 import './globals.css'
 import {Inter} from 'next/font/google'
 import {Provider} from 'react-redux'
-import {store} from '@/redux'
+import {PersistGate} from 'redux-persist/integration/react'
 import {ApolloProvider} from '@apollo/client'
-import ThemeProvider from '@/theme'
-import Footer from '@/components/Footer'
+import {store, persistor} from '@/redux'
 import client from '@/libs/apollo'
+import Footer from '@/components/Footer'
+import ThemeProvider from '@/theme'
 
 const inter = Inter({subsets: ['latin']})
 
@@ -21,12 +22,14 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <title>Feastta</title>
       <body className={inter.className}>
         <Provider store={store}>
-          <ApolloProvider client={client}>
-            <ThemeProvider>
-              {children}
-              <Footer />
-            </ThemeProvider>
-          </ApolloProvider>
+          <PersistGate loading={null} persistor={persistor}>
+            <ApolloProvider client={client}>
+              <ThemeProvider>
+                {children}
+                <Footer />
+              </ThemeProvider>
+            </ApolloProvider>
+          </PersistGate>
         </Provider>
       </body>
     </html>

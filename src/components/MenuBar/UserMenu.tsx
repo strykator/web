@@ -10,6 +10,7 @@ import {
   Divider,
   Typography,
 } from '@mui/material'
+import {useQuery, gql} from '@apollo/client'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {useDispatch} from 'react-redux'
 import {resetUser} from '@/redux/user/userSlice'
@@ -44,6 +45,17 @@ const paperXs = {
   },
 }
 
+const GET_USER = gql`
+  query getUser($id: ID!) {
+    getUser(id: $id) {
+      id
+      email
+      firstName
+      lastName
+    }
+  }
+`
+
 const UserMenu = () => {
   const dispatch = useDispatch()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -61,7 +73,13 @@ const UserMenu = () => {
     }
     handleClose()
   }
+  const {loading, error, data, refetch} = useQuery(GET_USER, {
+    fetchPolicy: 'no-cache',
+    variables: {id: 'ffb87f57-7e57-4839-8a43-5b59f79c9bfd'},
+  })
 
+  if (loading) return <p>Loading...</p>
+  console.log('data => ', data)
   return (
     <>
       <Tooltip title="Account settings">
@@ -81,7 +99,7 @@ const UserMenu = () => {
         }}
         transformOrigin={{horizontal: 'right', vertical: 'top'}}
         anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={() => refetch()}>
           <Avatar /> <Text>Profile</Text>
         </MenuItem>
         <Divider />
