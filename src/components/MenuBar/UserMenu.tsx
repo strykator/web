@@ -10,10 +10,11 @@ import {
   Divider,
   Typography,
 } from '@mui/material'
-import Logout from '@mui/icons-material/Logout'
+import LogoutIcon from '@mui/icons-material/Logout'
 import {useDispatch} from 'react-redux'
 import {resetUser} from '@/redux/user/userSlice'
 import {theme} from '@/theme'
+import {Logout} from '@/libs/firebase'
 
 const paperXs = {
   overflow: 'visible',
@@ -53,10 +54,14 @@ const UserMenu = () => {
   const handleClose = () => {
     setAnchorEl(null)
   }
-  const handleLogout = () => {
-    dispatch(resetUser())
+  const handleLogout = async () => {
+    const isLoggedOut = await Logout()
+    if (isLoggedOut) {
+      dispatch(resetUser())
+    }
     handleClose()
   }
+
   return (
     <>
       <Tooltip title="Account settings">
@@ -82,7 +87,7 @@ const UserMenu = () => {
         <Divider />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
-            <Logout fontSize="small" />
+            <LogoutIcon fontSize="small" />
           </ListItemIcon>
           <Text>Logout</Text>
         </MenuItem>
