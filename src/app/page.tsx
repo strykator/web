@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import {Grid, Paper, Box, Typography} from '@mui/material'
 import banner from '@/assets/images/banner.png'
 import {data} from '@/utils'
+import Footer from '@/components/Footer'
 
 export default function Home() {
   return (
@@ -39,6 +40,7 @@ export default function Home() {
           ))}
         </Box>
       </Grid>
+      <Footer />
     </>
   )
 }

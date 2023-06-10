@@ -7,8 +7,8 @@ import {PersistGate} from 'redux-persist/integration/react'
 import {ApolloProvider} from '@apollo/client'
 import {store, persistor} from '@/redux'
 import client from '@/libs/apollo'
-import Footer from '@/components/Footer'
 import ThemeProvider from '@/theme'
+import {Typography} from '@mui/material'
 
 const inter = Inter({subsets: ['latin']})
 
@@ -22,14 +22,14 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <title>Feastta</title>
       <body className={inter.className}>
         <Provider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-            <ApolloProvider client={client}>
-              <ThemeProvider>
+          <ApolloProvider client={client}>
+            <ThemeProvider>
+              <PersistGate loading={null} persistor={persistor}>
                 {children}
-                <Footer />
-              </ThemeProvider>
-            </ApolloProvider>
-          </PersistGate>
+              </PersistGate>
+              <Typography />
+            </ThemeProvider>
+          </ApolloProvider>
         </Provider>
       </body>
     </html>
