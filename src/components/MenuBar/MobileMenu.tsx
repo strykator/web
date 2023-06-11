@@ -1,10 +1,12 @@
 import React, {useState} from 'react'
-import styled from 'styled-components'
+//import styled from 'styled-components'
+import {styled} from '@mui/material/styles'
 import MenuIcon from '@mui/icons-material/Menu'
 import ClearIcon from '@mui/icons-material/Clear'
 import {IconButton} from '@mui/material'
 import {menu} from '@/constants'
 import {CustomLink, Text} from './'
+import {theme} from '@/theme'
 
 const MobileMenu = () => {
   const [isOpen, setOpen] = useState(false)
@@ -34,7 +36,7 @@ const Container = styled('div')`
   display: auto;
 `
 
-const MenuItemContainer = styled('div')<{isOpen: boolean}>`
+const MenuItemContainer = styled('div')<{isOpen: Boolean}>`
   display: flex;
   flex-direction: column;
   opacity: ${({isOpen}) => (isOpen ? 1 : 0.5)};
@@ -44,7 +46,7 @@ const MenuItemContainer = styled('div')<{isOpen: boolean}>`
   width: 100%;
   gap: 10px;
   padding: 10px 0px 10px 40px;
-  background-color: ${({theme}) => theme.color.menu};
+  background-color: ${theme.color.menu};
   transition: opacity 1.5s ease, transform 0.5s ease; /* Add a smooth transition */
 `
 

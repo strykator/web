@@ -1,5 +1,6 @@
 import React from 'react'
-import styled, {keyframes} from 'styled-components'
+// import styled, {keyframes} from 'styled-components'
+import {styled, keyframes} from '@mui/material/styles'
 import {Typography, Modal as MModal, IconButton} from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import {useResponsive} from '@/hooks'
@@ -55,7 +56,7 @@ const ModalContainer = styled(MModal)`
   align-items: center;
   justify-content: center;
 `
-const Container = styled('div')<{isMobile: boolean}>`
+const Container = styled('div')<{isMobile: Boolean}>`
   display: flex;
   flex-direction: column;
   width: ${({isMobile}) => (isMobile ? '80%' : '50%')};

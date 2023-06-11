@@ -9,7 +9,7 @@ import banner from '@/assets/images/banner.png'
 import {data} from '@/utils'
 import Footer from '@/components/Footer'
 
-export default function Home() {
+const Home = () => {
   return (
     <>
       <MenuBar />
@@ -68,3 +68,4 @@ const ContainerText = styled('div')`
   width: 100%;
   justify-content: center;
 `
+export default Home
