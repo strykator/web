@@ -12,7 +12,7 @@ const MobileMenu = () => {
   const [isOpen, setOpen] = useState(false)
   return (
     <Container>
-      <IconButton
+      <IconButtonContainer
         size="large"
         edge="start"
         color="inherit"
@@ -20,7 +20,7 @@ const MobileMenu = () => {
         sx={{mr: 2}}
         onClick={() => setOpen(!isOpen)}>
         {isOpen ? <ClearIcon /> : <MenuIcon />}
-      </IconButton>
+      </IconButtonContainer>
       <MenuItemContainer isOpen={isOpen}>
         {menu.map(item => (
           <CustomLink href={item.path} underline="hover" key={item.key}>
@@ -37,7 +37,9 @@ const MobileMenu = () => {
 const Container = styled('div')`
   display: auto;
 `
-
+const IconButtonContainer = styled(IconButton)`
+  color: ${theme.color.primaryDark};
+`
 const MenuItemContainer = styled('div')<{isOpen: Boolean}>`
   display: flex;
   flex-direction: column;

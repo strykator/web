@@ -44,7 +44,10 @@ const MenuBar = () => {
             title="Account"
             width="70px"
             height="30px"
+            type="outlined"
             onClick={() => setOpenModal(true)}
+            titleColor={isMobile ? theme.color.primaryDark : theme.color.menu}
+            borderColor={isMobile ? theme.color.primaryDark : theme.color.menu}
           />
         )}
       </Right>
@@ -64,6 +67,7 @@ const Container = styled(Box)<{isMobile: Boolean}>`
   justify-content: center;
   width: 100%;
   height: 60px;
+  opacity: ${({isMobile}) => (isMobile ? 0.7 : 1)};
   background-color: ${({isMobile}) =>
     isMobile ? theme.color.menu : 'transparent'};
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
