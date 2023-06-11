@@ -24,7 +24,9 @@ const MobileMenu = () => {
       <MenuItemContainer isOpen={isOpen}>
         {menu.map(item => (
           <CustomLink href={item.path} underline="hover" key={item.key}>
-            <Text variant="h6">{item.label}</Text>
+            <Text isMobile variant="h6">
+              {item.label}
+            </Text>
           </CustomLink>
         ))}
       </MenuItemContainer>

@@ -1,11 +1,10 @@
 import React, {useState} from 'react'
 import Image from 'next/image'
-import styled from 'styled-components'
 import {useRouter} from 'next/navigation'
 import {useDispatch, useSelector} from 'react-redux'
-import {Link, Typography} from '@mui/material'
+import {Link, Typography, Box} from '@mui/material'
+import {styled} from '@mui/material/styles'
 import Button from '@/components/Button'
-import logo from '@/assets/images/logo.png'
 import {menu} from '@/constants'
 import useResponsive from '@/hooks/useResponsive'
 import Modal from '@/components/Modal'
@@ -14,6 +13,7 @@ import Login from './Login'
 import {selectUserUid} from '@/redux/user/userSlice'
 import {RootState} from '@/redux'
 import UserMenu from './UserMenu'
+import {theme} from '@/theme'
 
 const MenuBar = () => {
   const router = useRouter()
@@ -25,21 +25,8 @@ const MenuBar = () => {
   const handleCloseModal = () => setOpenModal(false)
 
   return (
-    <Container>
-      <Left>
-        {isMobile ? <MobileMenu /> : null}
-        {!isMobile ? (
-          <WrapImage
-            src={logo}
-            alt="Feastta"
-            width={55}
-            height={55}
-            // blurDataURL="data:..." automatically provided
-            // placeholder="blur" // Optional blur-up while loading
-            onClick={() => router.push('/')}
-          />
-        ) : null}
-      </Left>
+    <Container isMobile={isMobile}>
+      <Left>{isMobile ? <MobileMenu /> : null}</Left>
       <Middle>
         {!isMobile
           ? menu.map(item => (
@@ -68,7 +55,7 @@ const MenuBar = () => {
   )
 }
 
-const Container = styled('div')`
+const Container = styled(Box)<{isMobile: Boolean}>`
   position: absolute;
   left: 0;
   top: 0;
@@ -77,7 +64,8 @@ const Container = styled('div')`
   justify-content: center;
   width: 100%;
   height: 60px;
-  background-color: ${({theme}) => theme.color.menu};
+  background-color: ${({isMobile}) =>
+    isMobile ? theme.color.menu : 'transparent'};
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
 `
 
@@ -111,15 +99,16 @@ const WrapImage = styled(Image)`
   }
 `
 
-export const Text = styled(Typography)`
+export const Text = styled(Typography)<{isMobile?: Boolean}>`
   font-weight: 400;
   font-size: 14px;
-  color: ${({theme}) => theme.color.primaryDark};
+  color: ${({isMobile}) =>
+    isMobile ? theme.color.primaryDark : theme.color.menu};
 `
 
 export const CustomLink = styled(Link)`
   &:hover {
-    text-decoration-color: ${({theme}) => theme.color.primaryDark};
+    text-decoration-color: ${theme.color.menu};
   }
 `
 

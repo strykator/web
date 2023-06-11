@@ -5,7 +5,7 @@ import Image from 'next/image'
 import MenuBar from '@/components/MenuBar'
 import styled from 'styled-components'
 import {Grid, Paper, Box, Typography} from '@mui/material'
-import banner from '@/assets/images/banner.png'
+import banner from '@/assets/images/banner.jpeg'
 import {data} from '@/utils'
 import Footer from '@/components/Footer'
 
@@ -13,7 +13,7 @@ const Home = () => {
   return (
     <>
       <MenuBar />
-      <Banner src={banner} alt="Feast" height={500} />
+      <Banner src={banner} alt="Feast" height={window.innerHeight} />
       <Grid item xs={4}>
         <Box
           sx={{
