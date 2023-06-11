@@ -5,7 +5,7 @@ import Image from 'next/image'
 import MenuBar from '@/components/MenuBar'
 import styled from 'styled-components'
 import {Grid, Paper, Box, Typography} from '@mui/material'
-import banner from '@/assets/images/banner.jpeg'
+import banner from '@/assets/images/banner3.jpeg'
 import {data} from '@/utils'
 import Footer from '@/components/Footer'
 
@@ -46,7 +46,6 @@ const Home = () => {
 }
 
 const Banner = styled(Image)`
-  margin-top: -50px;
   width: 100%;
 `
 const Item = styled(Paper)(({theme}) => ({
