@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['popmenucloud.com'],
+    domains: ['popmenucloud.com', 'img.cdn4dd.com'],
   },
 }
 

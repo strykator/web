@@ -8,6 +8,7 @@ import {Grid, Paper, Box, Typography} from '@mui/material'
 import banner from '@/assets/images/banner3.jpeg'
 import {data} from '@/utils'
 import Footer from '@/components/Footer'
+import dish from '@/assets/images/dish.png'
 
 const Home = () => {
   return (
@@ -27,13 +28,13 @@ const Home = () => {
             <Item key={index} elevation={2}>
               <Content>
                 <CustomeImage
-                  src={item.img}
-                  alt={item.name}
+                  src={item.img === '' ? dish : item.img}
+                  alt={item.title}
                   width={150}
                   height={150}
                 />
                 <ContainerText>
-                  <Typography variant="subtitle1">{item.name}</Typography>
+                  <Typography variant="subtitle1">{item.title}</Typography>
                 </ContainerText>
               </Content>
             </Item>
