@@ -21,9 +21,10 @@ interface ILogin {
 }
 
 const Login = ({onCloseModal}: ILogin) => {
-  const [showPassword, setShowPassword] = React.useState(false)
-  const [email, setEmail] = React.useState('')
-  const [password, setPassword] = React.useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<boolean>(false)
   const dispatch = useDispatch()
 
   const handleClickShowPassword = () => setShowPassword(show => !show)
@@ -39,11 +40,14 @@ const Login = ({onCloseModal}: ILogin) => {
     setPassword(event.target?.value)
   }
   const handleSubmit = async () => {
-    onCloseModal && onCloseModal()
     const user = await loginWithEmailAndPassword(email, password)
     if (user) {
+      setError(false)
       const payload = buildUserPayload(user)
       dispatch(updateUser(payload))
+      onCloseModal && onCloseModal()
+    } else {
+      setError(true)
     }
   }
 
@@ -57,13 +61,16 @@ const Login = ({onCloseModal}: ILogin) => {
           type="text"
           value={email}
           onChange={handleEmailInput}
+          error={error}
         />
+        {error ? <ErrorMessage>Invalid Input</ErrorMessage> : null}
       </FormControl>
       <FormControl sx={{m: 1, width: '50%'}} variant="filled">
         <InputLabel htmlFor="filled-adornment-password">Password</InputLabel>
         <FilledInput
           id="filled-adornment-password"
           type={showPassword ? 'text' : 'password'}
+          error={error}
           endAdornment={
             <InputAdornment position="end">
               <IconButton
@@ -78,6 +85,7 @@ const Login = ({onCloseModal}: ILogin) => {
           value={password}
           onChange={handlePasswordInput}
         />
+        {error ? <ErrorMessage>Invalid Input</ErrorMessage> : null}
       </FormControl>
       <Space />
       <Button
@@ -103,6 +111,13 @@ const Title = styled(Typography)`
 `
 const Space = styled('div')`
   height: 10px;
+`
+const ErrorMessage = styled(Typography)`
+  font-size: ${({theme}) => theme.font.size.s};
+  color: ${({theme}) => theme.color.error};
+  font-weight: 400;
+  margin-bottom: 5px;
+  margin-top: 5px;
 `
 
 export default Login
