@@ -10,6 +10,7 @@ import {
   Divider,
   Typography,
 } from '@mui/material'
+import {useRouter} from 'next/navigation'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {useDispatch} from 'react-redux'
 import {resetUser} from '@/redux/user/userSlice'
@@ -45,6 +46,7 @@ const paperXs = {
 }
 
 const UserMenu = () => {
+  const router = useRouter()
   const dispatch = useDispatch()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -60,6 +62,11 @@ const UserMenu = () => {
       dispatch(resetUser())
     }
     handleClose()
+  }
+
+  const onClickProfile = () => {
+    handleClose()
+    router.push('/profile')
   }
 
   return (
@@ -81,7 +88,7 @@ const UserMenu = () => {
         }}
         transformOrigin={{horizontal: 'right', vertical: 'top'}}
         anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={onClickProfile}>
           <Avatar /> <Text>Profile</Text>
         </MenuItem>
         <Divider />

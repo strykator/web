@@ -7,4 +7,5 @@ export const color = {
   menu: '#f0f8ff',
   background: '#fafafa',
   text: '#444445',
+  avatarCover: '#DFE2E7',
 }
