@@ -65,8 +65,8 @@ const UserMenu = () => {
   }
 
   const onClickProfile = () => {
-    handleClose()
     router.push('/profile')
+    handleClose()
   }
 
   return (

@@ -17,7 +17,10 @@ const useWindow = () => {
     }
   }, [])
 
-  return {isBottom}
+  return {
+    isBottom,
+    fullHeight: window.innerHeight + document.documentElement.scrollHeight,
+  }
 }
 
 export default useWindow

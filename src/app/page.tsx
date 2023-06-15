@@ -4,43 +4,49 @@ import React from 'react'
 import Image from 'next/image'
 import MenuBar from '@/components/MenuBar'
 import styled from 'styled-components'
-import {Grid, Paper, Box, Typography} from '@mui/material'
+import {Grid, Paper, Box, Typography, Link} from '@mui/material'
 import banner from '@/assets/images/banner3.jpeg'
 import {data} from '@/utils'
 import Footer from '@/components/Footer'
 import dish from '@/assets/images/dish.png'
+import {useResponsive} from '@/hooks'
+import {theme} from '@/theme'
 
 const Home = () => {
+  const {isMobile} = useResponsive()
   return (
     <>
       <MenuBar />
       <Banner src={banner} alt="Feast" height={window.innerHeight} />
-      <Grid item xs={4}>
-        <Box
-          sx={{
-            p: 2,
-            bgcolor: 'background.default',
-            display: 'grid',
-            gridTemplateColumns: {md: '1fr 1fr'},
-            gap: 3,
-          }}>
+      <Box p={3} sx={{flexGrow: 1}}>
+        <Grid container spacing={3}>
           {data.map((item, index) => (
-            <Item key={index} elevation={2}>
-              <Content>
-                <CustomeImage
-                  src={item.img === '' ? dish : item.img}
-                  alt={item.title}
-                  width={150}
-                  height={150}
-                />
+            <Grid item xs={12} md={6} key={index}>
+              <Content elevation={1}>
+                <ImageContainer isMobile={isMobile}>
+                  <CustomeImage
+                    fill
+                    src={item.img === '' ? dish : item.img}
+                    alt={item.title}
+                    style={{objectFit: 'cover'}}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </ImageContainer>
                 <ContainerText>
-                  <Typography variant="subtitle1">{item.title}</Typography>
+                  <Title
+                    href="/restaurants/id"
+                    variant="subtitle1"
+                    underline="none">
+                    {item.title}
+                  </Title>
+                  <SubTitle variant="body2">more description here</SubTitle>
+                  <SubTitle variant="body2">4.7 rating</SubTitle>
                 </ContainerText>
               </Content>
-            </Item>
+            </Grid>
           ))}
-        </Box>
-      </Grid>
+        </Grid>
+      </Box>
       <Footer />
     </>
   )
@@ -49,23 +55,32 @@ const Home = () => {
 const Banner = styled(Image)`
   width: 100%;
 `
-const Item = styled(Paper)(({theme}) => ({
-  padding: 5,
-  height: 150,
-}))
-
 const CustomeImage = styled(Image)`
   border-radius: 2px;
 `
-const Content = styled('div')`
+const Content = styled(Paper)`
   display: flex;
-  flex-direction: 'row';
-  padding-top: 0;
+  flex-direction: column;
+  height: 40vh;
 `
-
+const ImageContainer = styled('div')<{isMobile: boolean}>`
+  width: 100%;
+  height: 67%;
+  position: relative;
+`
 const ContainerText = styled('div')`
   display: flex;
+  flex-direction: column;
+  padding-top: 15px;
+  padding-left: 20px;
   width: 100%;
-  justify-content: center;
+  justify-content: flex-start;
 `
+const Title = styled(Link)`
+  color: ${theme.color.primaryDark};
+`
+const SubTitle = styled(Typography)`
+  color: ${theme.color.textWeak};
+`
+
 export default Home

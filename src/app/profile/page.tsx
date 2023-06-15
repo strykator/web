@@ -211,6 +211,7 @@ const BannerTop = styled(Image)`
   width: 100%;
   border-radius: 10px;
   object-fit: cover;
+  object-position: 75% 25%;
 `
 const Avatar = styled(Image)`
   margin-top: -80px;
@@ -220,7 +221,6 @@ const Avatar = styled(Image)`
   border-radius: 60px;
   background-color: ${theme.color.avatarCover};
 `
-
 const Body = styled(Paper)`
   display: flex;
   height: 100%;
@@ -229,7 +229,6 @@ const Body = styled(Paper)`
   background-color: ${theme.color.background};
   margin-bottom: 50px;
 `
-
 const CustomTextField = styled(TextField)`
   display: flex;
   width: 100%;
@@ -243,6 +242,7 @@ const MultilineTextField = styled(TextField)`
   width: 100%;
   border-radius: 5px;
   & .MuiInputBase-root {
+    min-height: 100px;
     height: 100%;
   }
 `
