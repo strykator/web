@@ -8,7 +8,12 @@ import {menu} from '@/constants'
 import {CustomLink, Text} from './'
 import {theme} from '@/theme'
 
-const MobileMenu = () => {
+interface IMobileMenu {
+  textColor?: string
+  bgColor?: string
+}
+
+const MobileMenu = ({textColor, bgColor}: IMobileMenu) => {
   const [isOpen, setOpen] = useState(false)
   return (
     <Container>
@@ -21,10 +26,14 @@ const MobileMenu = () => {
         onClick={() => setOpen(!isOpen)}>
         {isOpen ? <ClearIcon /> : <MenuIcon />}
       </IconButtonContainer>
-      <MenuItemContainer isOpen={isOpen}>
+      <MenuItemContainer isOpen={isOpen} bgColor={bgColor}>
         {menu.map(item => (
-          <CustomLink href={item.path} underline="hover" key={item.key}>
-            <Text isMobile variant="h6">
+          <CustomLink
+            href={item.path}
+            underline="hover"
+            key={item.key}
+            textColor={textColor}>
+            <Text textColor={textColor} isMobile variant="h6">
               {item.label}
             </Text>
           </CustomLink>
@@ -40,7 +49,7 @@ const Container = styled('div')`
 const IconButtonContainer = styled(IconButton)`
   color: ${theme.color.primaryDark};
 `
-const MenuItemContainer = styled('div')<{isOpen: Boolean}>`
+const MenuItemContainer = styled('div')<{isOpen: Boolean; bgColor?: string}>`
   display: flex;
   flex-direction: column;
   opacity: ${({isOpen}) => (isOpen ? 1 : 0.5)};
@@ -50,7 +59,7 @@ const MenuItemContainer = styled('div')<{isOpen: Boolean}>`
   width: 100%;
   gap: 10px;
   padding: 10px 0px 10px 40px;
-  background-color: ${theme.color.menu};
+  background-color: ${({bgColor}) => (bgColor ? bgColor : theme.color.menu)};
   transition: opacity 1.5s ease, transform 0.5s ease; /* Add a smooth transition */
 `
 

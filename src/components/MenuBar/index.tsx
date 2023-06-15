@@ -18,9 +18,10 @@ import {theme} from '@/theme'
 interface IMenuBar {
   bgColor?: string
   textColor?: string
+  sticky?: boolean
 }
 
-const MenuBar = ({bgColor, textColor}: IMenuBar) => {
+const MenuBar = ({bgColor, textColor, sticky}: IMenuBar) => {
   const router = useRouter()
   const {isMobile} = useResponsive()
   const [isOpenModal, setOpenModal] = useState<boolean>(false)
@@ -30,12 +31,20 @@ const MenuBar = ({bgColor, textColor}: IMenuBar) => {
   const handleCloseModal = () => setOpenModal(false)
 
   return (
-    <Container bgColor={bgColor} isMobile={isMobile}>
-      <Left>{isMobile ? <MobileMenu /> : null}</Left>
+    <Container sticky={sticky} bgColor={bgColor} isMobile={isMobile}>
+      <Left>
+        {isMobile ? (
+          <MobileMenu bgColor={bgColor} textColor={textColor} />
+        ) : null}
+      </Left>
       <Middle>
         {!isMobile
           ? menu.map(item => (
-              <CustomLink href={item.path} underline="hover" key={item.key}>
+              <CustomLink
+                href={item.path}
+                textColor={textColor}
+                underline="hover"
+                key={item.key}>
                 <Text textColor={textColor} variant="h6">
                   {item.label}
                 </Text>
@@ -69,10 +78,15 @@ const MenuBar = ({bgColor, textColor}: IMenuBar) => {
   )
 }
 
-const Container = styled(Box)<{isMobile: Boolean; bgColor?: string}>`
-  position: absolute;
+const Container = styled(Box)<{
+  isMobile: Boolean
+  bgColor?: string
+  sticky?: boolean
+}>`
+  position: ${({sticky}) => (sticky ? 'sticky' : 'absolute')};
   left: 0;
   top: 0;
+  z-index: 1;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -135,9 +149,10 @@ export const Text = styled(Typography)<{
     }
   }};
 `
-export const CustomLink = styled(Link)`
+export const CustomLink = styled(Link)<{textColor?: string}>`
   &:hover {
-    text-decoration-color: ${theme.color.menu};
+    text-decoration-color: ${({textColor}) =>
+      textColor ? textColor : theme.color.menu};
   }
 `
 

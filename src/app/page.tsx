@@ -18,7 +18,7 @@ const Home = () => {
     <>
       <MenuBar />
       <Banner src={banner} alt="Feast" height={window.innerHeight} />
-      <Box p={3} sx={{flexGrow: 1}}>
+      <Box pl={10} pr={10} pt={5} pb={5} sx={{flexGrow: 1}}>
         <Grid container spacing={3}>
           {data.map((item, index) => (
             <Grid item xs={12} md={6} key={index}>
@@ -61,7 +61,7 @@ const CustomeImage = styled(Image)`
 const Content = styled(Paper)`
   display: flex;
   flex-direction: column;
-  height: 40vh;
+  height: 30vh;
 `
 const ImageContainer = styled('div')<{isMobile: boolean}>`
   width: 100%;
@@ -71,8 +71,9 @@ const ImageContainer = styled('div')<{isMobile: boolean}>`
 const ContainerText = styled('div')`
   display: flex;
   flex-direction: column;
-  padding-top: 15px;
+  padding-top: 5px;
   padding-left: 20px;
+  padding-bottom: 5px;
   width: 100%;
   justify-content: flex-start;
 `
