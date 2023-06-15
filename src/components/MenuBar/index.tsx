@@ -15,7 +15,12 @@ import {RootState} from '@/redux'
 import UserMenu from './UserMenu'
 import {theme} from '@/theme'
 
-const MenuBar = () => {
+interface IMenuBar {
+  bgColor?: string
+  textColor?: string
+}
+
+const MenuBar = ({bgColor, textColor}: IMenuBar) => {
   const router = useRouter()
   const {isMobile} = useResponsive()
   const [isOpenModal, setOpenModal] = useState<boolean>(false)
@@ -25,13 +30,15 @@ const MenuBar = () => {
   const handleCloseModal = () => setOpenModal(false)
 
   return (
-    <Container isMobile={isMobile}>
+    <Container bgColor={bgColor} isMobile={isMobile}>
       <Left>{isMobile ? <MobileMenu /> : null}</Left>
       <Middle>
         {!isMobile
           ? menu.map(item => (
               <CustomLink href={item.path} underline="hover" key={item.key}>
-                <Text variant="h6">{item.label}</Text>
+                <Text textColor={textColor} variant="h6">
+                  {item.label}
+                </Text>
               </CustomLink>
             ))
           : null}
@@ -46,8 +53,12 @@ const MenuBar = () => {
             height="30px"
             type="outlined"
             onClick={() => setOpenModal(true)}
-            titleColor={isMobile ? theme.color.primaryDark : theme.color.menu}
-            borderColor={isMobile ? theme.color.primaryDark : theme.color.menu}
+            titleColor={
+              isMobile || textColor ? theme.color.primaryDark : theme.color.menu
+            }
+            borderColor={
+              isMobile || textColor ? theme.color.primaryDark : theme.color.menu
+            }
           />
         )}
       </Right>
@@ -58,7 +69,7 @@ const MenuBar = () => {
   )
 }
 
-const Container = styled(Box)<{isMobile: Boolean}>`
+const Container = styled(Box)<{isMobile: Boolean; bgColor?: string}>`
   position: absolute;
   left: 0;
   top: 0;
@@ -67,9 +78,16 @@ const Container = styled(Box)<{isMobile: Boolean}>`
   justify-content: center;
   width: 100%;
   height: 60px;
-  opacity: ${({isMobile}) => (isMobile ? 0.7 : 1)};
-  background-color: ${({isMobile}) =>
-    isMobile ? theme.color.menu : 'transparent'};
+  opacity: ${({isMobile}) => (isMobile ? 0.85 : 1)};
+  background-color: ${({isMobile, bgColor}) => {
+    if (bgColor) {
+      return bgColor
+    } else if (isMobile) {
+      return theme.color.menu
+    } else {
+      return 'transparent'
+    }
+  }};
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
 `
 
@@ -96,20 +114,27 @@ const Right = styled('div')`
   width: 25%;
   gap: 10px;
 `
-
 const WrapImage = styled(Image)`
   &:hover {
     cursor: pointer;
   }
 `
-
-export const Text = styled(Typography)<{isMobile?: Boolean}>`
+export const Text = styled(Typography)<{
+  isMobile?: Boolean
+  textColor?: string
+}>`
   font-weight: 400;
   font-size: 14px;
-  color: ${({isMobile}) =>
-    isMobile ? theme.color.primaryDark : theme.color.menu};
+  color: ${({isMobile, textColor}) => {
+    if (textColor) {
+      return textColor
+    } else if (isMobile) {
+      return theme.color.primaryDark
+    } else {
+      return theme.color.menu
+    }
+  }};
 `
-
 export const CustomLink = styled(Link)`
   &:hover {
     text-decoration-color: ${theme.color.menu};

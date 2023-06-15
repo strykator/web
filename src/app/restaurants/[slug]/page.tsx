@@ -24,7 +24,7 @@ export default function Page({params}: {params: {slug: string}}) {
   const searchParams = useSearchParams()
   return (
     <Container>
-      <MenuBar />
+      <MenuBar textColor={theme.color.primaryDark} />
       <LeftContainer variant="outlined">
         <Banner>
           <BannerContainer>
