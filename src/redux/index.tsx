@@ -3,6 +3,7 @@ import {persistStore, persistReducer} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import {createLogger} from 'redux-logger'
 import userReducer from './user/userSlice'
+import cartReducer from './cart/cartSlice'
 
 // REDUX LOGGER
 const loggerMiddleware = createLogger({
@@ -13,6 +14,7 @@ const loggerMiddleware = createLogger({
 // ROOT REDUCER
 const rootReducer = combineReducers({
   user: userReducer,
+  cart: cartReducer,
 })
 
 // REDUX PERSIST CONFIG
