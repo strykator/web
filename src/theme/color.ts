@@ -9,4 +9,5 @@ export const color = {
   text: '#444445',
   textWeak: '#797979',
   avatarCover: '#DFE2E7',
+  hover: '#F7F7F7',
 }

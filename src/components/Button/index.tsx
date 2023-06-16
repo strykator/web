@@ -26,6 +26,7 @@ const Button = ({
   backgroundColor,
   borderColor,
   titleColor,
+  ...props
 }: IButton) => {
   return (
     <Container
@@ -35,7 +36,8 @@ const Button = ({
       width={width}
       disabled={disabled}
       backgroundColor={backgroundColor}
-      borderColor={borderColor}>
+      borderColor={borderColor}
+      {...props}>
       <Text titleColor={titleColor}>{title}</Text>
     </Container>
   )
@@ -56,6 +58,11 @@ const Container = styled(MButton)<{
   border-color: ${({borderColor}) => (borderColor ? borderColor : 'auto')};
   background-color: ${({backgroundColor}) =>
     backgroundColor ? backgroundColor : 'auto'};
+  &:hover {
+    background-color: ${({backgroundColor}) =>
+      backgroundColor ? backgroundColor : 'auto'};
+    opacity: ${({backgroundColor}) => (backgroundColor ? '0.8' : 'auto')};
+  }
 `
 const Text = styled(Typography)<{titleColor?: string}>`
   font-size: ${({theme}) => theme.font.size.m};

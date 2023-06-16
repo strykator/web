@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit'
 import type {PayloadAction} from '@reduxjs/toolkit'
 import type {RootState} from '@/redux'
-import {updateTotalPriceAndQuantity} from './utils'
+import {updateTotalPriceAndQuantity, handleUpdateItem} from './utils'
 
 /*********************************************
    #1 -- Define a type for the slice state
@@ -54,12 +54,23 @@ export const cartSlice = createSlice({
     },
     updateItem: (state, action: PayloadAction<Item>) => {
       const updatedItem = action.payload
-      state.items = state.items.map(item => {
-        if (item.itemId === updatedItem.itemId) {
-          return updatedItem
-        }
-        return item
-      })
+      handleUpdateItem(state, updatedItem)
+      updateTotalPriceAndQuantity(state)
+    },
+    increaseItemQuantity: (state, action: PayloadAction<Item>) => {
+      const updatedItem = {
+        ...action.payload,
+        quantity: action.payload.quantity + 1,
+      }
+      handleUpdateItem(state, updatedItem)
+      updateTotalPriceAndQuantity(state)
+    },
+    decreaseItemQuantity: (state, action: PayloadAction<Item>) => {
+      const updatedItem = {
+        ...action.payload,
+        quantity: action.payload.quantity - 1,
+      }
+      handleUpdateItem(state, updatedItem)
       updateTotalPriceAndQuantity(state)
     },
     emptyCart: state => {
@@ -75,7 +86,14 @@ export const cartSlice = createSlice({
 /*********************************************
    #4 -- dispatch actions
 **********************************************/
-export const {addItem, removeItem, updateItem, emptyCart} = cartSlice.actions
+export const {
+  addItem,
+  removeItem,
+  updateItem,
+  emptyCart,
+  increaseItemQuantity,
+  decreaseItemQuantity,
+} = cartSlice.actions
 
 /*********************************************
    #5 -- dispatch selectors

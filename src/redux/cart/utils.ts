@@ -17,3 +17,13 @@ export const updateTotalPriceAndQuantity = (state: ICartSlice) => {
   state.totalPrice = totalPrice
   state.totalQuantity = totalQuantity
 }
+
+export const handleUpdateItem = (state: ICartSlice, item: Item) => {
+  const updatedItem = item
+  state.items = state.items.map(item => {
+    if (item.itemId === updatedItem.itemId) {
+      return updatedItem
+    }
+    return item
+  })
+}
