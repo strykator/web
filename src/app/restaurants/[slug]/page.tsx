@@ -48,10 +48,11 @@ export default function Page({params}: {params: {slug: string}}) {
 
   const handleAddItem = (item: any) => {
     const payload: Item = {
-      itemId: item.key,
+      itemId: item.key + new Date().getTime(),
       name: item.title,
       price: item.price,
       quantity: 1,
+      photoUrl: item.img,
     }
     dispatch(addItem(payload))
   }
@@ -142,17 +143,20 @@ export default function Page({params}: {params: {slug: string}}) {
                         />
                       </ImageContainer>
                       <ContainerText>
-                        <Title variant="subtitle1">{item.title}</Title>
+                        <Title>{item.title}</Title>
                         <SubTitle variant="body2">
                           {truncate(item.description, 50)}
                         </SubTitle>
-                        <CustomRating
-                          size="small"
-                          name="half-rating-read"
-                          defaultValue={item.rating}
-                          precision={0.5}
-                          readOnly
-                        />
+                        <Price>${item.price}</Price>
+                        {item.rating !== 0 ? (
+                          <CustomRating
+                            size="small"
+                            name="half-rating-read"
+                            defaultValue={item.rating}
+                            precision={0.5}
+                            readOnly
+                          />
+                        ) : null}
                       </ContainerText>
                     </Content>
                   </Grid>
@@ -180,26 +184,38 @@ export default function Page({params}: {params: {slug: string}}) {
                   borderColor={theme.color.hover}
                   pt={1}
                   pb={1}>
-                  <Grid item xs={10} md={10}>
+                  <Grid
+                    item
+                    xs={3}
+                    md={3}
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}>
+                    <CartItemImageContainer>
+                      <CartItemImage
+                        fill
+                        src={el.photoUrl === '' ? dish : el.photoUrl}
+                        alt={el.name}
+                        style={{objectFit: 'cover'}}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    </CartItemImageContainer>
+                  </Grid>
+                  <Grid item xs={7} md={7}>
                     <Stack pl={1}>
-                      <SubTitle variant="body2">itemId: {el.itemId}</SubTitle>
-                      <SubTitle variant="body2">name: {el.name}</SubTitle>
-                      <SubTitle variant="body2">price: {el.price}</SubTitle>
-                      <SubTitle variant="body2">
-                        quantity: {el.quantity}
-                      </SubTitle>
+                      <Title>{el.name}</Title>
+                      <Price size="small">${el.price}</Price>
                     </Stack>
                   </Grid>
                   <Grid
                     item
                     xs={2}
                     md={2}
-                    alignItems={'center'}
-                    zIndex={1}
-                    display={'flex'}>
+                    display={'flex'}
+                    justifyContent={'center'}
+                    zIndex={1}>
                     <ButtonGroup
                       size="large"
-                      fullWidth
                       disableElevation
                       orientation="vertical"
                       aria-label="vertical contained button group"
@@ -245,7 +261,8 @@ const RightContainer = styled(Paper)<{fullHeight: number}>`
 `
 const RightHeader = styled(Box)`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 60px;
   padding-top: 20px;
@@ -333,8 +350,9 @@ const ContainerText = styled('div')`
 `
 const Title = styled(Typography)`
   font-size: ${theme.font.size.m};
+  font-weight: 500;
   color: ${theme.color.text};
-  line-height: 20px;
+  line-height: 18px;
 `
 const CustomRating = styled(Rating)`
   margin-top: 10px;
@@ -351,4 +369,23 @@ const CartItemContainer = styled(Grid)`
     cursor: pointer;
     background-color: ${theme.color.hover};
   }
+`
+const CartItemImageContainer = styled('div')`
+  display: flex;
+  justify-content: flex-end;
+  width: 80%;
+  height: 90%;
+  position: relative;
+`
+const CartItemImage = styled(Image)`
+  border-radius: 5px;
+`
+const Price = styled(Typography)<{size?: 'small' | 'large'}>`
+  font-size: ${({size}) => {
+    if (size === 'small') return theme.font.size.s
+    return theme.font.size.m
+  }};
+  color: ${theme.color.text};
+  font-weight: 500;
+  line-height: 20px;
 `

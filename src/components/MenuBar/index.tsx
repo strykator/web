@@ -2,7 +2,15 @@ import React, {useState} from 'react'
 import Image from 'next/image'
 import {useRouter} from 'next/navigation'
 import {useDispatch, useSelector} from 'react-redux'
-import {Link, Typography, Box} from '@mui/material'
+import {
+  Link,
+  Typography,
+  Box,
+  Badge,
+  BadgeProps,
+  IconButton,
+} from '@mui/material'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import {styled} from '@mui/material/styles'
 import Button from '@/components/Button'
 import {menu} from '@/constants'
@@ -11,6 +19,7 @@ import Modal from '@/components/Modal'
 import MobileMenu from './MobileMenu'
 import Login from './Login'
 import {selectUserUid} from '@/redux/user/userSlice'
+import {selectTotalQuantity} from '@/redux/cart/cartSlice'
 import {RootState} from '@/redux'
 import UserMenu from './UserMenu'
 import {theme} from '@/theme'
@@ -28,7 +37,44 @@ const MenuBar = ({bgColor, textColor, sticky}: IMenuBar) => {
   const state = useSelector((state: RootState) => state)
   const dispatch = useDispatch()
   const userId = selectUserUid(state)
+  const totalShoppingCartQuantity = selectTotalQuantity(state)
   const handleCloseModal = () => setOpenModal(false)
+
+  const renderShoppingCart = () => {
+    return totalShoppingCartQuantity !== 0 ? (
+      <IconButton aria-label="cart">
+        <CustomBadge badgeContent={totalShoppingCartQuantity}>
+          <ShoppingCart />
+        </CustomBadge>
+      </IconButton>
+    ) : null
+  }
+
+  const renderRight = () => {
+    return userId ? (
+      <>
+        {renderShoppingCart()}
+        <UserMenu />
+      </>
+    ) : (
+      <>
+        {renderShoppingCart()}
+        <Button
+          title="Account"
+          width="70px"
+          height="30px"
+          type="outlined"
+          onClick={() => setOpenModal(true)}
+          titleColor={
+            isMobile || textColor ? theme.color.primaryDark : theme.color.menu
+          }
+          borderColor={
+            isMobile || textColor ? theme.color.primaryDark : theme.color.menu
+          }
+        />
+      </>
+    )
+  }
 
   return (
     <Container sticky={sticky} bgColor={bgColor} isMobile={isMobile}>
@@ -52,25 +98,7 @@ const MenuBar = ({bgColor, textColor, sticky}: IMenuBar) => {
             ))
           : null}
       </Middle>
-      <Right>
-        {userId ? (
-          <UserMenu />
-        ) : (
-          <Button
-            title="Account"
-            width="70px"
-            height="30px"
-            type="outlined"
-            onClick={() => setOpenModal(true)}
-            titleColor={
-              isMobile || textColor ? theme.color.primaryDark : theme.color.menu
-            }
-            borderColor={
-              isMobile || textColor ? theme.color.primaryDark : theme.color.menu
-            }
-          />
-        )}
-      </Right>
+      <Right>{renderRight()}</Right>
       <Modal isOpen={isOpenModal} onClose={handleCloseModal}>
         <Login onCloseModal={handleCloseModal} />
       </Modal>
@@ -154,6 +182,19 @@ export const CustomLink = styled(Link)<{textColor?: string}>`
     text-decoration-color: ${({textColor}) =>
       textColor ? textColor : theme.color.menu};
   }
+`
+const CustomBadge = styled(Badge)`
+  & .MuiBadge-badge {
+    top: 3px;
+    padding: '0 4px';
+    background-color: ${theme.color.success};
+    color: ${theme.color.background};
+  }
+`
+const ShoppingCart = styled(ShoppingCartIcon)`
+  width: 28px;
+  height: 28px;
+  color: red;
 `
 
 export default MenuBar

@@ -11,6 +11,7 @@ export type Item = {
   name: string
   price: number
   quantity: number
+  photoUrl: string
   options?: {
     name: string
     price?: number
