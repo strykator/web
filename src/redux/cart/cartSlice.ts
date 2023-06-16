@@ -81,6 +81,15 @@ export const cartSlice = createSlice({
       state.totalPrice = initialState.totalPrice
       state.totalQuantity = initialState.totalQuantity
     },
+    addOrUpdateCartIds: (
+      state,
+      action: PayloadAction<{userId: string; entityId: string}>,
+    ) => {
+      if (state.entityId !== action.payload.entityId)
+        state.entityId = action.payload.entityId
+      if (state.userId !== action.payload.userId)
+        state.userId = action.payload.userId
+    },
   },
 })
 
@@ -94,11 +103,13 @@ export const {
   emptyCart,
   increaseItemQuantity,
   decreaseItemQuantity,
+  addOrUpdateCartIds,
 } = cartSlice.actions
 
 /*********************************************
    #5 -- dispatch selectors
 **********************************************/
+export const selectUserId = (state: RootState) => state.cart.userId
 export const selectEntityId = (state: RootState) => state.cart.entityId
 export const selectItems = (state: RootState) => state.cart.items
 export const selectTotalPrice = (state: RootState) => state.cart.totalPrice

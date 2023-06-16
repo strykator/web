@@ -24,13 +24,16 @@ import {truncate} from '@/utils'
 import {
   addItem,
   removeItem,
-  updateItem,
   increaseItemQuantity,
   decreaseItemQuantity,
   emptyCart,
   Item,
   selectItems,
+  selectEntityId,
+  selectUserId,
+  addOrUpdateCartIds,
 } from '@/redux/cart/cartSlice'
+import {selectUserUid} from '@/redux/user/userSlice'
 import {RootState} from '@/redux'
 import Button from '@/components/Button'
 
@@ -42,8 +45,12 @@ export default function Page({params}: {params: {slug: string}}) {
   const {isMobile} = useResponsive()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const restaurantId = params.slug
   const state = useSelector((state: RootState) => state)
   const items = selectItems(state)
+  const entityId = selectEntityId(state)
+  const userId = selectUserId(state)
+  const userUid = selectUserUid(state)
   const dispatch = useDispatch()
 
   const handleAddItem = (item: any) => {
@@ -55,6 +62,9 @@ export default function Page({params}: {params: {slug: string}}) {
       photoUrl: item.img,
     }
     dispatch(addItem(payload))
+
+    if (entityId !== restaurantId || userId !== userUid)
+      dispatch(addOrUpdateCartIds({userId: userUid, entityId: restaurantId}))
   }
 
   const renderButtons = (item: Item) => {
@@ -75,7 +85,7 @@ export default function Page({params}: {params: {slug: string}}) {
     const renderDecreaseIcons = () => {
       switch (quantity) {
         case 1:
-          return '💀'
+          return '☠️'
         case 2:
           return '😱'
         case 3:
