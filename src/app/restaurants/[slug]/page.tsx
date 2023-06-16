@@ -72,12 +72,32 @@ export default function Page({params}: {params: {slug: string}}) {
     const handleIncrease = () => {
       dispatch(increaseItemQuantity(item))
     }
+    const renderDecreaseIcons = () => {
+      switch (quantity) {
+        case 1:
+          return '💀'
+        case 2:
+          return '😱'
+        case 3:
+          return '😐'
+        case 4:
+          return '🙂'
+        case 5:
+          return '😉'
+        case 6:
+          return '🥰'
+        case 7:
+          return '😍'
+        default:
+          return '🤩'
+      }
+    }
     return [
       <Button key="one" title={'+'} onClick={handleIncrease} />,
       <Button key="two" title={`${quantity}`} onClick={() => {}} />,
       <Button
         key="three"
-        title={`${quantity === 1 ? 'x' : '-'}`}
+        title={renderDecreaseIcons()}
         onClick={handleRemove}
         backgroundColor={quantity === 1 ? theme.color.error : undefined}
       />,
