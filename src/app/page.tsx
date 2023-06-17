@@ -4,7 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import MenuBar from '@/components/MenuBar'
 import styled from 'styled-components'
-import {Grid, Paper, Box, Typography, Rating} from '@mui/material'
+import {Grid, Paper, Box, Typography, Rating, Stack} from '@mui/material'
 import {useRouter} from 'next/navigation'
 import banner from '@/assets/images/banner3.jpeg'
 import Footer from '@/components/Footer'
@@ -47,7 +47,7 @@ const Home = () => {
                 </ImageContainer>
                 <ContainerText>
                   <Title>{item.name}</Title>
-                  <SubTitle variant="body2">{item.address}</SubTitle>
+                  <SubTitle>{item.address}</SubTitle>
                   <CustomRating
                     size="small"
                     name="half-rating-read"
@@ -76,6 +76,7 @@ const Content = styled(Paper)`
   display: flex;
   flex-direction: column;
   height: 30vh;
+  width: 100%;
   &:hover {
     cursor: pointer;
   }
@@ -85,7 +86,7 @@ const ImageContainer = styled('div')<{isMobile: boolean}>`
   height: 67%;
   position: relative;
 `
-const ContainerText = styled('div')`
+const ContainerText = styled(Stack)`
   display: flex;
   flex-direction: column;
   padding-top: 5px;
@@ -93,12 +94,14 @@ const ContainerText = styled('div')`
   padding-bottom: 5px;
   width: 100%;
   justify-content: flex-start;
+  box-sizing: border-box;
 `
 const Title = styled(Typography)`
   font-size: ${theme.font.size.m};
   color: ${theme.color.primaryDark};
 `
 const SubTitle = styled(Typography)`
+  font-size: ${theme.font.size.s};
   color: ${theme.color.textWeak};
 `
 const CustomRating = styled(Rating)`

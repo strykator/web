@@ -37,6 +37,7 @@ import {RootState} from '@/redux'
 import Button from '@/components/Button'
 import Image from '@/components/Image'
 import {getRestaurantById} from './utils'
+import {formatCurrency} from '@/utils'
 
 export default function Page({params}: {params: {slug: string}}) {
   const {fullHeight, isTop} = useWindow()
@@ -130,7 +131,7 @@ export default function Page({params}: {params: {slug: string}}) {
         <Title>{restaurant.name}</Title>
         <Box mt={2}>
           <Button
-            title={`Checkout - $${subTotal}`}
+            title={`Checkout - ${formatCurrency(subTotal)}`}
             onClick={() => dispatch(emptyCart())}
             width="100%"
           />
@@ -189,7 +190,7 @@ export default function Page({params}: {params: {slug: string}}) {
                         <SubTitle variant="body2">
                           {truncate(item.description, 50)}
                         </SubTitle>
-                        <Price>${item.price}</Price>
+                        <Price>{formatCurrency(item.price)}</Price>
                         {item.rating !== 0 ? (
                           <CustomRating
                             size="small"
@@ -235,9 +236,9 @@ export default function Page({params}: {params: {slug: string}}) {
                     />
                   </Grid>
                   <Grid item xs={7} md={7}>
-                    <Stack pl={1}>
+                    <Stack pl={2}>
                       <Title>{el.name}</Title>
-                      <Price size="small">${el.price}</Price>
+                      <Price size="small">{formatCurrency(el.price)}</Price>
                     </Stack>
                   </Grid>
                   <Grid
@@ -376,19 +377,12 @@ const ContainerText = styled('div')`
 `
 const Title = styled(Typography)`
   font-size: ${theme.font.size.m};
-  font-weight: 500;
+  font-weight: 400;
   color: ${theme.color.text};
   line-height: 18px;
 `
 const CustomRating = styled(Rating)`
   margin-top: 10px;
-`
-const Separator = styled('span')`
-  margin-top: 8px;
-  margin-bottom: 8px;
-  height: 0.5px;
-  width: 100%;
-  background-color: ${theme.color.textWeak};
 `
 const CartItemContainer = styled(Grid)`
   &:hover {

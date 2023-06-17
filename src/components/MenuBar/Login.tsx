@@ -10,11 +10,11 @@ import {
 } from '@mui/material'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
-import {useDispatch, useSelector} from 'react-redux'
+import {useDispatch} from 'react-redux'
 import Button from '@/components/Button'
 import {loginWithEmailAndPassword} from '@/libs/firebase'
 import {buildUserPayload} from './utils'
-import {selectUserUid, updateUser} from '@/redux/user/userSlice'
+import {updateUser} from '@/redux/user/userSlice'
 
 interface ILogin {
   onCloseModal: () => void
@@ -92,7 +92,7 @@ const Login = ({onCloseModal}: ILogin) => {
         title="Submit"
         onClick={handleSubmit}
         width="50%"
-        height="40px"
+        height={40}
         disabled={!email || !password}
       />
     </Container>
@@ -110,6 +110,7 @@ const Title = styled(Typography)`
   margin-bottom: 20px;
 `
 const Space = styled('div')`
+  width: 100%;
   height: 10px;
 `
 const ErrorMessage = styled(Typography)`

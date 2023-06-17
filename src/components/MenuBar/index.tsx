@@ -2,14 +2,7 @@ import React, {useState} from 'react'
 import Image from 'next/image'
 import {useRouter} from 'next/navigation'
 import {useDispatch, useSelector} from 'react-redux'
-import {
-  Link,
-  Typography,
-  Box,
-  Badge,
-  BadgeProps,
-  IconButton,
-} from '@mui/material'
+import {Link, Typography, Box, Badge, IconButton} from '@mui/material'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import {styled} from '@mui/material/styles'
 import Button from '@/components/Button'
@@ -30,12 +23,12 @@ interface IMenuBar {
   sticky?: boolean
 }
 
-const MenuBar = ({bgColor, textColor, sticky}: IMenuBar) => {
+export default function MenuBar({bgColor, textColor, sticky}: IMenuBar) {
   const router = useRouter()
   const {isMobile} = useResponsive()
   const [isOpenModal, setOpenModal] = useState<boolean>(false)
   const state = useSelector((state: RootState) => state)
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
   const userId = selectUserUid(state)
   const restaurantId = selectEntityId(state)
   const totalShoppingCartQuantity = selectTotalQuantity(state)
@@ -81,27 +74,28 @@ const MenuBar = ({bgColor, textColor, sticky}: IMenuBar) => {
 
   return (
     <Container sticky={sticky} bgColor={bgColor} isMobile={isMobile}>
-      <Left>
+      <Left isMobile={isMobile}>
         {isMobile ? (
           <MobileMenu bgColor={bgColor} textColor={textColor} />
         ) : null}
       </Left>
-      <Middle>
-        {!isMobile
-          ? menu.map(item => (
-              <CustomLink
-                href={item.path}
-                textColor={textColor}
-                underline="hover"
-                key={item.key}>
-                <Text textColor={textColor} variant="h6">
-                  {item.label}
-                </Text>
-              </CustomLink>
-            ))
-          : null}
-      </Middle>
-      <Right>{renderRight()}</Right>
+      {!isMobile ? (
+        <Middle>
+          {menu.map(item => (
+            <CustomLink
+              href={item.path}
+              textColor={textColor}
+              underline="hover"
+              key={item.key}>
+              <Text textColor={textColor} variant="h6">
+                {item.label}
+              </Text>
+            </CustomLink>
+          ))}
+        </Middle>
+      ) : null}
+
+      <Right isMobile={isMobile}>{renderRight()}</Right>
       <Modal isOpen={isOpenModal} onClose={handleCloseModal}>
         <Login onCloseModal={handleCloseModal} />
       </Modal>
@@ -120,7 +114,7 @@ const Container = styled(Box)<{
   z-index: 1;
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: ${({isMobile}) => (isMobile ? 'space-evenly' : 'center')};
   width: 100%;
   height: 60px;
   opacity: ${({isMobile}) => (isMobile ? 0.85 : 1)};
@@ -136,11 +130,11 @@ const Container = styled(Box)<{
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
 `
 
-const Left = styled('div')`
+const Left = styled('div')<{isMobile?: boolean}>`
   display: flex;
-  justify-content: center;
+  justify-content: ${({isMobile}) => (isMobile ? 'flex-start' : 'center')};
   align-items: center;
-  width: 25%;
+  width: ${({isMobile}) => (isMobile ? '42%' : '25%')};
 `
 
 const Middle = styled('div')`
@@ -151,18 +145,13 @@ const Middle = styled('div')`
   gap: 15px;
 `
 
-const Right = styled('div')`
+const Right = styled('div')<{isMobile?: boolean}>`
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: ${({isMobile}) => (isMobile ? 'flex-end' : 'center')};
   align-items: center;
-  width: 25%;
+  width: ${({isMobile}) => (isMobile ? '42%' : '25%')};
   gap: 10px;
-`
-const WrapImage = styled(Image)`
-  &:hover {
-    cursor: pointer;
-  }
 `
 export const Text = styled(Typography)<{
   isMobile?: Boolean
@@ -199,5 +188,3 @@ const ShoppingCart = styled(ShoppingCartIcon)`
   height: 28px;
   color: red;
 `
-
-export default MenuBar

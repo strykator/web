@@ -60,7 +60,6 @@ const Container = styled('div')<{isMobile: Boolean}>`
   display: flex;
   flex-direction: column;
   width: ${({isMobile}) => (isMobile ? '80%' : '50%')};
-  height: 50%;
   background: linear-gradient(to bottom, #d4d3dd, #abbaab);
   border-radius: 4px;
   box-shadow: 24;
