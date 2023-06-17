@@ -3,7 +3,6 @@
 import React from 'react'
 import {useRouter, useSearchParams} from 'next/navigation'
 import styled from 'styled-components'
-import Image from 'next/image'
 import {
   Grid,
   Paper,
@@ -13,6 +12,7 @@ import {
   Stack,
   ButtonGroup,
 } from '@mui/material'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import {useDispatch, useSelector} from 'react-redux'
 import MenuBar from '@/components/MenuBar'
 import {useWindow, useResponsive} from '@/hooks'
@@ -36,6 +36,8 @@ import {
 import {selectUserUid} from '@/redux/user/userSlice'
 import {RootState} from '@/redux'
 import Button from '@/components/Button'
+import Image from '@/components/Image'
+import shoppingCart from '@/assets/images/3d_shopping_cart.png'
 
 const bannerUrl =
   'https://img.cdn4dd.com/cdn-cgi/image/fit=cover,width=1000,height=300,format=auto,quality=80/https://doordash-static.s3.amazonaws.com/media/store/header/8a4704ab-9dae-48e9-af6d-af0a2d2e6ac9.jpg'
@@ -113,6 +115,16 @@ export default function Page({params}: {params: {slug: string}}) {
       />,
     ]
   }
+
+  const renderEmptyShoppingCart = () => {
+    return items.length === 0 ? (
+      <EmptyCartContainer>
+        <EmptyCart />
+        <TextWeak>Add items to get started</TextWeak>
+      </EmptyCartContainer>
+    ) : null
+  }
+
   return (
     <Stack>
       <MenuBar
@@ -124,25 +136,20 @@ export default function Page({params}: {params: {slug: string}}) {
         <LeftContainer variant="outlined">
           <Banner>
             <BannerContainer>
-              <BannerTop
-                fill
-                src={bannerUrl}
-                alt="Cover"
-                style={{objectFit: 'cover'}}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
+              <BannerTop src={bannerUrl} alt="Cover" />
               <Avatar
                 src={restaurant}
                 alt="Cover"
                 width={100}
                 height={100}
-                style={{objectFit: 'contain', objectPosition: '10px'}}
+                type="contain"
+                typePosition="10px"
               />
             </BannerContainer>
           </Banner>
           <LeftHeader>
             <RestaurantText variant="subtitle1">
-              Han's Deli & Boba
+              Han&apos;s Deli & Boba
             </RestaurantText>
             <SubTitle variant="body2">
               7618 Highway 70 South 101, Nashville, TN
@@ -163,15 +170,11 @@ export default function Page({params}: {params: {slug: string}}) {
                     <Content
                       variant="outlined"
                       onClick={() => handleAddItem(item)}>
-                      <ImageContainer isMobile={isMobile}>
-                        <CustomeImage
-                          fill
-                          src={item.img === '' ? dish : item.img}
-                          alt={item.title}
-                          style={{objectFit: 'cover'}}
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                      </ImageContainer>
+                      <MenuImage
+                        src={item.img === '' ? dish : item.img}
+                        alt={item.title}
+                        type="cover"
+                      />
                       <ContainerText>
                         <Title>{item.title}</Title>
                         <SubTitle variant="body2">
@@ -205,6 +208,8 @@ export default function Page({params}: {params: {slug: string}}) {
           </RightHeader>
           <Separator />
           <Stack borderTop={1} borderColor={theme.color.hover}>
+            {renderEmptyShoppingCart()}
+
             {items.map((el, index) => {
               return (
                 <CartItemContainer
@@ -221,15 +226,11 @@ export default function Page({params}: {params: {slug: string}}) {
                     display={'flex'}
                     justifyContent={'center'}
                     alignItems={'center'}>
-                    <CartItemImageContainer>
-                      <CartItemImage
-                        fill
-                        src={el.photoUrl === '' ? dish : el.photoUrl}
-                        alt={el.name}
-                        style={{objectFit: 'cover'}}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    </CartItemImageContainer>
+                    <CartItemImage
+                      src={el.photoUrl === '' ? dish : el.photoUrl}
+                      alt={el.name}
+                      type="cover"
+                    />
                   </Grid>
                   <Grid item xs={7} md={7}>
                     <Stack pl={1}>
@@ -323,11 +324,8 @@ const BannerTop = styled(Image)`
   object-position: 75% 25%;
 `
 const Avatar = styled(Image)`
-  position: absolute;
-  left: 50px;
-  bottom: -50px;
-  height: 100px;
-  width: 100px;
+  margin-top: -50px;
+  margin-left: 60px;
   border-radius: 50px;
   background-color: ${theme.color.avatarCover};
 `
@@ -353,7 +351,9 @@ const SubTitle = styled(Typography)`
   color: ${theme.color.textWeak};
   margin-top: 5px;
 `
-const CustomeImage = styled(Image)`
+const MenuImage = styled(Image)`
+  width: 100%;
+  height: 100%;
   border-radius: 2px;
 `
 const Content = styled(Paper)`
@@ -363,11 +363,6 @@ const Content = styled(Paper)`
   &:hover {
     cursor: pointer;
   }
-`
-const ImageContainer = styled('div')<{isMobile: boolean}>`
-  width: 100%;
-  height: 100%;
-  position: relative;
 `
 const ContainerText = styled('div')`
   display: flex;
@@ -400,14 +395,12 @@ const CartItemContainer = styled(Grid)`
     background-color: ${theme.color.hover};
   }
 `
-const CartItemImageContainer = styled('div')`
+const CartItemImage = styled(Image)`
   display: flex;
   justify-content: flex-end;
+  margin-left: 5px;
   width: 80%;
   height: 90%;
-  position: relative;
-`
-const CartItemImage = styled(Image)`
   border-radius: 5px;
 `
 const Price = styled(Typography)<{size?: 'small' | 'large'}>`
@@ -418,4 +411,21 @@ const Price = styled(Typography)<{size?: 'small' | 'large'}>`
   color: ${theme.color.text};
   font-weight: 500;
   line-height: 20px;
+`
+const EmptyCartContainer = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 50px;
+`
+const EmptyCart = styled(ShoppingCartIcon)`
+  width: 40%;
+  height: auto;
+  color: ${theme.color.avatarCover};
+`
+const TextWeak = styled(Typography)`
+  margin-top: 20px;
+  font-size: ${theme.font.size.s};
+  font-weight: 300;
+  color: ${theme.color.textWeak};
 `

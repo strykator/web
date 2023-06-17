@@ -19,7 +19,7 @@ import Modal from '@/components/Modal'
 import MobileMenu from './MobileMenu'
 import Login from './Login'
 import {selectUserUid} from '@/redux/user/userSlice'
-import {selectTotalQuantity} from '@/redux/cart/cartSlice'
+import {selectTotalQuantity, selectEntityId} from '@/redux/cart/cartSlice'
 import {RootState} from '@/redux'
 import UserMenu from './UserMenu'
 import {theme} from '@/theme'
@@ -37,12 +37,15 @@ const MenuBar = ({bgColor, textColor, sticky}: IMenuBar) => {
   const state = useSelector((state: RootState) => state)
   const dispatch = useDispatch()
   const userId = selectUserUid(state)
+  const restaurantId = selectEntityId(state)
   const totalShoppingCartQuantity = selectTotalQuantity(state)
   const handleCloseModal = () => setOpenModal(false)
 
   const renderShoppingCart = () => {
+    const gotoRestaurantDetail = () =>
+      router.push(`/restaurants/${restaurantId}`)
     return totalShoppingCartQuantity !== 0 ? (
-      <IconButton aria-label="cart">
+      <IconButton aria-label="cart" onClick={gotoRestaurantDetail}>
         <CustomBadge badgeContent={totalShoppingCartQuantity}>
           <ShoppingCart />
         </CustomBadge>
