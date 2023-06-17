@@ -17,30 +17,26 @@ import {useDispatch, useSelector} from 'react-redux'
 import MenuBar from '@/components/MenuBar'
 import {useWindow, useResponsive} from '@/hooks'
 import {theme} from '@/theme'
-import restaurant from '@/assets/images/restaurant.png'
-import {data} from '@/utils'
 import dish from '@/assets/images/dish.png'
 import {truncate} from '@/utils'
 import {
+  Item,
   addItem,
   removeItem,
   increaseItemQuantity,
   decreaseItemQuantity,
+  addOrUpdateCartIds,
   emptyCart,
-  Item,
   selectItems,
   selectEntityId,
   selectUserId,
-  addOrUpdateCartIds,
+  selectTotalPrice,
 } from '@/redux/cart/cartSlice'
 import {selectUserUid} from '@/redux/user/userSlice'
 import {RootState} from '@/redux'
 import Button from '@/components/Button'
 import Image from '@/components/Image'
-import shoppingCart from '@/assets/images/3d_shopping_cart.png'
-
-const bannerUrl =
-  'https://img.cdn4dd.com/cdn-cgi/image/fit=cover,width=1000,height=300,format=auto,quality=80/https://doordash-static.s3.amazonaws.com/media/store/header/8a4704ab-9dae-48e9-af6d-af0a2d2e6ac9.jpg'
+import {getRestaurantById} from './utils'
 
 export default function Page({params}: {params: {slug: string}}) {
   const {fullHeight, isTop} = useWindow()
@@ -48,9 +44,11 @@ export default function Page({params}: {params: {slug: string}}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const restaurantId = params.slug
+  const restaurant = getRestaurantById(restaurantId)
   const state = useSelector((state: RootState) => state)
   const items = selectItems(state)
   const entityId = selectEntityId(state)
+  const subTotal = selectTotalPrice(state)
   const userId = selectUserId(state)
   const userUid = selectUserUid(state)
   const dispatch = useDispatch()
@@ -125,6 +123,22 @@ export default function Page({params}: {params: {slug: string}}) {
     ) : null
   }
 
+  const renderCheckout = () => {
+    return items.length !== 0 ? (
+      <RightHeader pr={1}>
+        <TextWeak>Order From:</TextWeak>
+        <Title>{restaurant.name}</Title>
+        <Box mt={2}>
+          <Button
+            title={`Checkout - $${subTotal}`}
+            onClick={() => dispatch(emptyCart())}
+            width="100%"
+          />
+        </Box>
+      </RightHeader>
+    ) : null
+  }
+
   return (
     <Stack>
       <MenuBar
@@ -136,28 +150,23 @@ export default function Page({params}: {params: {slug: string}}) {
         <LeftContainer variant="outlined">
           <Banner>
             <BannerContainer>
-              <BannerTop src={bannerUrl} alt="Cover" />
+              <BannerTop src={restaurant.photoUrl} alt="Cover" />
               <Avatar
-                src={restaurant}
-                alt="Cover"
+                src={restaurant.logoUrl}
+                alt="logo"
                 width={100}
                 height={100}
                 type="contain"
-                typePosition="10px"
               />
             </BannerContainer>
           </Banner>
           <LeftHeader>
-            <RestaurantText variant="subtitle1">
-              Han&apos;s Deli & Boba
-            </RestaurantText>
-            <SubTitle variant="body2">
-              7618 Highway 70 South 101, Nashville, TN
-            </SubTitle>
+            <RestaurantText>{restaurant.name}</RestaurantText>
+            <SubTitle variant="body2">{restaurant.address}</SubTitle>
             <CustomRating
               size="large"
               name="half-rating-read"
-              defaultValue={4.5}
+              defaultValue={restaurant.rating}
               precision={0.5}
               readOnly
             />
@@ -165,14 +174,14 @@ export default function Page({params}: {params: {slug: string}}) {
           <LeftBody>
             <Box sx={{flexGrow: 1}}>
               <Grid container spacing={3}>
-                {data.map((item, index) => (
+                {restaurant.menu.map((item, index) => (
                   <Grid item xs={12} md={6} key={index}>
                     <Content
                       variant="outlined"
                       onClick={() => handleAddItem(item)}>
                       <MenuImage
                         src={item.img === '' ? dish : item.img}
-                        alt={item.title}
+                        alt="photo"
                         type="cover"
                       />
                       <ContainerText>
@@ -199,14 +208,7 @@ export default function Page({params}: {params: {slug: string}}) {
           </LeftBody>
         </LeftContainer>
         <RightContainer elevation={3} fullHeight={fullHeight}>
-          <RightHeader>
-            <Button
-              title="Clear Cart"
-              onClick={() => dispatch(emptyCart())}
-              width="120px"
-            />
-          </RightHeader>
-          <Separator />
+          {renderCheckout()}
           <Stack borderTop={1} borderColor={theme.color.hover}>
             {renderEmptyShoppingCart()}
 
@@ -292,11 +294,10 @@ const RightContainer = styled(Paper)<{fullHeight: number}>`
 `
 const RightHeader = styled(Box)`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 60px;
-  padding-top: 20px;
+  flex-direction: column;
+  width: 90%;
+  padding-left: 5%;
+  padding-bottom: 15px;
 `
 const RightFooter = styled('div')`
   display: flex;
@@ -424,7 +425,7 @@ const EmptyCart = styled(ShoppingCartIcon)`
   color: ${theme.color.avatarCover};
 `
 const TextWeak = styled(Typography)`
-  margin-top: 20px;
+  margin-top: 10px;
   font-size: ${theme.font.size.s};
   font-weight: 300;
   color: ${theme.color.textWeak};

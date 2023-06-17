@@ -4,43 +4,57 @@ import React from 'react'
 import Image from 'next/image'
 import MenuBar from '@/components/MenuBar'
 import styled from 'styled-components'
-import {Grid, Paper, Box, Typography, Link} from '@mui/material'
+import {Grid, Paper, Box, Typography, Rating} from '@mui/material'
+import {useRouter} from 'next/navigation'
 import banner from '@/assets/images/banner3.jpeg'
-import {data} from '@/utils'
 import Footer from '@/components/Footer'
 import dish from '@/assets/images/dish.png'
 import {useResponsive} from '@/hooks'
 import {theme} from '@/theme'
+import {restaurants} from '@/constants'
 
 const Home = () => {
+  const router = useRouter()
   const {isMobile} = useResponsive()
+  const onClickRestaurant = (id: string) => {
+    router.push(`/restaurants/${id}`)
+  }
   return (
     <>
-      <MenuBar />
-      <Banner src={banner} alt="Feast" height={window.innerHeight} />
-      <Box pl={10} pr={10} pt={5} pb={5} sx={{flexGrow: 1}}>
-        <Grid container spacing={3}>
-          {data.map((item, index) => (
+      <MenuBar sticky={isMobile} />
+      {!isMobile ? (
+        <Banner src={banner} alt="Feast" height={window.innerHeight} />
+      ) : null}
+      <Box
+        p={4}
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          justifyContent: 'center',
+        }}>
+        <Grid container spacing={3} maxWidth={1200}>
+          {restaurants.map((item, index) => (
             <Grid item xs={12} md={6} key={index}>
-              <Content elevation={1}>
+              <Content elevation={1} onClick={() => onClickRestaurant(item.id)}>
                 <ImageContainer isMobile={isMobile}>
                   <CustomeImage
                     fill
-                    src={item.img === '' ? dish : item.img}
-                    alt={item.title}
+                    src={item.photoUrl === '' ? dish : item.photoUrl}
+                    alt={item.name}
                     style={{objectFit: 'cover'}}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </ImageContainer>
                 <ContainerText>
-                  <Title
-                    href="/restaurants/id"
-                    variant="subtitle1"
-                    underline="none">
-                    {item.title}
-                  </Title>
-                  <SubTitle variant="body2">more description here</SubTitle>
-                  <SubTitle variant="body2">4.7 rating</SubTitle>
+                  <Title>{item.name}</Title>
+                  <SubTitle variant="body2">{item.address}</SubTitle>
+                  <CustomRating
+                    size="small"
+                    name="half-rating-read"
+                    defaultValue={item.rating}
+                    precision={0.5}
+                    readOnly
+                  />
                 </ContainerText>
               </Content>
             </Grid>
@@ -62,6 +76,9 @@ const Content = styled(Paper)`
   display: flex;
   flex-direction: column;
   height: 30vh;
+  &:hover {
+    cursor: pointer;
+  }
 `
 const ImageContainer = styled('div')<{isMobile: boolean}>`
   width: 100%;
@@ -77,11 +94,15 @@ const ContainerText = styled('div')`
   width: 100%;
   justify-content: flex-start;
 `
-const Title = styled(Link)`
+const Title = styled(Typography)`
+  font-size: ${theme.font.size.m};
   color: ${theme.color.primaryDark};
 `
 const SubTitle = styled(Typography)`
   color: ${theme.color.textWeak};
+`
+const CustomRating = styled(Rating)`
+  margin-top: 10px;
 `
 
 export default Home

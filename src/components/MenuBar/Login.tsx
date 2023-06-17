@@ -22,8 +22,8 @@ interface ILogin {
 
 const Login = ({onCloseModal}: ILogin) => {
   const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('test@test.com')
+  const [password, setPassword] = useState('test1234')
   const [error, setError] = useState<boolean>(false)
   const dispatch = useDispatch()
 

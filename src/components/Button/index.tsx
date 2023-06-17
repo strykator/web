@@ -9,8 +9,8 @@ interface IButton {
   onClick: () => void
   type?: ButtonType
   disabled?: boolean
-  height?: string
-  width?: string
+  height?: string | number
+  width?: string | number
   backgroundColor?: string
   borderColor?: string
   titleColor?: string
@@ -20,8 +20,8 @@ const Button = ({
   title,
   disabled,
   onClick,
-  height = '25px',
-  width = '40px',
+  height,
+  width,
   type = 'contained',
   backgroundColor,
   borderColor,
@@ -44,14 +44,20 @@ const Button = ({
 }
 
 const Container = styled(MButton)<{
-  height: string
-  width: string
+  height: string | number | undefined
+  width: string | number | undefined
   backgroundColor?: string
   borderColor?: string
 }>`
-  height: ${({height}) => (height ? height : '25px')};
-  width: ${({width}) => (width ? width : '40px')};
-  padding: 14px 14px;
+  height: ${({height}) => {
+    if (height) return typeof height === 'string' ? height : `${height}px`
+    return 'auto'
+  }};
+  width: ${({width}) => {
+    if (width) return typeof width === 'string' ? width : `${width}px`
+    return 'auto'
+  }};
+  padding: 5px 5px;
   justify-content: center;
   align-items: center;
   text-transform: none;
