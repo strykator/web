@@ -1,4 +1,9 @@
-import {handeliMenu} from './RestaurantMenu'
+import {
+  handeliMenu,
+  chipotleMenu,
+  chickFillAMenu,
+  crumbleCookiesMenu,
+} from './restaurantMenu'
 
 export const restaurantIds = {
   chickFillA: 'Chick-fil-A',
@@ -18,7 +23,7 @@ export const restaurants = [
       'https://img.cdn4dd.com/cdn-cgi/image/fit=cover,width=1000,height=300,format=auto,quality=80/https://doordash-static.s3.amazonaws.com/media/store/header/c4919426-b5b2-4047-9757-af40f9aafa27.jpg',
     logoUrl:
       'https://img.cdn4dd.com/p/fit=contain,width=100,height=100,format=auto,quality=95/media/restaurant/cover_square/Chick-fil-A%C3%82_logo.png',
-    menu: [],
+    menu: chickFillAMenu,
   },
   {
     id: restaurantIds.hanDeli,
@@ -42,7 +47,7 @@ export const restaurants = [
       'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,format=auto,width=800,quality=50/https://doordash-static.s3.amazonaws.com/media/photosV2/81006ae4-874c-445a-a4a4-35e5b645179a-retina-large.png',
     logoUrl:
       'https://img.cdn4dd.com/p/fit=contain,width=100,height=100,format=auto,quality=95/media/restaurant/cover_square/ChipotelLogo1.jpg',
-    menu: [],
+    menu: chipotleMenu,
   },
   {
     id: restaurantIds.crumbleCookies,
@@ -54,6 +59,6 @@ export const restaurants = [
       'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,format=auto,width=800,quality=50/https://doordash-static.s3.amazonaws.com/media/store/header/c3d44cca-ce1f-41ee-ad36-e4ddf1005fda.png',
     logoUrl:
       'https://img.cdn4dd.com/p/fit=contain,width=200,height=200,format=auto,quality=95/media/restaurant/cover_square/151f957c-5f08-4d2a-a1d7-e62c584f39c7.jpg',
-    menu: [],
+    menu: crumbleCookiesMenu,
   },
 ]
