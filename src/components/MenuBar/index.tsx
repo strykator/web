@@ -41,15 +41,9 @@ export default function MenuBar({bgColor, textColor, sticky}: IMenuBar) {
   const handleCloseModal = () => setOpenModal(false)
 
   const renderShoppingCart = () => {
-    const handleOnClick = () => {
-      if (pathName.includes('restaurants')) {
-        dispatch(toggleShowShoppingCart(!shouldShowShoppingCart))
-      } else {
-        router.push(`/restaurants/${restaurantId}`)
-      }
-    }
+    const toggleShoppingCart = () => dispatch(toggleShowShoppingCart(true))
     return totalShoppingCartQuantity !== 0 ? (
-      <IconButton aria-label="cart" onClick={handleOnClick}>
+      <IconButton aria-label="cart" onClick={toggleShoppingCart}>
         <CustomBadge badgeContent={totalShoppingCartQuantity}>
           <ShoppingCart />
         </CustomBadge>

@@ -3,13 +3,14 @@ import {useEffect, useState} from 'react'
 const useWindow = () => {
   const [isBottom, setIsBottom] = useState<boolean>(false)
   const [isTop, setIsTop] = useState<boolean>(true)
+  const [scrollY, setScrollY] = useState<number>(0)
 
   useEffect(() => {
     const handleScroll = () => {
       const atBottom =
         window.innerHeight + window.scrollY >= document.body.offsetHeight
       setIsBottom(atBottom)
-
+      setScrollY(window.scrollY)
       if (window.scrollY === 0) {
         setIsTop(true)
       } else {
@@ -28,6 +29,7 @@ const useWindow = () => {
     isTop,
     isBottom,
     fullHeight: window.innerHeight + document.documentElement.scrollHeight,
+    scrollY,
   }
 }
 

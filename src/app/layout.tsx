@@ -10,6 +10,7 @@ import {store, persistor} from '@/redux'
 import client from '@/libs/apollo'
 import ThemeProvider from '@/theme'
 import {Typography} from '@mui/material'
+import ShoppingCart from '@/components/ShoppingCart'
 
 const inter = Inter({subsets: ['latin']})
 const poppins = Poppins({
@@ -35,6 +36,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
               <ThemeProvider>
                 <PersistGate loading={null} persistor={persistor}>
                   {children}
+                  <ShoppingCart />
                 </PersistGate>
                 <Typography />
               </ThemeProvider>
