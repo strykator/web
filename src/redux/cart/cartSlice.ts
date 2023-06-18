@@ -23,6 +23,7 @@ export interface ICartSlice {
   items: Item[]
   totalPrice: number
   totalQuantity: number
+  showShoppingCart?: boolean
 }
 
 /*********************************************
@@ -34,6 +35,7 @@ export const initialState: ICartSlice = {
   items: [],
   totalPrice: 0,
   totalQuantity: 0,
+  showShoppingCart: false,
 }
 
 /*********************************************
@@ -90,6 +92,9 @@ export const cartSlice = createSlice({
       if (state.userId !== action.payload.userId)
         state.userId = action.payload.userId
     },
+    toggleShowShoppingCart: (state, action: PayloadAction<boolean>) => {
+      state.showShoppingCart = action.payload
+    },
   },
 })
 
@@ -104,6 +109,7 @@ export const {
   increaseItemQuantity,
   decreaseItemQuantity,
   addOrUpdateCartIds,
+  toggleShowShoppingCart,
 } = cartSlice.actions
 
 /*********************************************
@@ -115,6 +121,8 @@ export const selectItems = (state: RootState) => state.cart.items
 export const selectTotalPrice = (state: RootState) => state.cart.totalPrice
 export const selectTotalQuantity = (state: RootState) =>
   state.cart.totalQuantity
+export const selectShowShoppingCart = (state: RootState) =>
+  state.cart.showShoppingCart
 
 /*********************************************
    #6 -- export reducer

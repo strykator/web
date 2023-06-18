@@ -1,6 +1,5 @@
 import React, {useState} from 'react'
-import Image from 'next/image'
-import {useRouter} from 'next/navigation'
+import {useRouter, usePathname} from 'next/navigation'
 import {useDispatch, useSelector} from 'react-redux'
 import {Link, Typography, Box, Badge, IconButton} from '@mui/material'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
@@ -12,7 +11,12 @@ import Modal from '@/components/Modal'
 import MobileMenu from './MobileMenu'
 import Login from './Login'
 import {selectUserUid} from '@/redux/user/userSlice'
-import {selectTotalQuantity, selectEntityId} from '@/redux/cart/cartSlice'
+import {
+  selectTotalQuantity,
+  selectEntityId,
+  selectShowShoppingCart,
+  toggleShowShoppingCart,
+} from '@/redux/cart/cartSlice'
 import {RootState} from '@/redux'
 import UserMenu from './UserMenu'
 import {theme} from '@/theme'
@@ -25,20 +29,27 @@ interface IMenuBar {
 
 export default function MenuBar({bgColor, textColor, sticky}: IMenuBar) {
   const router = useRouter()
+  const pathName = usePathname()
   const {isMobile} = useResponsive()
   const [isOpenModal, setOpenModal] = useState<boolean>(false)
   const state = useSelector((state: RootState) => state)
-  // const dispatch = useDispatch()
+  const dispatch = useDispatch()
   const userId = selectUserUid(state)
   const restaurantId = selectEntityId(state)
+  const shouldShowShoppingCart = selectShowShoppingCart(state)
   const totalShoppingCartQuantity = selectTotalQuantity(state)
   const handleCloseModal = () => setOpenModal(false)
 
   const renderShoppingCart = () => {
-    const gotoRestaurantDetail = () =>
-      router.push(`/restaurants/${restaurantId}`)
+    const handleOnClick = () => {
+      if (pathName.includes('restaurants')) {
+        dispatch(toggleShowShoppingCart(!shouldShowShoppingCart))
+      } else {
+        router.push(`/restaurants/${restaurantId}`)
+      }
+    }
     return totalShoppingCartQuantity !== 0 ? (
-      <IconButton aria-label="cart" onClick={gotoRestaurantDetail}>
+      <IconButton aria-label="cart" onClick={handleOnClick}>
         <CustomBadge badgeContent={totalShoppingCartQuantity}>
           <ShoppingCart />
         </CustomBadge>

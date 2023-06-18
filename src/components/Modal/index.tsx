@@ -10,9 +10,16 @@ interface IModal {
   onClose: () => void
   children?: React.ReactNode
   backdropClickDisabled?: boolean
+  bgColor?: string
 }
 
-const Modal = ({isOpen, onClose, children, backdropClickDisabled}: IModal) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  children,
+  backdropClickDisabled,
+  bgColor,
+}: IModal) => {
   const {isMobile} = useResponsive()
   const handleClose = (event: object, reason: string) => {
     if (backdropClickDisabled) return
@@ -28,7 +35,7 @@ const Modal = ({isOpen, onClose, children, backdropClickDisabled}: IModal) => {
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
       }}>
-      <Container isMobile={isMobile}>
+      <Container isMobile={isMobile} bgColor={bgColor}>
         <Header>
           <IconButton onClick={onClose}>
             <CloseIcon />
@@ -56,11 +63,12 @@ const ModalContainer = styled(MModal)`
   align-items: center;
   justify-content: center;
 `
-const Container = styled('div')<{isMobile: Boolean}>`
+const Container = styled('div')<{isMobile: Boolean; bgColor?: string}>`
   display: flex;
   flex-direction: column;
   width: ${({isMobile}) => (isMobile ? '80%' : '50%')};
-  background: linear-gradient(to bottom, #d4d3dd, #abbaab);
+  background: ${({bgColor}) =>
+    bgColor ? bgColor : 'linear-gradient(to bottom, #d4d3dd, #abbaab)'};
   border-radius: 4px;
   box-shadow: 24;
   animation: ${zoomInDownAnimation} 0.3s;

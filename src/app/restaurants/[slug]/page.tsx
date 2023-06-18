@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import {useRouter, useSearchParams} from 'next/navigation'
 import styled from 'styled-components'
 import {
@@ -26,22 +26,28 @@ import {
   increaseItemQuantity,
   decreaseItemQuantity,
   addOrUpdateCartIds,
+  toggleShowShoppingCart,
   emptyCart,
   selectItems,
   selectEntityId,
   selectUserId,
   selectTotalPrice,
+  selectShowShoppingCart,
 } from '@/redux/cart/cartSlice'
 import {selectUserUid} from '@/redux/user/userSlice'
 import {RootState} from '@/redux'
 import Button from '@/components/Button'
 import Image from '@/components/Image'
+import Modal from '@/components/Modal'
 import {getRestaurantById} from './utils'
 import {formatCurrency} from '@/utils'
+import {ShowChart} from '@mui/icons-material'
 
 export default function Page({params}: {params: {slug: string}}) {
+  const [isOpenModal, setOpenModal] = useState<boolean>(false)
+  const [addedItem, setAddedItem] = useState<any>(null)
   const {fullHeight, isTop} = useWindow()
-  const {isMobile} = useResponsive()
+  const {isMobile, isTablet} = useResponsive()
   const router = useRouter()
   const searchParams = useSearchParams()
   const restaurantId = params.slug
@@ -50,11 +56,28 @@ export default function Page({params}: {params: {slug: string}}) {
   const items = selectItems(state)
   const entityId = selectEntityId(state)
   const subTotal = selectTotalPrice(state)
+  const shouldShowShoppingCart = selectShowShoppingCart(state)
   const userId = selectUserId(state)
   const userUid = selectUserUid(state)
   const dispatch = useDispatch()
 
+  useEffect(() => {
+    if (isMobile || isTablet) {
+      dispatch(toggleShowShoppingCart(false))
+    } else {
+      dispatch(toggleShowShoppingCart(true))
+    }
+  }, [isMobile, isTablet])
+
   const handleAddItem = (item: any) => {
+    if (entityId && entityId !== restaurantId) {
+      setAddedItem(item)
+      setOpenModal(true)
+      return
+    }
+    onAddItem(item)
+  }
+  const onAddItem = (item: any) => {
     const payload: Item = {
       itemId: item.key + new Date().getTime(),
       name: item.title,
@@ -126,7 +149,7 @@ export default function Page({params}: {params: {slug: string}}) {
 
   const renderCheckout = () => {
     return items.length !== 0 ? (
-      <RightHeader pr={1}>
+      <RightHeader>
         <TextWeak>Order From:</TextWeak>
         <Title>{restaurant.name}</Title>
         <Box mt={2}>
@@ -139,16 +162,44 @@ export default function Page({params}: {params: {slug: string}}) {
       </RightHeader>
     ) : null
   }
+  const onCloseModal = () => setOpenModal(false)
+
+  const handleClickYesModal = () => {
+    dispatch(emptyCart())
+    onAddItem(addedItem)
+    onCloseModal()
+  }
 
   return (
     <Stack>
+      <Modal
+        isOpen={isOpenModal}
+        onClose={onCloseModal}
+        bgColor={theme.color.background}>
+        <Stack
+          width={'50%'}
+          display="flex"
+          alignSelf={'center'}
+          spacing={1}
+          alignItems={'center'}>
+          <TextWeak>Adding new item will empty the current cart</TextWeak>
+          <Title>Are you sure?</Title>
+          <Button
+            title="YES"
+            onClick={handleClickYesModal}
+            width="50%"
+            type="outlined"
+          />
+          <Button title="NO" onClick={onCloseModal} width="50%" />
+        </Stack>
+      </Modal>
       <MenuBar
         sticky
         textColor={theme.color.primaryDark}
         bgColor={theme.color.background}
       />
       <Container>
-        <LeftContainer variant="outlined">
+        <LeftContainer variant="outlined" isMobile={isMobile || isTablet}>
           <Banner>
             <BannerContainer>
               <BannerTop src={restaurant.photoUrl} alt="Cover" />
@@ -208,7 +259,12 @@ export default function Page({params}: {params: {slug: string}}) {
             </Box>
           </LeftBody>
         </LeftContainer>
-        <RightContainer elevation={3} fullHeight={fullHeight}>
+        <RightContainer
+          elevation={3}
+          fullHeight={fullHeight}
+          isMobile={isMobile}
+          isTablet={isTablet}
+          showCart={Boolean(shouldShowShoppingCart)}>
           {renderCheckout()}
           <Stack borderTop={1} borderColor={theme.color.hover}>
             {renderEmptyShoppingCart()}
@@ -272,32 +328,56 @@ const Container = styled(Box)`
   display: flex;
   justify-content: flex-start;
   padding-top: 10px;
-  gap: 10px;
 `
-const LeftContainer = styled(Paper)`
+const LeftContainer = styled(Paper)<{isMobile?: boolean}>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 70%;
+  width: ${({isMobile}) => (isMobile ? '100%' : '74.5%')};
   padding-top: 20px;
-  padding-left: 2%;
-  padding-right: 2%;
-  padding-bottom: 10%;
+  padding-left: 4%;
+  padding-right: 4%;
+  padding-bottom: 5%;
   gap: 20px;
+  box-sizing: border-box;
 `
-const RightContainer = styled(Paper)<{fullHeight: number}>`
-  position: fixed;
+const RightContainer = styled(Paper)<{
+  fullHeight: number
+  isMobile: boolean
+  isTablet: boolean
+  showCart: boolean
+}>`
+  position: ${({isMobile}) => (isMobile ? 'absolute' : 'fixed')};
   top: 60px;
-  right: 0;
-  height: 100vh;
-  width: 25%;
+  right: ${({isMobile, isTablet, showCart}) => {
+    if ((isMobile || isTablet) && !showCart) {
+      return '-100%'
+    } else {
+      return '0px'
+    }
+  }};
+  height: ${({fullHeight}) => (fullHeight ? `${fullHeight}px` : '100vh')};
+  width: ${({isMobile, isTablet, showCart}) => {
+    if (isMobile && showCart) {
+      return '100%'
+    } else if (isTablet && showCart) {
+      return '30%'
+    } else if ((isMobile || isTablet) && !showCart) {
+      return '0%'
+    } else {
+      return '25%'
+    }
+  }};
   overflow: auto;
+  z-index: 1;
+  transition: 0.5s ease;
 `
-const RightHeader = styled(Box)`
+const RightHeader = styled(Grid)`
   display: flex;
   flex-direction: column;
-  width: 90%;
+  width: 100%;
   padding-left: 5%;
+  padding-right: 5%;
   padding-bottom: 15px;
 `
 const RightFooter = styled('div')`
@@ -385,6 +465,7 @@ const CustomRating = styled(Rating)`
   margin-top: 10px;
 `
 const CartItemContainer = styled(Grid)`
+  width: 100%;
   &:hover {
     cursor: pointer;
     background-color: ${theme.color.hover};
