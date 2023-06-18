@@ -56,16 +56,25 @@ export default function ShoppingCart() {
     }
   }, [isMobile, isTablet, pathName])
 
+  useEffect(() => {
+    if (items.length === 0 && restaurantId) dispatch(emptyCart())
+  }, [items])
+
+  const renderCloseShoppingCart = () => {
+    return (
+      (isMobile || isTablet || !pathName.includes('restaurants')) && (
+        <Box pt={1}>
+          <IconButton onClick={() => dispatch(toggleShowShoppingCart(false))}>
+            <ArrowForward style={{color: theme.color.primaryDark}} />
+          </IconButton>
+        </Box>
+      )
+    )
+  }
   const renderHeaderCheckout = () => {
     return items.length !== 0 ? (
       <Header>
-        {(isMobile || isTablet || !pathName.includes('restaurants')) && (
-          <Box pt={1}>
-            <IconButton onClick={() => dispatch(toggleShowShoppingCart(false))}>
-              <ArrowForward style={{color: theme.color.primaryDark}} />
-            </IconButton>
-          </Box>
-        )}
+        {renderCloseShoppingCart()}
         <TextWeak>Order From:</TextWeak>
         <RestaurantName href={`/restaurants/${restaurantId}`}>
           {restaurant.name}
@@ -128,10 +137,13 @@ export default function ShoppingCart() {
   }
   const renderEmptyShoppingCart = () => {
     return items.length === 0 ? (
-      <EmptyCartContainer>
-        <EmptyCart />
-        <TextWeak>Add items to get started</TextWeak>
-      </EmptyCartContainer>
+      <>
+        {renderCloseShoppingCart()}
+        <EmptyCartContainer>
+          <EmptyCart />
+          <TextWeak>Add items to get started</TextWeak>
+        </EmptyCartContainer>
+      </>
     ) : null
   }
 
@@ -206,10 +218,10 @@ const Container = styled(Paper)<{
   showCart: boolean
   scrollY: number
 }>`
-  position: ${({isMobile}) => (isMobile ? 'absolute' : 'fixed')};
+  position: absolute;
   top: ${({scrollY}) => (scrollY > 10 ? '0px' : '70px')};
   right: ${({showCart}) => (!showCart ? '-100%' : '0px')};
-  height: ${({fullHeight}) => (fullHeight ? `${fullHeight}px` : '100vh')};
+  min-height: 100vh;
   width: ${({isMobile, isTablet, showCart}) => {
     if (isMobile && showCart) {
       return '100%'

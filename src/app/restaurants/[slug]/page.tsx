@@ -114,7 +114,11 @@ export default function Page({params}: {params: {slug: string}}) {
         bgColor={theme.color.background}
       />
       <Container>
-        <LeftContainer variant="outlined" isMobile={isMobile || isTablet}>
+        <LeftContainer
+          variant="outlined"
+          isMobile={isMobile}
+          isTablet={isTablet}
+          showCart={Boolean(shouldShowShoppingCart)}>
           <Banner>
             <BannerContainer>
               <BannerTop src={restaurant.photoUrl} alt="Cover" />
@@ -184,17 +188,31 @@ const Container = styled(Box)`
   justify-content: flex-start;
   padding-top: 10px;
 `
-const LeftContainer = styled(Paper)<{isMobile?: boolean}>`
-  display: flex;
+const LeftContainer = styled(Paper)<{
+  isMobile?: boolean
+  isTablet: boolean
+  showCart: boolean
+}>`
+  display: ${({isMobile, showCart}) =>
+    isMobile && showCart ? 'none' : 'flex'};
   flex-direction: column;
   align-items: center;
-  width: ${({isMobile}) => (isMobile ? '100%' : '74.5%')};
+  width: ${({isMobile, isTablet, showCart}) => {
+    if (showCart && isTablet) {
+      return '59.5%'
+    } else if (!showCart && (isMobile || isTablet)) {
+      return '100%'
+    } else {
+      return '74.5%'
+    }
+  }};
   padding-top: 20px;
   padding-left: 4%;
   padding-right: 4%;
   padding-bottom: 5%;
   gap: 20px;
   box-sizing: border-box;
+  transition: 0.7 ease;
 `
 const BannerContainer = styled('div')<{isMobile?: boolean}>`
   height: 80%;
