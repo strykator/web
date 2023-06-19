@@ -13,7 +13,7 @@ const Restaurants = () => {
 }
 
 const Container = styled(Box)`
-  background-color: yellow;
+  background-color: transparent;
 `
 
 const Title = styled(Typography)`

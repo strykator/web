@@ -2,7 +2,7 @@
 
 import React, {useEffect} from 'react'
 import styled from 'styled-components'
-import {usePathname} from 'next/navigation'
+import {useRouter, usePathname} from 'next/navigation'
 import {
   Grid,
   Paper,
@@ -39,6 +39,7 @@ import dish from '@/assets/images/dish.png'
 export default function ShoppingCart() {
   const {isMobile, isTablet} = useResponsive()
   const {fullHeight, scrollY} = useWindow()
+  const router = useRouter()
   const pathName = usePathname()
   const state = useSelector((state: RootState) => state)
   const dispatch = useDispatch()
@@ -72,6 +73,9 @@ export default function ShoppingCart() {
     )
   }
   const renderHeaderCheckout = () => {
+    const handleCheckout = () => {
+      router.push(`/restaurants/${restaurantId}/checkout`)
+    }
     return items.length !== 0 ? (
       <Header>
         {renderCloseShoppingCart()}
@@ -82,7 +86,7 @@ export default function ShoppingCart() {
         <Box mt={2}>
           <Button
             title={`Checkout - ${formatCurrency(subTotal)}`}
-            onClick={() => dispatch(emptyCart())}
+            onClick={handleCheckout}
             width="100%"
           />
         </Box>
@@ -217,10 +221,10 @@ const Container = styled(Paper)<{
   showCart: boolean
   scrollY: number
 }>`
-  position: absolute;
+  position: ${({isMobile}) => (isMobile ? 'absolute' : 'fixed')};
   top: ${({scrollY}) => (scrollY > 10 ? '0px' : '70px')};
   right: ${({showCart}) => (!showCart ? '-100%' : '0px')};
-  min-height: 100vh;
+  height: 100vh;
   width: ${({isMobile, isTablet, showCart}) => {
     if (isMobile && showCart) {
       return '100%'

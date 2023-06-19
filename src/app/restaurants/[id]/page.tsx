@@ -30,13 +30,13 @@ import Modal from '@/components/Modal'
 import {getRestaurantById} from './utils'
 import {formatCurrency} from '@/utils'
 
-export default function Page({params}: {params: {slug: string}}) {
+export default function Page({params}: {params: {id: string}}) {
   const [isOpenModal, setOpenModal] = useState<boolean>(false)
   const [addedItem, setAddedItem] = useState<any>(null)
   const {isMobile, isTablet} = useResponsive()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const restaurantId = params.slug
+  const restaurantId = params.id
   const restaurant = getRestaurantById(restaurantId)
   const state = useSelector((state: RootState) => state)
   const items = selectItems(state)
