@@ -113,86 +113,80 @@ export default function Page({params}: {params: {slug: string}}) {
         textColor={theme.color.primaryDark}
         bgColor={theme.color.background}
       />
-      <Container>
-        <LeftContainer
-          variant="outlined"
-          isMobile={isMobile}
-          isTablet={isTablet}
-          showCart={Boolean(shouldShowShoppingCart)}>
-          <Banner>
-            <BannerContainer>
-              <BannerTop src={restaurant.photoUrl} alt="Cover" />
-              <Avatar
-                src={restaurant.logoUrl}
-                alt="logo"
-                width={100}
-                height={100}
-                type="contain"
-              />
-            </BannerContainer>
-          </Banner>
-          <LeftHeader>
-            <RestaurantText>{restaurant.name}</RestaurantText>
-            <SubTitle variant="body2">{restaurant.address}</SubTitle>
-            <CustomRating
-              size="large"
-              name="half-rating-read"
-              defaultValue={restaurant.rating}
-              precision={0.5}
-              readOnly
+      <Container
+        variant="outlined"
+        isMobile={isMobile}
+        isTablet={isTablet}
+        showCart={Boolean(shouldShowShoppingCart)}>
+        <Banner>
+          <BannerContainer>
+            <BannerTop src={restaurant.photoUrl} alt="Cover" />
+            <Avatar
+              src={restaurant.logoUrl}
+              alt="logo"
+              width={100}
+              height={100}
+              type="contain"
             />
-          </LeftHeader>
-          <LeftBody>
-            <Box sx={{flexGrow: 1}}>
-              <Grid container spacing={3}>
-                {restaurant.menu.map((item, index) => (
-                  <Grid item xs={12} md={6} key={index}>
-                    <Content
-                      variant="outlined"
-                      onClick={() => handleAddItem(item)}>
-                      <MenuImage
-                        src={item.img === '' ? dish : item.img}
-                        alt="photo"
-                        type="cover"
-                      />
-                      <ContainerText>
-                        <Title>{item.title}</Title>
-                        <SubTitle variant="body2">
-                          {truncate(item.description, 50)}
-                        </SubTitle>
-                        <Price>{formatCurrency(item.price)}</Price>
-                        {item.rating !== 0 ? (
-                          <CustomRating
-                            size="small"
-                            name="half-rating-read"
-                            defaultValue={item.rating}
-                            precision={0.5}
-                            readOnly
-                          />
-                        ) : null}
-                      </ContainerText>
-                    </Content>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          </LeftBody>
-        </LeftContainer>
+          </BannerContainer>
+        </Banner>
+        <Header>
+          <RestaurantText>{restaurant.name}</RestaurantText>
+          <SubTitle variant="body2">{restaurant.address}</SubTitle>
+          <CustomRating
+            size="large"
+            name="half-rating-read"
+            defaultValue={restaurant.rating}
+            precision={0.5}
+            readOnly
+          />
+        </Header>
+        <Body>
+          <Box sx={{flexGrow: 1}}>
+            <Grid container spacing={3}>
+              {restaurant.menu.map((item, index) => (
+                <Grid item xs={12} md={6} key={index}>
+                  <Content
+                    variant="outlined"
+                    onClick={() => handleAddItem(item)}>
+                    <MenuImage
+                      src={item.img === '' ? dish : item.img}
+                      alt="photo"
+                      type="cover"
+                    />
+                    <ContainerText>
+                      <Title>{item.title}</Title>
+                      <SubTitle variant="body2">
+                        {truncate(item.description, 50)}
+                      </SubTitle>
+                      <Price>{formatCurrency(item.price)}</Price>
+                      {item.rating !== 0 ? (
+                        <CustomRating
+                          size="small"
+                          name="half-rating-read"
+                          defaultValue={item.rating}
+                          precision={0.5}
+                          readOnly
+                        />
+                      ) : null}
+                    </ContainerText>
+                  </Content>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        </Body>
       </Container>
     </Stack>
   )
 }
 
-const Container = styled(Box)`
-  display: flex;
-  justify-content: flex-start;
-  padding-top: 10px;
-`
-const LeftContainer = styled(Paper)<{
+const Container = styled(Paper)<{
   isMobile?: boolean
   isTablet: boolean
   showCart: boolean
 }>`
+  margin-top: 10px;
   display: ${({isMobile, showCart}) =>
     isMobile && showCart ? 'none' : 'flex'};
   flex-direction: column;
@@ -238,13 +232,13 @@ const Avatar = styled(Image)`
   border-radius: 50px;
   background-color: ${theme.color.avatarCover};
 `
-const LeftHeader = styled(Grid)`
+const Header = styled(Grid)`
   display: flex;
   flex-direction: column;
   height: 100px;
   width: 100%;
 `
-const LeftBody = styled('div')`
+const Body = styled('div')`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -261,14 +255,14 @@ const SubTitle = styled(Typography)`
   margin-top: 5px;
 `
 const MenuImage = styled(Image)`
-  width: 100%;
-  height: 100%;
+  width: 40%;
+  height: auto;
   border-radius: 2px;
 `
 const Content = styled(Paper)`
   display: flex;
   flex-direction: row;
-  height: 20vh;
+  height: 22vh;
   &:hover {
     cursor: pointer;
   }

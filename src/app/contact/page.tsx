@@ -163,5 +163,5 @@ const Card = styled(Paper)`
   min-width: 350px;
 `
 const BackIcon = styled(ArrowBackIcon)`
-  color: ${theme.color.error};
+  color: ${theme.color.primaryDark};
 `

@@ -206,7 +206,6 @@ export default function ShoppingCart() {
           )
         })}
       </Stack>
-      <Footer />
     </Container>
   )
 }
