@@ -333,6 +333,18 @@ export default function Checkout({params}: {params: {checkout: string}}) {
                 <SubTitle>{restaurant?.address}</SubTitle>
               </MiddleHeader>
             </Grid>
+            {isMobile && (
+              <Grid item xs={12}>
+                <Box p={1}>
+                  <Button
+                    title="Place Order"
+                    onClick={handlePlaceOrder}
+                    width="100%"
+                    disabled={Boolean(!readyToPlaceOrder)}
+                  />
+                </Box>
+              </Grid>
+            )}
             <Grid item xs={12} md={4}>
               <RightHeader>
                 <Row>
@@ -462,12 +474,14 @@ export default function Checkout({params}: {params: {checkout: string}}) {
         </OrderDetails>
 
         <Footer>
-          <Button
-            title="Place Order"
-            onClick={handlePlaceOrder}
-            width="100%"
-            disabled={Boolean(!readyToPlaceOrder)}
-          />
+          {!isMobile && (
+            <Button
+              title="Place Order"
+              onClick={handlePlaceOrder}
+              width="100%"
+              disabled={Boolean(!readyToPlaceOrder)}
+            />
+          )}
         </Footer>
       </Container>
     </>
