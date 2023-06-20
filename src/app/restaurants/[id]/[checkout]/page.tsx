@@ -13,8 +13,17 @@ import {
   AccordionDetails,
   AccordionSummary,
   TextField,
+  Stack,
+  Tabs,
+  Tab,
+  Divider,
 } from '@mui/material'
-import {ArrowBack, ExpandMore, Check} from '@mui/icons-material'
+import {
+  ArrowBack,
+  ExpandMore,
+  CheckRounded,
+  PriorityHighRounded,
+} from '@mui/icons-material'
 import {useRouter, useSearchParams} from 'next/navigation'
 import {useDispatch, useSelector} from 'react-redux'
 import {RootState} from '@/redux'
@@ -54,7 +63,9 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const restaurant = getRestaurantById(restaurantId)
   const subTotal = selectTotalPrice(appState)
   const totalQuantity = selectTotalQuantity(appState)
-  const [expanded, setExpanded] = React.useState<string | false>('panel1')
+  const [expanded, setExpanded] = React.useState<string | false>('panel2')
+  const [value, setValue] = React.useState(0)
+  const [tip, setTip] = React.useState(0)
   const [name, setName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [phone, setPhone] = useState<string>('')
@@ -67,10 +78,35 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const [cardCode, setCardCode] = useState<string>('')
   const [expiration, setExpiration] = useState<string>('')
 
-  const onChange =
+  const onChangeAccordion =
     (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(isExpanded ? panel : false)
     }
+  const onChangeTab = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue)
+  }
+
+  useEffect(() => {
+    let tipFloat = 0.0
+    switch (value) {
+      case 0:
+        tipFloat = subTotal * 0
+        break
+      case 1:
+        tipFloat = subTotal * 0.1
+        break
+      case 2:
+        tipFloat = subTotal * 0.15
+        break
+      case 3:
+        tipFloat = subTotal * 0.2
+        break
+      default:
+        break
+    }
+    setTip(parseFloat(tipFloat.toFixed(2)))
+  }, [value, subTotal])
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     switch (event.target.id) {
       case fieldIds['name']:
@@ -110,7 +146,12 @@ export default function Checkout({params}: {params: {checkout: string}}) {
         break
     }
   }
-  const handlePlaceOrder = () => alert('Order Placed')
+  const handlePlaceOrder = () =>
+    alert(
+      `Your order includes ${totalQuantity} items with total ${formatCurrency(
+        subTotal + subTotal * 0.1 + tip,
+      )}`,
+    )
 
   const renderInputFields = () => (
     <Grid container spacing={2}>
@@ -271,14 +312,12 @@ export default function Checkout({params}: {params: {checkout: string}}) {
                 </Row>
                 <Row>
                   <PriceTitleWeak>Tip</PriceTitleWeak>
-                  <Price>{formatCurrency(subTotal * 0.05)}</Price>
+                  <Price>{formatCurrency(tip)}</Price>
                 </Row>
                 <Row>
                   <PriceTitle>Total</PriceTitle>
                   <PriceTitle>
-                    {formatCurrency(
-                      subTotal + subTotal * 0.1 + subTotal * 0.05,
-                    )}
+                    {formatCurrency(subTotal + subTotal * 0.1 + tip)}
                   </PriceTitle>
                 </Row>
               </RightHeader>
@@ -286,9 +325,9 @@ export default function Checkout({params}: {params: {checkout: string}}) {
           </Grid>
         </Header>
 
-        <PersonalDetails
+        <Options
           expanded={expanded === 'panel1'}
-          onChange={onChange('panel1')}>
+          onChange={onChangeAccordion('panel1')}>
           <AccordionSummary
             expandIcon={<ExpandMore />}
             aria-controls="panel1bh-content"
@@ -298,17 +337,54 @@ export default function Checkout({params}: {params: {checkout: string}}) {
               display={'flex'}
               justifyContent={'space-between'}>
               <Typography sx={{width: '50%', flexShrink: 0}}>
-                Personal Details
+                Options
               </Typography>
-              {readyToPlaceOrder && <Check style={{color: 'green'}} />}
+              {<CheckRounded style={{color: 'green'}} />}
             </Box>
           </AccordionSummary>
-          <AccordionDetails>{renderInputFields()}</AccordionDetails>
-        </PersonalDetails>
+          <AccordionDetails>
+            <Stack spacing={2}>
+              <CustomTextField
+                id="promoteCode-outlined-basic"
+                label="Promote Code"
+                variant="filled"
+                defaultValue={cardCode}
+                onChange={handleChange}
+              />
+              <Divider />
+              <Box sx={{width: '100%', bgcolor: 'background.paper'}}>
+                <Tabs value={value} onChange={onChangeTab} centered>
+                  <Tab
+                    icon={<SubTitle>{formatCurrency(0)}</SubTitle>}
+                    iconPosition="bottom"
+                    label="0%"
+                  />
+                  <Tab
+                    icon={<SubTitle>{formatCurrency(subTotal * 0.1)}</SubTitle>}
+                    iconPosition="bottom"
+                    label="10%"
+                  />
+                  <Tab
+                    icon={
+                      <SubTitle>{formatCurrency(subTotal * 0.15)}</SubTitle>
+                    }
+                    iconPosition="bottom"
+                    label="15%"
+                  />
+                  <Tab
+                    icon={<SubTitle>{formatCurrency(subTotal * 0.2)}</SubTitle>}
+                    iconPosition="bottom"
+                    label="20%"
+                  />
+                </Tabs>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Options>
 
-        <OrderDetails
+        <PersonalDetails
           expanded={expanded === 'panel2'}
-          onChange={onChange('panel2')}>
+          onChange={onChangeAccordion('panel2')}>
           <AccordionSummary
             expandIcon={<ExpandMore />}
             aria-controls="panel2bh-content"
@@ -318,9 +394,33 @@ export default function Checkout({params}: {params: {checkout: string}}) {
               display={'flex'}
               justifyContent={'space-between'}>
               <Typography sx={{width: '50%', flexShrink: 0}}>
+                Personal Details
+              </Typography>
+              {readyToPlaceOrder ? (
+                <CheckRounded style={{color: 'green'}} />
+              ) : (
+                <PriorityHighRounded style={{color: 'red'}} />
+              )}
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>{renderInputFields()}</AccordionDetails>
+        </PersonalDetails>
+
+        <OrderDetails
+          expanded={expanded === 'panel3'}
+          onChange={onChangeAccordion('panel3')}>
+          <AccordionSummary
+            expandIcon={<ExpandMore />}
+            aria-controls="panel3bh-content"
+            id="panel3bh-header">
+            <Box
+              width={'100%'}
+              display={'flex'}
+              justifyContent={'space-between'}>
+              <Typography sx={{width: '50%', flexShrink: 0}}>
                 Your Order {`(${totalQuantity})`}
               </Typography>
-              <Check style={{color: 'green'}} />
+              <CheckRounded style={{color: 'green'}} />
             </Box>
           </AccordionSummary>
           <AccordionDetails>
@@ -425,6 +525,9 @@ const RightHeader = styled(Box)`
   height: 100%;
   width: 100%;
   box-sizing: border-box;
+`
+const Options = styled(Accordion)`
+  margin-top: 10px;
 `
 const PersonalDetails = styled(Accordion)`
   margin-top: 10px;
