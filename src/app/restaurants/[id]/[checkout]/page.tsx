@@ -17,6 +17,8 @@ import {
   Tabs,
   Tab,
   Divider,
+  Backdrop,
+  CircularProgress,
 } from '@mui/material'
 import {
   ArrowBack,
@@ -31,6 +33,7 @@ import {
   selectEntityId,
   selectTotalPrice,
   selectTotalQuantity,
+  emptyCart,
 } from '@/redux/cart/cartSlice'
 import Button from '@/components/Button'
 import Image from '@/components/Image'
@@ -59,6 +62,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const checkout = params.checkout
   const searchParams = useSearchParams()
   const appState = useSelector((state: RootState) => state)
+  const dispatch = useDispatch()
   const restaurantId = selectEntityId(appState)
   const restaurant = getRestaurantById(restaurantId)
   const subTotal = selectTotalPrice(appState)
@@ -77,6 +81,10 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const [cardNumber, setCardNumber] = useState<string>('')
   const [cardCode, setCardCode] = useState<string>('')
   const [expiration, setExpiration] = useState<string>('')
+  const [open, setOpen] = React.useState(false)
+
+  const onLoadingClose = () => setOpen(false)
+  const openLoadingSreen = () => setOpen(true)
 
   const onChangeAccordion =
     (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -146,12 +154,16 @@ export default function Checkout({params}: {params: {checkout: string}}) {
         break
     }
   }
-  const handlePlaceOrder = () =>
+  const handlePlaceOrder = () => {
+    openLoadingSreen()
     alert(
       `Your order includes ${totalQuantity} items with total ${formatCurrency(
         subTotal + subTotal * 0.1 + tip,
       )}`,
     )
+    router.replace('/')
+    dispatch(emptyCart())
+  }
 
   const renderInputFields = () => (
     <Grid container spacing={2}>
@@ -269,8 +281,29 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   // TODO: handle this
   const readyToPlaceOrder = name
 
+  const renderBackDrop = () => {
+    return (
+      <Backdrop
+        sx={{
+          color: '#fff',
+          zIndex: theme => theme.zIndex.drawer + 1,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(20px)',
+        }}
+        open={open}
+        onClick={onLoadingClose}>
+        <Stack spacing={2} display={'flex'} alignItems={'center'}>
+          <SuccessText>Order placed successfully!</SuccessText>
+          <SuccessText>Navigating back to home...</SuccessText>
+          <CircularProgress color="inherit" />
+        </Stack>
+      </Backdrop>
+    )
+  }
+
   return (
     <>
+      {renderBackDrop()}
       <TopBar>
         <IconButton onClick={() => router.back()}>
           <GoBackIcon />
@@ -283,7 +316,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
             <Grid item xs={3} md={2}>
               <LeftHeader>
                 <Image
-                  src={restaurant.logoUrl}
+                  src={restaurant?.logoUrl}
                   alt="logo"
                   type="contain"
                   circle
@@ -295,9 +328,9 @@ export default function Checkout({params}: {params: {checkout: string}}) {
             <Grid item xs={9} md={6}>
               <MiddleHeader>
                 <Title href={`/restaurants/${restaurantId}`}>
-                  {restaurant.name}
+                  {restaurant?.name}
                 </Title>
-                <SubTitle>{restaurant.address}</SubTitle>
+                <SubTitle>{restaurant?.address}</SubTitle>
               </MiddleHeader>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -563,4 +596,9 @@ const SectionText = styled(Typography)`
   font-weight: 600;
   font-size: ${theme.font.size.l};
   color: ${theme.color.text};
+`
+const SuccessText = styled(Typography)`
+  font-weight: 400;
+  font-size: ${theme.font.size.l};
+  color: ${theme.color.background};
 `
