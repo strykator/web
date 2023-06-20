@@ -36,7 +36,11 @@ import Image from '@/components/Image'
 import {formatCurrency, getRestaurantById} from '@/utils'
 import dish from '@/assets/images/dish.png'
 
-export default function ShoppingCart() {
+interface IShoppingCar {
+  horizontal?: boolean
+}
+
+export default function ShoppingCart({horizontal}: IShoppingCar) {
   const {isMobile, isTablet} = useResponsive()
   const {fullHeight, scrollY} = useWindow()
   const router = useRouter()
@@ -50,7 +54,12 @@ export default function ShoppingCart() {
   const subTotal = selectTotalPrice(state)
 
   useEffect(() => {
-    if (isMobile || isTablet || !pathName.includes('restaurants')) {
+    if (
+      isMobile ||
+      isTablet ||
+      !pathName.includes('restaurants') ||
+      pathName.includes('checkout')
+    ) {
       dispatch(toggleShowShoppingCart(false))
     } else {
       dispatch(toggleShowShoppingCart(true))
@@ -153,14 +162,16 @@ export default function ShoppingCart() {
 
   return (
     <Container
+      elevation={horizontal ? 0 : 1}
       fullHeight={fullHeight}
       isMobile={isMobile}
       isTablet={isTablet}
       showCart={Boolean(shouldShowShoppingCart)}
-      scrollY={scrollY}>
-      {renderHeaderCheckout()}
+      scrollY={scrollY}
+      horizontal={Boolean(horizontal)}>
+      {!horizontal && renderHeaderCheckout()}
       <Stack borderTop={1} borderColor={theme.color.hover}>
-        {renderEmptyShoppingCart()}
+        {!horizontal && renderEmptyShoppingCart()}
 
         {items.map((el, index) => {
           return (
@@ -220,13 +231,38 @@ const Container = styled(Paper)<{
   isTablet: boolean
   showCart: boolean
   scrollY: number
+  horizontal: boolean
 }>`
-  position: ${({isMobile}) => (isMobile ? 'absolute' : 'fixed')};
-  top: ${({scrollY}) => (scrollY > 10 ? '0px' : '70px')};
-  right: ${({showCart}) => (!showCart ? '-100%' : '0px')};
-  height: 100vh;
-  width: ${({isMobile, isTablet, showCart}) => {
-    if (isMobile && showCart) {
+  position: ${({isMobile, horizontal}) => {
+    if (horizontal) {
+      return 'relative'
+    } else {
+      return isMobile ? 'absolute' : 'fixed'
+    }
+  }};
+  top: ${({scrollY, horizontal}) => {
+    if (horizontal) {
+      return 'auto'
+    } else {
+      return scrollY > 10 ? '0px' : '70px'
+    }
+  }};
+  right: ${({showCart, horizontal}) => {
+    if (horizontal) {
+      return 'auto'
+    } else {
+      return !showCart ? '-100%' : '0px'
+    }
+  }};
+  height: ${({horizontal}) => {
+    if (horizontal) {
+      return 'auto'
+    } else {
+      return '100vh'
+    }
+  }};
+  width: ${({horizontal, isMobile, isTablet, showCart}) => {
+    if (horizontal || (isMobile && showCart)) {
       return '100%'
     } else if (isTablet && showCart) {
       return '40%'
@@ -237,7 +273,13 @@ const Container = styled(Paper)<{
     }
   }};
   overflow: auto;
-  z-index: 1;
+  z-index: ${({horizontal}) => {
+    if (horizontal) {
+      return 'auto'
+    } else {
+      return '1'
+    }
+  }};
   transition: 0.5s ease;
 `
 const RestaurantName = styled(Link)`
