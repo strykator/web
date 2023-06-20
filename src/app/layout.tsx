@@ -1,5 +1,6 @@
 'use client'
 
+import {Suspense} from 'react'
 import './globals.css'
 import {Inter, Poppins} from 'next/font/google'
 import {Provider} from 'react-redux'
@@ -11,6 +12,7 @@ import client from '@/libs/apollo'
 import ThemeProvider from '@/theme'
 import {Typography} from '@mui/material'
 import ShoppingCart from '@/components/ShoppingCart'
+import Analytics from '@/components/Analyctics'
 
 const inter = Inter({subsets: ['latin']})
 const poppins = Poppins({
@@ -30,6 +32,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       />
       <title>Feastta</title>
       <body className={poppins.className}>
+        <Suspense>
+          <Analytics />
+        </Suspense>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <ApolloProvider client={client}>
