@@ -54,6 +54,7 @@ const fieldIds = {
   cardNumber: 'cardNumber-outlined-basic',
   expiration: 'expiration-outlined-basic',
   cardCode: 'cardCode-outlined-basic',
+  promoteCode: 'promoteCode-outlined-basic',
 }
 
 export default function Checkout({params}: {params: {checkout: string}}) {
@@ -81,6 +82,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const [cardNumber, setCardNumber] = useState<string>('')
   const [cardCode, setCardCode] = useState<string>('')
   const [expiration, setExpiration] = useState<string>('')
+  const [promoteCode, setPromoteCode] = useState<string>('')
   const [open, setOpen] = React.useState(false)
 
   const onLoadingClose = () => setOpen(false)
@@ -149,6 +151,9 @@ export default function Checkout({params}: {params: {checkout: string}}) {
         break
       case fieldIds['cardCode']:
         setCardCode(event.target.value)
+        break
+      case fieldIds['promoteCode']:
+        setPromoteCode(event.target.value)
         break
       default:
         break
@@ -393,7 +398,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
                 id="promoteCode-outlined-basic"
                 label="Promote Code"
                 variant="filled"
-                defaultValue={cardCode}
+                defaultValue={promoteCode}
                 onChange={handleChange}
               />
               <Divider />
