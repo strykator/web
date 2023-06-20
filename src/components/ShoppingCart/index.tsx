@@ -286,6 +286,10 @@ const RestaurantName = styled(Link)`
   font-size: ${theme.font.size.m};
   line-height: 20px;
   color: ${theme.color.text};
+  text-decoration-color: transparent;
+  &:hover {
+    text-decoration-color: ${theme.color.primaryDark};
+  }
 `
 const Title = styled(Typography)`
   font-size: ${theme.font.size.m};

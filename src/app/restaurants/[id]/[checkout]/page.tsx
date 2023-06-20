@@ -54,7 +54,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const restaurant = getRestaurantById(restaurantId)
   const subTotal = selectTotalPrice(appState)
   const totalQuantity = selectTotalQuantity(appState)
-  const [expanded, setExpanded] = React.useState<string | false>(false)
+  const [expanded, setExpanded] = React.useState<string | false>('panel1')
   const [name, setName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [phone, setPhone] = useState<string>('')
@@ -368,6 +368,10 @@ const Title = styled(Link)`
   font-weight: 500;
   font-size: ${theme.font.size.m};
   color: ${theme.color.text};
+  text-decoration-color: transparent;
+  &:hover {
+    text-decoration-color: ${theme.color.primaryDark};
+  }
 `
 const SubTitle = styled(Typography)`
   font-weight: 400;
@@ -422,21 +426,12 @@ const RightHeader = styled(Box)`
   width: 100%;
   box-sizing: border-box;
 `
-const PriceContainer = styled(Paper)`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 3%;
-  box-sizing: border-box;
-  margin-top: 10px;
-`
 const PersonalDetails = styled(Accordion)`
   margin-top: 10px;
 `
 const OrderDetails = styled(Accordion)`
   margin-top: 10px;
 `
-
 const Footer = styled(Box)`
   display: flex;
   width: 100%;
