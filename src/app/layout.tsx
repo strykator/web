@@ -3,6 +3,7 @@
 import {Suspense} from 'react'
 import './globals.css'
 import {Inter, Poppins} from 'next/font/google'
+import {Analytics as VercelAnalytics} from '@vercel/analytics/react'
 import {Provider} from 'react-redux'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import {PersistGate} from 'redux-persist/integration/react'
@@ -34,6 +35,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <body className={poppins.className}>
         <Suspense>
           <Analytics />
+          <VercelAnalytics />
         </Suspense>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
