@@ -14,7 +14,12 @@ import {
   Link,
 } from '@mui/material'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-import {ArrowForward} from '@mui/icons-material'
+import {
+  ArrowForward,
+  DeleteForeverRounded,
+  RemoveRounded,
+  AddRounded,
+} from '@mui/icons-material'
 import {useDispatch, useSelector} from 'react-redux'
 import {RootState} from '@/redux'
 import {
@@ -117,35 +122,24 @@ export default function ShoppingCart({horizontal}: IShoppingCar) {
     const handleIncrease = () => {
       dispatch(increaseItemQuantity(item))
     }
-    const renderDecreaseIcons = () => {
-      switch (quantity) {
-        case 1:
-          return '☠️'
-        case 2:
-          return '😱'
-        case 3:
-          return '😐'
-        case 4:
-          return '🙂'
-        case 5:
-          return '😉'
-        case 6:
-          return '🥰'
-        case 7:
-          return '😍'
-        default:
-          return '🤩'
-      }
-    }
+
     return [
-      <Button key="one" title={'+'} onClick={handleIncrease} />,
+      <Button key="one" onClick={handleIncrease}>
+        <AddRounded style={{height: '17px'}} />
+      </Button>,
       <Button key="two" title={`${quantity}`} onClick={() => {}} />,
       <Button
         key="three"
-        title={renderDecreaseIcons()}
         onClick={handleRemove}
-        backgroundColor={quantity === 1 ? theme.color.error : undefined}
-      />,
+        backgroundColor={
+          quantity === 1 ? theme.color.error : theme.color.secondary
+        }>
+        {quantity === 1 ? (
+          <DeleteForeverRounded style={{height: '17px'}} />
+        ) : (
+          <RemoveRounded style={{height: '17px'}} />
+        )}
+      </Button>,
     ]
   }
   const renderEmptyShoppingCart = () => {

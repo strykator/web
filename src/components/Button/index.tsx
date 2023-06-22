@@ -5,7 +5,7 @@ import styled from 'styled-components'
 
 type ButtonType = 'text' | 'outlined' | 'contained'
 interface IButton {
-  title: string
+  title?: string
   onClick: () => void
   type?: ButtonType
   disabled?: boolean
@@ -14,6 +14,7 @@ interface IButton {
   backgroundColor?: string
   borderColor?: string
   titleColor?: string
+  children?: React.ReactNode
 }
 
 const Button = ({
@@ -26,6 +27,7 @@ const Button = ({
   backgroundColor,
   borderColor,
   titleColor,
+  children,
   ...props
 }: IButton) => {
   return (
@@ -38,7 +40,7 @@ const Button = ({
       backgroundColor={backgroundColor}
       borderColor={borderColor}
       {...props}>
-      <Text titleColor={titleColor}>{title}</Text>
+      {children ? children : <Text titleColor={titleColor}>{title}</Text>}
     </Container>
   )
 }

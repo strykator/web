@@ -28,6 +28,8 @@ import {
 } from '@mui/icons-material'
 import {useRouter, useSearchParams} from 'next/navigation'
 import {useDispatch, useSelector} from 'react-redux'
+import {useForm, Controller, SubmitHandler} from 'react-hook-form'
+import {yupResolver} from '@hookform/resolvers/yup'
 import {RootState} from '@/redux'
 import {
   selectEntityId,
@@ -38,23 +40,46 @@ import {
 import Button from '@/components/Button'
 import Image from '@/components/Image'
 import ShoppingCart from '@/components/ShoppingCart'
+import ErrorMessage from '@/components/ErrorMessage'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
-import {getRestaurantById, formatCurrency} from '@/utils'
+import {
+  getRestaurantById,
+  formatCurrency,
+  formatPhoneInput,
+  formatVisaCardNumber,
+  formatExpirationDate,
+  sanitizeData,
+  schemaFormCheckout,
+} from '@/utils'
 
-const fieldIds = {
-  name: 'name-outlined-basic',
-  email: 'email-outlined-basic',
-  phone: 'phone-outlined-basic',
-  address: 'address-outlined-basic',
-  country: 'country-outlined-basic',
-  state: 'state-outlined-basic',
-  city: 'city-outlined-basic',
-  zipcode: 'zipcode-outlined-basic',
-  cardNumber: 'cardNumber-outlined-basic',
-  expiration: 'expiration-outlined-basic',
-  cardCode: 'cardCode-outlined-basic',
-  promoteCode: 'promoteCode-outlined-basic',
+interface IFormInput {
+  name: string
+  email: string
+  phone: string
+  address: string
+  country: string
+  state: string
+  city: string
+  zipcode: string
+  cardNumber: string
+  expiration: string
+  cardCode: string
+  promoCode: string
+}
+const defaultFormValues = {
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  country: '',
+  state: '',
+  city: '',
+  zipcode: '',
+  cardNumber: '',
+  expiration: '',
+  cardCode: '',
+  promoCode: '',
 }
 
 export default function Checkout({params}: {params: {checkout: string}}) {
@@ -71,19 +96,20 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const [expanded, setExpanded] = React.useState<string | false>('panel2')
   const [value, setValue] = React.useState(0)
   const [tip, setTip] = React.useState(0)
-  const [name, setName] = useState<string>('')
-  const [email, setEmail] = useState<string>('')
-  const [phone, setPhone] = useState<string>('')
-  const [address, setAddress] = useState<string>('')
-  const [country, setCountry] = useState<string>('')
-  const [state, setState] = useState<string>('')
-  const [city, setCity] = useState<string>('')
-  const [zipcode, setZipcode] = useState<string>('')
-  const [cardNumber, setCardNumber] = useState<string>('')
-  const [cardCode, setCardCode] = useState<string>('')
-  const [expiration, setExpiration] = useState<string>('')
-  const [promoteCode, setPromoteCode] = useState<string>('')
   const [open, setOpen] = React.useState(false)
+  const {
+    control,
+    trigger,
+    clearErrors,
+    setError,
+    handleSubmit,
+    getValues,
+    formState: {errors},
+  } = useForm<IFormInput>({
+    defaultValues: defaultFormValues,
+    //resolver: yupResolver(schemaFormCheckout),
+  })
+  const {name, phone} = getValues()
 
   const onLoadingClose = () => setOpen(false)
   const openLoadingSreen = () => setOpen(true)
@@ -117,49 +143,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
     setTip(parseFloat(tipFloat.toFixed(2)))
   }, [value, subTotal])
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    switch (event.target.id) {
-      case fieldIds['name']:
-        setName(event.target.value)
-        break
-      case fieldIds['email']:
-        setEmail(event.target.value)
-        break
-      case fieldIds['phone']:
-        setPhone(event.target.value)
-        break
-      case fieldIds['address']:
-        setAddress(event.target.value)
-        break
-      case fieldIds['country']:
-        setCountry(event.target.value)
-        break
-      case fieldIds['state']:
-        setState(event.target.value)
-        break
-      case fieldIds['city']:
-        setCity(event.target.value)
-        break
-      case fieldIds['zipcode']:
-        setZipcode(event.target.value)
-        break
-      case fieldIds['cardNumber']:
-        setCardNumber(event.target.value)
-        break
-      case fieldIds['expiration']:
-        setExpiration(event.target.value)
-        break
-      case fieldIds['cardCode']:
-        setCardCode(event.target.value)
-        break
-      case fieldIds['promoteCode']:
-        setPromoteCode(event.target.value)
-        break
-      default:
-        break
-    }
-  }
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder: SubmitHandler<IFormInput> = async data => {
     openLoadingSreen()
     alert(
       `Your order includes ${totalQuantity} items with total ${formatCurrency(
@@ -176,108 +160,187 @@ export default function Checkout({params}: {params: {checkout: string}}) {
         <SectionText>Account Details</SectionText>
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="name-outlined-basic"
-          label="Name"
-          variant="outlined"
-          defaultValue={name}
-          onChange={handleChange}
+        <Controller
+          name="name"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              onBlur={() => trigger('name')}
+              variant="outlined"
+              label="Name"
+              error={!!errors.name}
+            />
+          )}
+          rules={{
+            required: 'Name is required',
+          }}
+        />
+        {errors.name && <ErrorMessage>{errors.name?.message}</ErrorMessage>}
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Controller
+          name="email"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="Email"
+              error={!!errors.email}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="email-outlined-basic"
-          label="Email"
-          variant="outlined"
-          defaultValue={email}
-          onChange={handleChange}
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="phone-outlined-basic"
-          label="Phone Number"
-          variant="outlined"
-          defaultValue={phone}
-          onChange={handleChange}
+        <Controller
+          name="phone"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              value={formatPhoneInput(field.value)}
+              onChange={e =>
+                field.onChange(
+                  e.target.value.length <= 12 ? e.target.value : field.value,
+                )
+              }
+              variant="outlined"
+              label="Phone Number"
+              error={!!errors.phone}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={12}>
         <SectionText>Shipping Details</SectionText>
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="address-outlined-basic"
-          label="Address"
-          variant="outlined"
-          defaultValue={address}
-          onChange={handleChange}
+        <Controller
+          name="address"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="Address"
+              error={!!errors.address}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="country-outlined-basic"
-          label="Country"
-          variant="outlined"
-          defaultValue={country}
-          onChange={handleChange}
+        <Controller
+          name="country"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="Country"
+              error={!!errors.country}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="state-outlined-basic"
-          label="State/Region"
-          variant="outlined"
-          defaultValue={state}
-          onChange={handleChange}
+        <Controller
+          name="state"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="State/Region"
+              error={!!errors.state}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="city-outlined-basic"
-          label="City"
-          variant="outlined"
-          defaultValue={city}
-          onChange={handleChange}
+        <Controller
+          name="city"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="City"
+              error={!!errors.city}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="zipcode-outlined-basic"
-          label="Zip Code"
-          variant="outlined"
-          defaultValue={zipcode}
-          onChange={handleChange}
+        <Controller
+          name="zipcode"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="Zip Code"
+              error={!!errors.zipcode}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={12}>
         <SectionText>Payment Details</SectionText>
       </Grid>
       <Grid item xs={12} md={12}>
-        <CustomTextField
-          id="cardNumber-outlined-basic"
-          label="Card Number"
-          variant="outlined"
-          defaultValue={cardNumber}
-          onChange={handleChange}
+        <Controller
+          name="cardNumber"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="Card Number"
+              value={formatVisaCardNumber(field.value)}
+              onChange={e =>
+                field.onChange(
+                  e.target.value.length <= 19 ? e.target.value : field.value,
+                )
+              }
+              error={!!errors.cardNumber}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="expiration-outlined-basic"
-          label="Expiration Date"
-          variant="outlined"
-          defaultValue={expiration}
-          onChange={handleChange}
+        <Controller
+          name="expiration"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="Expiration Date"
+              placeholder="MM/YY"
+              value={formatExpirationDate(field.value)}
+              onChange={e =>
+                field.onChange(
+                  e.target.value.length <= 5 ? e.target.value : field.value,
+                )
+              }
+              error={!!errors.expiration}
+            />
+          )}
         />
       </Grid>
       <Grid item xs={12} md={6}>
-        <CustomTextField
-          id="cardCode-outlined-basic"
-          label="Security Code"
-          variant="outlined"
-          defaultValue={cardCode}
-          onChange={handleChange}
+        <Controller
+          name="cardCode"
+          control={control}
+          render={({field}) => (
+            <CustomTextField
+              {...field}
+              variant="outlined"
+              label="CVV"
+              error={!!errors.cardCode}
+            />
+          )}
         />
       </Grid>
     </Grid>
@@ -343,7 +406,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
                 <Box p={1}>
                   <Button
                     title="Place Order"
-                    onClick={handlePlaceOrder}
+                    onClick={handleSubmit(handlePlaceOrder)}
                     width="100%"
                     disabled={Boolean(!readyToPlaceOrder)}
                   />
@@ -394,12 +457,17 @@ export default function Checkout({params}: {params: {checkout: string}}) {
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={2}>
-              <CustomTextField
-                id="promoteCode-outlined-basic"
-                label="Promote Code"
-                variant="filled"
-                defaultValue={promoteCode}
-                onChange={handleChange}
+              <Controller
+                name="promoCode"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    variant="filled"
+                    label="Promo Code"
+                    error={!!errors.promoCode}
+                  />
+                )}
               />
               <Divider />
               <Box sx={{width: '100%', bgcolor: 'background.paper'}}>
@@ -482,7 +550,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
           {!isMobile && (
             <Button
               title="Place Order"
-              onClick={handlePlaceOrder}
+              onClick={handleSubmit(handlePlaceOrder)}
               width="100%"
               disabled={Boolean(!readyToPlaceOrder)}
             />
