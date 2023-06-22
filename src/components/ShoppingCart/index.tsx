@@ -17,7 +17,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import {
   ArrowForward,
   DeleteForeverRounded,
-  AddRoadRounded,
+  RemoveRounded,
   AddRounded,
 } from '@mui/icons-material'
 import {useDispatch, useSelector} from 'react-redux'
@@ -131,8 +131,14 @@ export default function ShoppingCart({horizontal}: IShoppingCar) {
       <Button
         key="three"
         onClick={handleRemove}
-        backgroundColor={theme.color.error}>
-        <DeleteForeverRounded style={{height: '17px'}} />
+        backgroundColor={
+          quantity === 1 ? theme.color.error : theme.color.secondary
+        }>
+        {quantity === 1 ? (
+          <DeleteForeverRounded style={{height: '17px'}} />
+        ) : (
+          <RemoveRounded style={{height: '17px'}} />
+        )}
       </Button>,
     ]
   }
