@@ -1,7 +1,7 @@
 import numeral from 'numeral'
 import {restaurants} from '@/constants'
 
-export {schemaFormCheckout} from './schemas'
+export {schemaFormCheckout, schemaFormProfile} from './schemas'
 
 export const truncate = (words: string, n: number) => {
   if (!words) return ''
@@ -73,8 +73,8 @@ export const sanitizeData = (data: any) => {
   const sanitizedData = {
     ...data,
     phone: data.phone.replace(/[^\d]/g, ''),
-    cardNumber: data.cardNumber.replace(/[^\d]/g, ''),
-    expiration: data.expiration.replace(/[^\d]/g, ''),
+    cardNumber: data.cardNumber?.replace(/[^\d]/g, ''),
+    expiration: data.expiration?.replace(/[^\d]/g, ''),
   }
 
   return sanitizedData

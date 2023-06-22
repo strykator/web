@@ -30,7 +30,6 @@ import {useRouter, useSearchParams} from 'next/navigation'
 import {useDispatch, useSelector} from 'react-redux'
 import {useForm, Controller, SubmitHandler} from 'react-hook-form'
 import {yupResolver} from '@hookform/resolvers/yup'
-import * as yup from 'yup'
 import {RootState} from '@/redux'
 import {
   selectEntityId,

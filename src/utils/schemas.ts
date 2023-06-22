@@ -29,3 +29,21 @@ export const schemaFormCheckout = yup.object().shape({
   cardCode: yup.string(),
   promoCode: yup.string(),
 })
+
+export const schemaFormProfile = yup.object().shape({
+  name: yup.string(),
+  email: yup.string().email(),
+  phone: yup
+    .string()
+    .required()
+    .matches(
+      /^\d{3}-\d{3}-\d{4}$/,
+      'Phone number must have the format XXX-XXX-XXXX',
+    ),
+  address: yup.string(),
+  country: yup.string(),
+  state: yup.string(),
+  city: yup.string(),
+  zipcode: yup.string(),
+  about: yup.string(),
+})

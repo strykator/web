@@ -5,70 +5,56 @@ import styled from 'styled-components'
 import Image from 'next/image'
 import {useRouter} from 'next/navigation'
 import {Paper, TextField, Grid, Box} from '@mui/material'
+import {yupResolver} from '@hookform/resolvers/yup'
+import {useForm, Controller, SubmitHandler} from 'react-hook-form'
 import {theme} from '@/theme'
 import profileCover from '@/assets/images/profile_cover.jpg'
 import maleAvatar from '@/assets/images/3d_male_avatar.png'
 import Button from '@/components/Button'
+import {schemaFormProfile, formatPhoneInput, sanitizeData} from '@/utils'
 
-const fieldIds = {
-  name: 'name-outlined-basic',
-  email: 'email-outlined-basic',
-  phone: 'phone-outlined-basic',
-  address: 'address-outlined-basic',
-  country: 'country-outlined-basic',
-  state: 'state-outlined-basic',
-  city: 'city-outlined-basic',
-  zipcode: 'zipcode-outlined-basic',
-  about: 'about-outlined-basic',
+interface IFormInput {
+  name: string
+  email: string
+  phone: string
+  address: string
+  country: string
+  state: string
+  city: string
+  zipcode: string
+  about: string
+}
+const defaultFormValues = {
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  country: '',
+  state: '',
+  city: '',
+  zipcode: '',
+  about: '',
 }
 
 const Profile = () => {
   const router = useRouter()
-  const [name, setName] = useState<string>('')
-  const [email, setEmail] = useState<string>('')
-  const [phone, setPhone] = useState<string>('')
-  const [address, setAddress] = useState<string>('')
-  const [country, setCountry] = useState<string>('')
-  const [state, setState] = useState<string>('')
-  const [city, setCity] = useState<string>('')
-  const [zipcode, setZipcode] = useState<string>('')
-  const [about, setAbout] = useState<string>('')
+  const {
+    control,
+    trigger,
+    clearErrors,
+    setError,
+    handleSubmit,
+    getValues,
+    formState: {errors},
+  } = useForm<IFormInput>({
+    defaultValues: defaultFormValues,
+    resolver: yupResolver(schemaFormProfile),
+  })
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    switch (event.target.id) {
-      case fieldIds['name']:
-        setName(event.target.value)
-        break
-      case fieldIds['email']:
-        setEmail(event.target.value)
-        break
-      case fieldIds['phone']:
-        setPhone(event.target.value)
-        break
-      case fieldIds['address']:
-        setAddress(event.target.value)
-        break
-      case fieldIds['country']:
-        setCountry(event.target.value)
-        break
-      case fieldIds['state']:
-        setState(event.target.value)
-        break
-      case fieldIds['city']:
-        setCity(event.target.value)
-        break
-      case fieldIds['zipcode']:
-        setZipcode(event.target.value)
-        break
-      case fieldIds['about']:
-        setAbout(event.target.value)
-        break
-      default:
-        break
-    }
-  }
-
-  const handleSave = () => {
+  const handleSave: SubmitHandler<IFormInput> = async data => {
+    const sanitizedData = sanitizeData(data)
+    const {name, email, phone, address, country, state, city, zipcode, about} =
+      sanitizedData
     alert(
       `${name}-${email}-${phone}-${address}-${country}-${state}-${city}-${zipcode}-${about}`,
     )
@@ -86,85 +72,139 @@ const Profile = () => {
         <Box p={3} sx={{flexGrow: 1}}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <CustomTextField
-                id="name-outlined-basic"
-                label="Name"
-                variant="outlined"
-                defaultValue={name}
-                onChange={handleChange}
+              <Controller
+                name="name"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    onBlur={() => trigger('name')}
+                    variant="outlined"
+                    label="Name"
+                    error={!!errors.name}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <CustomTextField
-                id="email-outlined-basic"
-                label="Email"
-                variant="outlined"
-                defaultValue={email}
-                onChange={handleChange}
+              <Controller
+                name="email"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    variant="outlined"
+                    label="Email"
+                    error={!!errors.email}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <CustomTextField
-                id="phone-outlined-basic"
-                label="Phone Number"
-                variant="outlined"
-                defaultValue={phone}
-                onChange={handleChange}
+              <Controller
+                name="phone"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    value={formatPhoneInput(field.value)}
+                    onChange={e =>
+                      field.onChange(
+                        e.target.value.length <= 12
+                          ? e.target.value
+                          : field.value,
+                      )
+                    }
+                    variant="outlined"
+                    label="Phone Number"
+                    error={!!errors.phone}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <CustomTextField
-                id="address-outlined-basic"
-                label="Address"
-                variant="outlined"
-                defaultValue={address}
-                onChange={handleChange}
+              <Controller
+                name="address"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    variant="outlined"
+                    label="Address"
+                    error={!!errors.address}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <CustomTextField
-                id="country-outlined-basic"
-                label="Country"
-                variant="outlined"
-                defaultValue={country}
-                onChange={handleChange}
+              <Controller
+                name="country"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    variant="outlined"
+                    label="Country"
+                    error={!!errors.country}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <CustomTextField
-                id="state-outlined-basic"
-                label="State/Region"
-                variant="outlined"
-                defaultValue={state}
-                onChange={handleChange}
+              <Controller
+                name="state"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    variant="outlined"
+                    label="State/Region"
+                    error={!!errors.state}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <CustomTextField
-                id="city-outlined-basic"
-                label="City"
-                variant="outlined"
-                defaultValue={city}
-                onChange={handleChange}
+              <Controller
+                name="city"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    variant="outlined"
+                    label="City"
+                    error={!!errors.city}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <CustomTextField
-                id="zipcode-outlined-basic"
-                label="Zip Code"
-                variant="outlined"
-                defaultValue={zipcode}
-                onChange={handleChange}
+              <Controller
+                name="zipcode"
+                control={control}
+                render={({field}) => (
+                  <CustomTextField
+                    {...field}
+                    variant="outlined"
+                    label="Zip Code"
+                    error={!!errors.zipcode}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={12}>
-              <MultilineTextField
-                id="about-outlined-basic"
-                label="About"
-                variant="outlined"
-                defaultValue={about}
-                onChange={handleChange}
-                multiline
+              <Controller
+                name="about"
+                control={control}
+                render={({field}) => (
+                  <MultilineTextField
+                    {...field}
+                    variant="outlined"
+                    label="About"
+                    error={!!errors.about}
+                    multiline
+                  />
+                )}
               />
             </Grid>
           </Grid>
@@ -181,7 +221,7 @@ const Profile = () => {
             />
             <Button
               title="Save Changes"
-              onClick={handleSave}
+              onClick={handleSubmit(handleSave)}
               width="140px"
               height="40px"
             />
