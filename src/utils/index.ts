@@ -17,7 +17,9 @@ export const getRestaurantById = (id: string) => {
   return restaurants.filter(item => item.id === id)[0]
 }
 
-export const formatPhoneInput = (value: string) => {
+export const formatPhoneInput = (value: string | undefined): string => {
+  if (!value) return ''
+
   if (value) {
     // Remove non-digit characters
     const digitsOnly = value.replace(/[^\d]/g, '')

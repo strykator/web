@@ -20,6 +20,7 @@ import {
 import {RootState} from '@/redux'
 import UserMenu from './UserMenu'
 import {theme} from '@/theme'
+import {getOrder, createOrder, getListOrder} from '@/libs/firebase'
 
 interface IMenuBar {
   bgColor?: string
@@ -32,6 +33,7 @@ export default function MenuBar({bgColor, textColor, sticky}: IMenuBar) {
   const pathName = usePathname()
   const {isMobile} = useResponsive()
   const [isOpenModal, setOpenModal] = useState<boolean>(false)
+  const [data, setData] = useState<any>()
   const state = useSelector((state: RootState) => state)
   const dispatch = useDispatch()
   const userId = selectUserUid(state)
@@ -50,6 +52,14 @@ export default function MenuBar({bgColor, textColor, sticky}: IMenuBar) {
       </IconButton>
     ) : null
   }
+
+  const get = async () => {
+    const unsubscribe = await getOrder('orderID', setData)
+  }
+  const create = async () => {
+    await createOrder('')
+  }
+  const getList = async () => await getListOrder()
 
   const renderRight = () => {
     return userId ? (

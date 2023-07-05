@@ -7,13 +7,14 @@ import type {RootState} from '@/redux'
 **********************************************/
 interface IUserState {
   uid: string
-  firstName: string
-  lastName: string
-  email: string
-  mobile: string
-  roles: string[]
-  accessToken: string
-  refreshToken: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone?: string
+  bio?: string
+  roles?: string[]
+  accessToken?: string
+  refreshToken?: string
   expirationTime?: number
 }
 
@@ -25,7 +26,8 @@ const initialState: IUserState = {
   firstName: '',
   lastName: '',
   email: '',
-  mobile: '',
+  phone: '',
+  bio: '',
   roles: [],
   accessToken: '',
   refreshToken: '',
@@ -39,23 +41,26 @@ export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    updateUser: (state, action: PayloadAction<IUserState>) => {
-      state.uid = action.payload.uid ?? ''
-      state.firstName = action.payload.firstName ?? ''
-      state.lastName = action.payload.lastName ?? ''
-      state.email = action.payload.email ?? ''
-      state.mobile = action.payload.mobile ?? ''
-      state.roles = action.payload.roles ?? []
-      state.accessToken = action.payload.accessToken ?? ''
-      state.refreshToken = action.payload.refreshToken ?? ''
-      state.expirationTime = action.payload.expirationTime ?? 0
+    updateUser: (state, action: PayloadAction<IUserState | undefined>) => {
+      state.uid = action.payload?.uid ?? state.uid
+      state.firstName = action.payload?.firstName ?? state.firstName
+      state.lastName = action.payload?.lastName ?? state.lastName
+      state.email = action.payload?.email ?? state.email
+      state.phone = action.payload?.phone ?? state.phone
+      state.bio = action.payload?.bio ?? state.bio
+      state.roles = action.payload?.roles ?? state.roles
+      state.accessToken = action.payload?.accessToken ?? state.accessToken
+      state.refreshToken = action.payload?.refreshToken ?? state.refreshToken
+      state.expirationTime =
+        action.payload?.expirationTime ?? state.expirationTime
     },
     resetUser: state => {
       state.uid = initialState.uid
       state.firstName = initialState.firstName
       state.lastName = initialState.lastName
       state.email = initialState.email
-      state.mobile = initialState.mobile
+      state.phone = initialState.phone
+      state.bio = initialState.bio
       state.roles = initialState.roles
       state.accessToken = initialState.accessToken
       state.refreshToken = initialState.refreshToken
@@ -76,7 +81,8 @@ export const selectUserUid = (state: RootState) => state.user.uid
 export const selectUserFirstName = (state: RootState) => state.user.firstName
 export const selectUserLastName = (state: RootState) => state.user.lastName
 export const selectUserEmail = (state: RootState) => state.user.email
-export const selectUserMobile = (state: RootState) => state.user.mobile
+export const selectUserPhone = (state: RootState) => state.user.phone
+export const selectUserBio = (state: RootState) => state.user.bio
 export const selectUserRoles = (state: RootState) => state.user.roles
 export const selectUserAccessToken = (state: RootState) =>
   state.user.accessToken

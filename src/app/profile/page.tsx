@@ -4,6 +4,7 @@ import React, {useState} from 'react'
 import styled from 'styled-components'
 import Image from 'next/image'
 import {useRouter} from 'next/navigation'
+import {useDispatch, useSelector} from 'react-redux'
 import {Paper, TextField, Grid, Box} from '@mui/material'
 import {yupResolver} from '@hookform/resolvers/yup'
 import {useForm, Controller, SubmitHandler} from 'react-hook-form'
@@ -12,6 +13,9 @@ import profileCover from '@/assets/images/profile_cover.jpg'
 import maleAvatar from '@/assets/images/3d_male_avatar.png'
 import Button from '@/components/Button'
 import {schemaFormProfile, formatPhoneInput, sanitizeData} from '@/utils'
+import {RootState} from '@/redux'
+import {updateUserProfile} from '@/libs/firebase'
+import {updateUser} from '@/redux/user/userSlice'
 
 interface IFormInput {
   name: string
@@ -24,20 +28,23 @@ interface IFormInput {
   zipcode: string
   about: string
 }
-const defaultFormValues = {
-  name: '',
-  email: '',
-  phone: '',
-  address: '',
-  country: '',
-  state: '',
-  city: '',
-  zipcode: '',
-  about: '',
-}
 
 const Profile = () => {
+  const [saved, setSaved] = useState<boolean>(false)
   const router = useRouter()
+  const userProfile = useSelector((state: RootState) => state.user)
+  const dispatch = useDispatch()
+  const defaultFormValues = {
+    name: `${userProfile.firstName} ${userProfile.lastName}`,
+    email: userProfile.email,
+    phone: formatPhoneInput(userProfile?.phone),
+    address: '',
+    country: '',
+    state: '',
+    city: '',
+    zipcode: '',
+    about: userProfile.bio,
+  }
   const {
     control,
     trigger,
@@ -53,11 +60,16 @@ const Profile = () => {
 
   const handleSave: SubmitHandler<IFormInput> = async data => {
     const sanitizedData = sanitizeData(data)
-    const {name, email, phone, address, country, state, city, zipcode, about} =
-      sanitizedData
-    alert(
-      `${name}-${email}-${phone}-${address}-${country}-${state}-${city}-${zipcode}-${about}`,
-    )
+    const {about, phone} = sanitizedData
+    if (
+      await updateUserProfile(userProfile.uid, {phoneNumber: phone, bio: about})
+    ) {
+      dispatch(updateUser({phone, bio: about, uid: userProfile.uid}))
+      setSaved(true)
+      setTimeout(() => {
+        setSaved(false)
+      }, 2000)
+    }
   }
 
   const handleBack = () => router.back()
@@ -82,6 +94,7 @@ const Profile = () => {
                     variant="outlined"
                     label="Name"
                     error={!!errors.name}
+                    disabled
                   />
                 )}
               />
@@ -96,6 +109,7 @@ const Profile = () => {
                     variant="outlined"
                     label="Email"
                     error={!!errors.email}
+                    disabled
                   />
                 )}
               />
@@ -220,8 +234,9 @@ const Profile = () => {
               height="40px"
             />
             <Button
-              title="Save Changes"
+              title={saved ? '✅ Success' : 'Save Changes'}
               onClick={handleSubmit(handleSave)}
+              backgroundColor={saved ? theme.color.success : undefined}
               width="140px"
               height="40px"
             />
