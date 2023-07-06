@@ -124,7 +124,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
     defaultValues: defaultFormValues,
     //resolver: yupResolver(schemaFormCheckout),
   })
-  const {name, phone, address} = getValues()
+  const {name} = getValues()
   const onLoadingClose = () => setOpen(false)
   const openLoadingSreen = () => setOpen(true)
 
@@ -171,7 +171,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const fetchOptions = async (inputValue: string) => {
     if (!inputValue) return
     const result = await fetchPlaceAutocomplete(inputValue)
-    const formattedOption = result.map(
+    const formattedOption = result?.map(
       (el: TPlaceAutocomplete) => el.fullAddress,
     )
     setOptions(formattedOption)

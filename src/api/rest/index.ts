@@ -6,7 +6,7 @@ export const fetchUserById = async (id: string) => {
 }
 
 // GOOGLE MAPS
-const baseGoogleApi = 'http://localhost:4000/google/place_api'
+const baseGoogleApi = `${process.env.NEXT_PUBLIC_REST_API_URL}/google/place_api`
 
 export type TPlaceAutocomplete = {
   placeId: string
@@ -38,5 +38,6 @@ export const fetchZipcode = async (placeId: string) => {
     return `${zipcode}`
   } catch (error) {
     console.error('fetchZipcode error:', error)
+    return ''
   }
 }
