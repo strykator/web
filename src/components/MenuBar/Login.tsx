@@ -57,7 +57,7 @@ const Login = ({onCloseModal}: ILogin) => {
     const {email, password} = data
     const user = await loginWithEmailAndPassword(email, password)
     if (user) {
-      const payload = buildUserPayload(user)
+      const payload = user
       dispatch(updateUser(payload))
       onCloseModal && onCloseModal()
     } else {

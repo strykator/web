@@ -4,6 +4,7 @@ import React, {useState} from 'react'
 import styled from 'styled-components'
 import Image from 'next/image'
 import {useRouter} from 'next/navigation'
+import {useDispatch, useSelector} from 'react-redux'
 import {Paper, TextField, Grid, Box} from '@mui/material'
 import {yupResolver} from '@hookform/resolvers/yup'
 import {useForm, Controller, SubmitHandler} from 'react-hook-form'
@@ -12,6 +13,9 @@ import profileCover from '@/assets/images/profile_cover.jpg'
 import maleAvatar from '@/assets/images/3d_male_avatar.png'
 import Button from '@/components/Button'
 import {schemaFormProfile, formatPhoneInput, sanitizeData} from '@/utils'
+import {RootState} from '@/redux'
+import {updateUserProfile} from '@/libs/firebase'
+import {updateUser} from '@/redux/user/userSlice'
 
 interface IFormInput {
   name: string
@@ -22,22 +26,25 @@ interface IFormInput {
   state: string
   city: string
   zipcode: string
-  about: string
-}
-const defaultFormValues = {
-  name: '',
-  email: '',
-  phone: '',
-  address: '',
-  country: '',
-  state: '',
-  city: '',
-  zipcode: '',
-  about: '',
+  bio: string
 }
 
 const Profile = () => {
+  const [saved, setSaved] = useState<boolean>(false)
   const router = useRouter()
+  const userProfile = useSelector((state: RootState) => state.user)
+  const dispatch = useDispatch()
+  const defaultFormValues = {
+    name: `${userProfile.firstName} ${userProfile.lastName}`,
+    email: userProfile.email,
+    phone: formatPhoneInput(userProfile?.phone),
+    address: userProfile.address?.street ?? '',
+    country: userProfile.address?.country ?? '',
+    state: userProfile.address?.state ?? '',
+    city: userProfile.address?.city ?? '',
+    zipcode: userProfile.address?.zipcode ?? '',
+    bio: userProfile.bio,
+  }
   const {
     control,
     trigger,
@@ -52,12 +59,26 @@ const Profile = () => {
   })
 
   const handleSave: SubmitHandler<IFormInput> = async data => {
-    const sanitizedData = sanitizeData(data)
-    const {name, email, phone, address, country, state, city, zipcode, about} =
-      sanitizedData
-    alert(
-      `${name}-${email}-${phone}-${address}-${country}-${state}-${city}-${zipcode}-${about}`,
-    )
+    //const sanitizedData = sanitizeData(data)
+    const {bio, phone, address, city, state, country, zipcode} = data
+    const updatedProfile = {
+      phone: phone.trim(),
+      bio: bio.trim(),
+      address: {
+        street: address.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        country: country.trim(),
+        zipcode: zipcode.trim(),
+      },
+    }
+    if (await updateUserProfile(userProfile.uid, updatedProfile)) {
+      dispatch(updateUser({...updatedProfile, uid: userProfile.uid}))
+      setSaved(true)
+      setTimeout(() => {
+        setSaved(false)
+      }, 2000)
+    }
   }
 
   const handleBack = () => router.back()
@@ -82,6 +103,7 @@ const Profile = () => {
                     variant="outlined"
                     label="Name"
                     error={!!errors.name}
+                    disabled
                   />
                 )}
               />
@@ -96,6 +118,7 @@ const Profile = () => {
                     variant="outlined"
                     label="Email"
                     error={!!errors.email}
+                    disabled
                   />
                 )}
               />
@@ -194,14 +217,14 @@ const Profile = () => {
             </Grid>
             <Grid item xs={12} md={12}>
               <Controller
-                name="about"
+                name="bio"
                 control={control}
                 render={({field}) => (
                   <MultilineTextField
                     {...field}
                     variant="outlined"
                     label="About"
-                    error={!!errors.about}
+                    error={!!errors.bio}
                     multiline
                   />
                 )}
@@ -220,8 +243,9 @@ const Profile = () => {
               height="40px"
             />
             <Button
-              title="Save Changes"
+              title={saved ? '✅ Success' : 'Save Changes'}
               onClick={handleSubmit(handleSave)}
+              backgroundColor={saved ? theme.color.success : undefined}
               width="140px"
               height="40px"
             />
