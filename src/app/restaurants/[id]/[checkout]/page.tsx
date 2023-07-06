@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useMemo} from 'react'
 import styled from 'styled-components'
 import {
   Grid,
@@ -73,20 +73,6 @@ interface IFormInput {
   cardCode: string
   promoCode: string
 }
-const defaultFormValues = {
-  name: '',
-  email: '',
-  phone: '',
-  address: '',
-  country: '',
-  state: '',
-  city: '',
-  zipcode: '',
-  cardNumber: '',
-  expiration: '',
-  cardCode: '',
-  promoCode: '',
-}
 
 export default function Checkout({params}: {params: {checkout: string}}) {
   const router = useRouter()
@@ -94,6 +80,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const checkout = params.checkout
   const searchParams = useSearchParams()
   const appState = useSelector((state: RootState) => state)
+  const userProfile = useSelector((state: RootState) => state.user)
   const dispatch = useDispatch()
   const restaurantId = selectEntityId(appState)
   const restaurant = getRestaurantById(restaurantId)
@@ -105,6 +92,25 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const [open, setOpen] = useState(false)
   const [options, setOptions] = useState<string[]>([])
   const [predictions, setPredictions] = useState<TPlaceAutocomplete[]>([])
+  const defaultFormValues = useMemo(
+    () => ({
+      name: userProfile.firstName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : '',
+      email: userProfile.email,
+      phone: userProfile.phone,
+      address: userProfile.address?.street ?? '',
+      country: userProfile.address?.country ?? '',
+      state: userProfile.address?.state ?? '',
+      city: userProfile.address?.city ?? '',
+      zipcode: userProfile.address?.zipcode ?? '',
+      cardNumber: '',
+      expiration: '',
+      cardCode: '',
+      promoCode: '',
+    }),
+    [userProfile],
+  )
   const {
     control,
     trigger,
