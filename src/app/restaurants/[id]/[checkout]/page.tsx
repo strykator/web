@@ -19,6 +19,7 @@ import {
   Divider,
   Backdrop,
   CircularProgress,
+  Autocomplete,
 } from '@mui/material'
 import {
   ArrowBack,
@@ -52,6 +53,11 @@ import {
   sanitizeData,
   schemaFormCheckout,
 } from '@/utils'
+import {
+  fetchPlaceAutocomplete,
+  fetchZipcode,
+  TPlaceAutocomplete,
+} from '@/api/rest'
 
 interface IFormInput {
   name: string
@@ -94,9 +100,11 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const subTotal = selectTotalPrice(appState)
   const totalQuantity = selectTotalQuantity(appState)
   const [expanded, setExpanded] = React.useState<string | false>('panel2')
-  const [value, setValue] = React.useState(0)
-  const [tip, setTip] = React.useState(0)
-  const [open, setOpen] = React.useState(false)
+  const [value, setValue] = useState(0)
+  const [tip, setTip] = useState(0)
+  const [open, setOpen] = useState(false)
+  const [options, setOptions] = useState<string[]>([])
+  const [predictions, setPredictions] = useState<TPlaceAutocomplete[]>([])
   const {
     control,
     trigger,
@@ -104,13 +112,13 @@ export default function Checkout({params}: {params: {checkout: string}}) {
     setError,
     handleSubmit,
     getValues,
+    setValue: setFormValue,
     formState: {errors},
   } = useForm<IFormInput>({
     defaultValues: defaultFormValues,
     //resolver: yupResolver(schemaFormCheckout),
   })
-  const {name, phone} = getValues()
-
+  const {name, phone, address} = getValues()
   const onLoadingClose = () => setOpen(false)
   const openLoadingSreen = () => setOpen(true)
 
@@ -152,6 +160,16 @@ export default function Checkout({params}: {params: {checkout: string}}) {
     )
     router.replace('/')
     dispatch(emptyCart())
+  }
+
+  const fetchOptions = async (inputValue: string) => {
+    if (!inputValue) return
+    const result = await fetchPlaceAutocomplete(inputValue)
+    const formattedOption = result.map(
+      (el: TPlaceAutocomplete) => el.fullAddress,
+    )
+    setOptions(formattedOption)
+    setPredictions(result)
   }
 
   const renderInputFields = () => (
@@ -215,30 +233,53 @@ export default function Checkout({params}: {params: {checkout: string}}) {
       <Grid item xs={12} md={12}>
         <SectionText>Shipping Details</SectionText>
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} md={12}>
         <Controller
           name="address"
           control={control}
           render={({field}) => (
-            <CustomTextField
+            <CustomAutocomplete
               {...field}
-              variant="outlined"
-              label="Address"
-              error={!!errors.address}
+              filterOptions={x => x}
+              options={options}
+              noOptionsText="No locations"
+              autoComplete
+              includeInputInList
+              filterSelectedOptions
+              renderInput={params => {
+                return <TextField {...params} label="Address" fullWidth />
+              }}
+              onInputChange={async (event, newInputValue) => {
+                field.onChange(newInputValue)
+                if (newInputValue && newInputValue.trim() !== '') {
+                  await fetchOptions(newInputValue)
+                }
+              }}
+              onChange={async (event: any, newValue: any) => {
+                const selected = predictions.filter(
+                  (el: any) => el.fullAddress === newValue,
+                )[0]
+                const zipcode = await fetchZipcode(selected?.placeId ?? '')
+                setFormValue('address', selected?.street ?? '')
+                setFormValue('city', selected?.city ?? '')
+                setFormValue('state', selected?.state ?? '')
+                setFormValue('country', selected?.country ?? '')
+                setFormValue('zipcode', zipcode ?? '')
+              }}
             />
           )}
         />
       </Grid>
       <Grid item xs={12} md={6}>
         <Controller
-          name="country"
+          name="city"
           control={control}
           render={({field}) => (
             <CustomTextField
               {...field}
               variant="outlined"
-              label="Country"
-              error={!!errors.country}
+              label="City"
+              error={!!errors.city}
             />
           )}
         />
@@ -259,14 +300,14 @@ export default function Checkout({params}: {params: {checkout: string}}) {
       </Grid>
       <Grid item xs={12} md={6}>
         <Controller
-          name="city"
+          name="country"
           control={control}
           render={({field}) => (
             <CustomTextField
               {...field}
               variant="outlined"
-              label="City"
-              error={!!errors.city}
+              label="Country"
+              error={!!errors.country}
             />
           )}
         />
@@ -688,4 +729,13 @@ const SuccessText = styled(Typography)`
   font-weight: 400;
   font-size: ${theme.font.size.l};
   color: ${theme.color.background};
+`
+const CustomAutocomplete = styled(Autocomplete)`
+  display: flex;
+  width: 100%;
+  border-radius: 5px;
+  & .MuiInputBase-root {
+    height: 50px;
+    font-size: ${theme.font.size.m};
+  }
 `

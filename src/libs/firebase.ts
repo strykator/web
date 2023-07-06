@@ -17,7 +17,7 @@ import {
 } from 'firebase/firestore'
 import {transformUser} from '@/utils/transformer'
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? '',
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? '',
@@ -69,6 +69,7 @@ export const loginWithEmailAndPassword = async (
     const profile = await getUserProfile(user.uid)
     return transformUser(user, profile)
   } catch (error) {
+    console.log('error login => ', error)
     return null
   }
 }

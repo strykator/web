@@ -26,7 +26,7 @@ interface IFormInput {
   state: string
   city: string
   zipcode: string
-  about: string
+  bio: string
 }
 
 const Profile = () => {
@@ -38,12 +38,12 @@ const Profile = () => {
     name: `${userProfile.firstName} ${userProfile.lastName}`,
     email: userProfile.email,
     phone: formatPhoneInput(userProfile?.phone),
-    address: '',
-    country: '',
-    state: '',
-    city: '',
-    zipcode: '',
-    about: userProfile.bio,
+    address: userProfile.address?.street ?? '',
+    country: userProfile.address?.country ?? '',
+    state: userProfile.address?.state ?? '',
+    city: userProfile.address?.city ?? '',
+    zipcode: userProfile.address?.zipcode ?? '',
+    bio: userProfile.bio,
   }
   const {
     control,
@@ -59,12 +59,21 @@ const Profile = () => {
   })
 
   const handleSave: SubmitHandler<IFormInput> = async data => {
-    const sanitizedData = sanitizeData(data)
-    const {about, phone} = sanitizedData
-    if (
-      await updateUserProfile(userProfile.uid, {phoneNumber: phone, bio: about})
-    ) {
-      dispatch(updateUser({phone, bio: about, uid: userProfile.uid}))
+    //const sanitizedData = sanitizeData(data)
+    const {bio, phone, address, city, state, country, zipcode} = data
+    const updatedProfile = {
+      phone: phone.trim(),
+      bio: bio.trim(),
+      address: {
+        street: address.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        country: country.trim(),
+        zipcode: zipcode.trim(),
+      },
+    }
+    if (await updateUserProfile(userProfile.uid, updatedProfile)) {
+      dispatch(updateUser({...updatedProfile, uid: userProfile.uid}))
       setSaved(true)
       setTimeout(() => {
         setSaved(false)
@@ -208,14 +217,14 @@ const Profile = () => {
             </Grid>
             <Grid item xs={12} md={12}>
               <Controller
-                name="about"
+                name="bio"
                 control={control}
                 render={({field}) => (
                   <MultilineTextField
                     {...field}
                     variant="outlined"
                     label="About"
-                    error={!!errors.about}
+                    error={!!errors.bio}
                     multiline
                   />
                 )}

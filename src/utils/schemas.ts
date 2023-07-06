@@ -45,5 +45,5 @@ export const schemaFormProfile = yup.object().shape({
   state: yup.string(),
   city: yup.string(),
   zipcode: yup.string(),
-  about: yup.string(),
+  bio: yup.string(),
 })

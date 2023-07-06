@@ -5,12 +5,20 @@ import type {RootState} from '@/redux'
 /*********************************************
    #1 -- Define a type for the slice state
 **********************************************/
+export type TAddress = {
+  street: string
+  city: string
+  state: string
+  country: string
+  zipcode: string
+}
 interface IUserState {
   uid: string
   firstName?: string
   lastName?: string
   email?: string
   phone?: string
+  address?: TAddress
   bio?: string
   roles?: string[]
   accessToken?: string
@@ -27,6 +35,13 @@ const initialState: IUserState = {
   lastName: '',
   email: '',
   phone: '',
+  address: {
+    street: '',
+    city: '',
+    state: '',
+    country: '',
+    zipcode: '',
+  },
   bio: '',
   roles: [],
   accessToken: '',
@@ -47,6 +62,7 @@ export const userSlice = createSlice({
       state.lastName = action.payload?.lastName ?? state.lastName
       state.email = action.payload?.email ?? state.email
       state.phone = action.payload?.phone ?? state.phone
+      state.address = action.payload?.address ?? state.address
       state.bio = action.payload?.bio ?? state.bio
       state.roles = action.payload?.roles ?? state.roles
       state.accessToken = action.payload?.accessToken ?? state.accessToken
@@ -60,6 +76,7 @@ export const userSlice = createSlice({
       state.lastName = initialState.lastName
       state.email = initialState.email
       state.phone = initialState.phone
+      state.address = initialState.address
       state.bio = initialState.bio
       state.roles = initialState.roles
       state.accessToken = initialState.accessToken
@@ -82,6 +99,7 @@ export const selectUserFirstName = (state: RootState) => state.user.firstName
 export const selectUserLastName = (state: RootState) => state.user.lastName
 export const selectUserEmail = (state: RootState) => state.user.email
 export const selectUserPhone = (state: RootState) => state.user.phone
+export const selectUserAddress = (state: RootState) => state.user.address
 export const selectUserBio = (state: RootState) => state.user.bio
 export const selectUserRoles = (state: RootState) => state.user.roles
 export const selectUserAccessToken = (state: RootState) =>
