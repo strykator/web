@@ -23,7 +23,6 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
-  FormLabel,
   FormControl,
 } from '@mui/material'
 import {
@@ -62,8 +61,9 @@ import {
   fetchZipcode,
   TPlaceAutocomplete,
 } from '@/api/rest'
-
-interface IFormInput {
+import {createOrder} from '@/libs/firebase'
+import {calTaxes, calTotal, prepareOrderPayload} from './utils'
+export interface IFormInput {
   name: string
   email: string
   phone: string
@@ -86,6 +86,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const searchParams = useSearchParams()
   const appState = useSelector((state: RootState) => state)
   const userProfile = useSelector((state: RootState) => state.user)
+  const shoppingCart = useSelector((state: RootState) => state.cart)
   const dispatch = useDispatch()
   const restaurantId = selectEntityId(appState)
   const restaurant = getRestaurantById(restaurantId)
@@ -94,6 +95,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const [expanded, setExpanded] = React.useState<string | false>('panel2')
   const [value, setValue] = useState(0)
   const [tip, setTip] = useState(0)
+  const [discount, setDiscount] = useState(0)
   const [open, setOpen] = useState(false)
   const [options, setOptions] = useState<string[]>([])
   const [predictions, setPredictions] = useState<TPlaceAutocomplete[]>([])
@@ -165,22 +167,26 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   }, [value, subTotal])
 
   const handlePlaceOrder: SubmitHandler<IFormInput> = async data => {
+    const payload = prepareOrderPayload({data, shoppingCart, tip, discount})
+    const orderConfirmation = await createOrder(payload)
     openLoadingSreen()
-    alert(
-      `Your order includes ${totalQuantity} items with total ${formatCurrency(
-        subTotal + subTotal * 0.1 + tip,
-      )}`,
-    )
-    router.replace('/')
-    dispatch(emptyCart())
+    if (orderConfirmation) {
+      alert(
+        `Your order includes ${totalQuantity} items with total ${formatCurrency(
+          calTotal(subTotal, tip, discount),
+        )}`,
+      )
+      router.replace('/')
+      dispatch(emptyCart())
+    }
   }
 
   const fetchOptions = async (inputValue: string) => {
     if (!inputValue) return
     const result = await fetchPlaceAutocomplete(inputValue)
-    const formattedOption = result?.map(
-      (el: TPlaceAutocomplete) => el.fullAddress,
-    )
+    const formattedOption = result?.length
+      ? result.map((el: TPlaceAutocomplete) => el.fullAddress)
+      : []
     setOptions(formattedOption)
     setPredictions(result)
   }
@@ -513,7 +519,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
                 </Row>
                 <Row>
                   <PriceTitleWeak>Tax</PriceTitleWeak>
-                  <Price>{formatCurrency(subTotal * 0.1)}</Price>
+                  <Price>{formatCurrency(calTaxes(subTotal, discount))}</Price>
                 </Row>
                 <Row>
                   <PriceTitleWeak>Tip</PriceTitleWeak>
@@ -522,7 +528,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
                 <Row>
                   <PriceTitle>Total</PriceTitle>
                   <PriceTitle>
-                    {formatCurrency(subTotal + subTotal * 0.1 + tip)}
+                    {formatCurrency(calTotal(subTotal, tip, discount))}
                   </PriceTitle>
                 </Row>
               </RightHeader>

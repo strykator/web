@@ -6,21 +6,23 @@ import {updateTotalPriceAndQuantity, handleUpdateItem} from './utils'
 /*********************************************
    #1 -- Define a type for the slice state
 **********************************************/
-export type Item = {
+export type TItemOptions = {
+  name: string
+  price?: number
+  quantity: number
+}
+export type TItem = {
   itemId: string
   name: string
   price: number
   quantity: number
   photoUrl: string
-  options?: {
-    name: string
-    price?: number
-  }
+  options?: TItemOptions[]
 }
 export interface ICartSlice {
   userId: string
   entityId: string
-  items: Item[]
+  items: TItem[]
   totalPrice: number
   totalQuantity: number
   showShoppingCart?: boolean
@@ -45,7 +47,7 @@ export const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addItem: (state, action: PayloadAction<Item>) => {
+    addItem: (state, action: PayloadAction<TItem>) => {
       state.items.push(action.payload)
       updateTotalPriceAndQuantity(state)
     },
@@ -55,12 +57,12 @@ export const cartSlice = createSlice({
       )
       updateTotalPriceAndQuantity(state)
     },
-    updateItem: (state, action: PayloadAction<Item>) => {
+    updateItem: (state, action: PayloadAction<TItem>) => {
       const updatedItem = action.payload
       handleUpdateItem(state, updatedItem)
       updateTotalPriceAndQuantity(state)
     },
-    increaseItemQuantity: (state, action: PayloadAction<Item>) => {
+    increaseItemQuantity: (state, action: PayloadAction<TItem>) => {
       const updatedItem = {
         ...action.payload,
         quantity: action.payload.quantity + 1,
@@ -68,7 +70,7 @@ export const cartSlice = createSlice({
       handleUpdateItem(state, updatedItem)
       updateTotalPriceAndQuantity(state)
     },
-    decreaseItemQuantity: (state, action: PayloadAction<Item>) => {
+    decreaseItemQuantity: (state, action: PayloadAction<TItem>) => {
       const updatedItem = {
         ...action.payload,
         quantity: action.payload.quantity - 1,

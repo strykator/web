@@ -16,6 +16,7 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import {transformUser} from '@/utils/transformer'
+import {TOrderPayload} from './types'
 
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? '',
@@ -133,33 +134,14 @@ export const getListOrder = async () => {
   }
 }
 
-export const createOrder = async (orderData: any) => {
-  const data = {
-    customerEmail: 'johndo@example.com',
-    customerName: 'John Doe',
-    items: [
-      {
-        itemId: 'item id 5',
-        itemName: 'product b',
-        itemOptions: [],
-        itemPrice: 10.99,
-        itemQuantity: 1,
-      },
-    ],
-    paymentMethod: 'credit card',
-    shippingAddress: {
-      zipCode: '37221',
-      city: 'Nashville',
-      state: 'TN',
-      street: '123 main st',
-      country: 'USA',
-    },
-    status: 'pending',
-    timestamp: `${new Date().getTime()}`,
-    totalAmount: 50,
-  }
+export const createOrder = async (orderData: TOrderPayload) => {
+  if (!orderData) return
+
   try {
     const collectionRef = collection(db, 'orders')
-    const newOrderRef = await addDoc(collectionRef, data)
-  } catch (error) {}
+    const newOrderRef = await addDoc(collectionRef, orderData)
+    return newOrderRef.id
+  } catch (error) {
+    return null
+  }
 }

@@ -11,7 +11,7 @@ import {theme} from '@/theme'
 import dish from '@/assets/images/dish.png'
 import {truncate} from '@/utils'
 import {
-  Item,
+  TItem,
   addItem,
   addOrUpdateCartIds,
   toggleShowShoppingCart,
@@ -64,7 +64,7 @@ export default function Page({params}: {params: {id: string}}) {
     onAddItem(item)
   }
   const onAddItem = (item: any) => {
-    const payload: Item = {
+    const payload: TItem = {
       itemId: item.key + new Date().getTime(),
       name: item.title,
       price: item.price,

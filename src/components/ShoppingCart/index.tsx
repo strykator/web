@@ -23,7 +23,7 @@ import {
 import {useDispatch, useSelector} from 'react-redux'
 import {RootState} from '@/redux'
 import {
-  Item,
+  TItem,
   selectShowShoppingCart,
   selectItems,
   selectEntityId,
@@ -107,7 +107,7 @@ export default function ShoppingCart({horizontal}: IShoppingCar) {
       </Header>
     ) : null
   }
-  const renderButtons = (item: Item) => {
+  const renderButtons = (item: TItem) => {
     const {quantity} = item
     const handleRemove = () => {
       if (quantity === 1) {
