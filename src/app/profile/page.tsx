@@ -12,7 +12,7 @@ import {theme} from '@/theme'
 import profileCover from '@/assets/images/profile_cover.jpg'
 import maleAvatar from '@/assets/images/3d_male_avatar.png'
 import Button from '@/components/Button'
-import {schemaFormProfile, formatPhoneInput, sanitizeData} from '@/utils'
+import {schemaFormProfile, formatPhoneInput} from '@/utils'
 import {RootState} from '@/redux'
 import {updateUserProfile} from '@/libs/firebase'
 import {updateUser} from '@/redux/user/userSlice'
@@ -48,10 +48,7 @@ const Profile = () => {
   const {
     control,
     trigger,
-    clearErrors,
-    setError,
     handleSubmit,
-    getValues,
     formState: {errors},
   } = useForm<IFormInput>({
     defaultValues: defaultFormValues,
