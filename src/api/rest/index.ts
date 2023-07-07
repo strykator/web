@@ -25,7 +25,6 @@ export const fetchPlaceAutocomplete = async (
     const predictions = response.data
     return predictions
   } catch (error) {
-    console.error('fetchPlaceAutocomplete error:', error)
     return []
   }
 }
@@ -37,7 +36,6 @@ export const fetchZipcode = async (placeId: string) => {
     const zipcode = response.data
     return `${zipcode}`
   } catch (error) {
-    console.error('fetchZipcode error:', error)
     return ''
   }
 }

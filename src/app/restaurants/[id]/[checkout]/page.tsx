@@ -50,7 +50,6 @@ import {
   formatPhoneInput,
   formatVisaCardNumber,
   formatExpirationDate,
-  sanitizeData,
   schemaFormCheckout,
 } from '@/utils'
 import {
