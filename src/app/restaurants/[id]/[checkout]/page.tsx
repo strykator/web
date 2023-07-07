@@ -20,6 +20,11 @@ import {
   Backdrop,
   CircularProgress,
   Autocomplete,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormLabel,
+  FormControl,
 } from '@mui/material'
 import {
   ArrowBack,
@@ -67,6 +72,7 @@ interface IFormInput {
   state: string
   city: string
   zipcode: string
+  paymentType: string
   cardNumber: string
   expiration: string
   cardCode: string
@@ -91,6 +97,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const [open, setOpen] = useState(false)
   const [options, setOptions] = useState<string[]>([])
   const [predictions, setPredictions] = useState<TPlaceAutocomplete[]>([])
+  const [paymentType, setPaymentType] = useState('cash')
   const defaultFormValues = useMemo(
     () => ({
       name: userProfile.firstName
@@ -103,6 +110,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
       state: userProfile.address?.state ?? '',
       city: userProfile.address?.city ?? '',
       zipcode: userProfile.address?.zipcode ?? '',
+      paymentType: 'cash',
       cardNumber: '',
       expiration: '',
       cardCode: '',
@@ -175,6 +183,35 @@ export default function Checkout({params}: {params: {checkout: string}}) {
     )
     setOptions(formattedOption)
     setPredictions(result)
+  }
+
+  const renderPaymentType = () => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const selected = (event.target as HTMLInputElement).value
+      setPaymentType(selected)
+      setFormValue('paymentType', selected)
+    }
+    return (
+      <FormControl>
+        <RadioGroup
+          row
+          aria-labelledby="demo-controlled-radio-buttons-group"
+          name="controlled-radio-buttons-group"
+          value={paymentType}
+          onChange={handleChange}>
+          <FormControlLabel
+            value="cash"
+            control={<Radio />}
+            label="Cash on Deliver"
+          />
+          <FormControlLabel
+            value="card"
+            control={<Radio />}
+            label="Credit or Debit Card"
+          />
+        </RadioGroup>
+      </FormControl>
+    )
   }
 
   const renderInputFields = () => (
@@ -335,60 +372,69 @@ export default function Checkout({params}: {params: {checkout: string}}) {
         <SectionText>Payment Details</SectionText>
       </Grid>
       <Grid item xs={12} md={12}>
-        <Controller
-          name="cardNumber"
-          control={control}
-          render={({field}) => (
-            <CustomTextField
-              {...field}
-              variant="outlined"
-              label="Card Number"
-              value={formatVisaCardNumber(field.value)}
-              onChange={e =>
-                field.onChange(
-                  e.target.value.length <= 19 ? e.target.value : field.value,
-                )
-              }
-              error={!!errors.cardNumber}
-            />
-          )}
-        />
+        {renderPaymentType()}
       </Grid>
-      <Grid item xs={12} md={6}>
-        <Controller
-          name="expiration"
-          control={control}
-          render={({field}) => (
-            <CustomTextField
-              {...field}
-              variant="outlined"
-              label="Expiration Date"
-              placeholder="MM/YY"
-              value={formatExpirationDate(field.value)}
-              onChange={e =>
-                field.onChange(
-                  e.target.value.length <= 5 ? e.target.value : field.value,
-                )
-              }
-              error={!!errors.expiration}
+      {paymentType === 'card' && (
+        <>
+          <Grid item xs={12} md={12}>
+            <Controller
+              name="cardNumber"
+              control={control}
+              render={({field}) => (
+                <CustomTextField
+                  {...field}
+                  variant="outlined"
+                  label="Card Number"
+                  value={formatVisaCardNumber(field.value)}
+                  onChange={e =>
+                    field.onChange(
+                      e.target.value.length <= 19
+                        ? e.target.value
+                        : field.value,
+                    )
+                  }
+                  error={!!errors.cardNumber}
+                />
+              )}
             />
-          )}
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <Controller
-          name="cardCode"
-          control={control}
-          render={({field}) => (
-            <CustomTextField
-              {...field}
-              variant="outlined"
-              label="CVV"
-              error={!!errors.cardCode}
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="expiration"
+              control={control}
+              render={({field}) => (
+                <CustomTextField
+                  {...field}
+                  variant="outlined"
+                  label="Expiration Date"
+                  placeholder="MM/YY"
+                  value={formatExpirationDate(field.value)}
+                  onChange={e =>
+                    field.onChange(
+                      e.target.value.length <= 5 ? e.target.value : field.value,
+                    )
+                  }
+                  error={!!errors.expiration}
+                />
+              )}
             />
-          )}
-        />
-      </Grid>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="cardCode"
+              control={control}
+              render={({field}) => (
+                <CustomTextField
+                  {...field}
+                  variant="outlined"
+                  label="CVV"
+                  error={!!errors.cardCode}
+                />
+              )}
+            />
+          </Grid>
+        </>
+      )}
     </Grid>
   )
 
