@@ -20,6 +20,10 @@ import {
   Backdrop,
   CircularProgress,
   Autocomplete,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
 } from '@mui/material'
 import {
   ArrowBack,
@@ -57,8 +61,9 @@ import {
   fetchZipcode,
   TPlaceAutocomplete,
 } from '@/api/rest'
-
-interface IFormInput {
+import {createOrder} from '@/libs/firebase'
+import {calTaxes, calTotal, prepareOrderPayload} from './utils'
+export interface IFormInput {
   name: string
   email: string
   phone: string
@@ -67,10 +72,18 @@ interface IFormInput {
   state: string
   city: string
   zipcode: string
+  paymentType: string
   cardNumber: string
   expiration: string
   cardCode: string
   promoCode: string
+}
+
+enum Status {
+  PENDING = 'pending',
+  SUCCESS = 'success',
+  FAILED = 'failed',
+  LOADING = 'loading',
 }
 
 export default function Checkout({params}: {params: {checkout: string}}) {
@@ -80,17 +93,22 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const searchParams = useSearchParams()
   const appState = useSelector((state: RootState) => state)
   const userProfile = useSelector((state: RootState) => state.user)
+  const shoppingCart = useSelector((state: RootState) => state.cart)
   const dispatch = useDispatch()
   const restaurantId = selectEntityId(appState)
   const restaurant = getRestaurantById(restaurantId)
   const subTotal = selectTotalPrice(appState)
   const totalQuantity = selectTotalQuantity(appState)
   const [expanded, setExpanded] = React.useState<string | false>('panel2')
-  const [value, setValue] = useState(0)
-  const [tip, setTip] = useState(0)
-  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState<number>(0)
+  const [tip, setTip] = useState<number>(0)
+  const [discount, setDiscount] = useState<number>(0)
+  const [open, setOpen] = useState<boolean>(false)
   const [options, setOptions] = useState<string[]>([])
   const [predictions, setPredictions] = useState<TPlaceAutocomplete[]>([])
+  const [paymentType, setPaymentType] = useState<string>('cash')
+  const [orderConfirmation, setOrderConfirmation] = useState<string>('')
+  const [status, setStatus] = useState<Status>(Status.PENDING)
   const defaultFormValues = useMemo(
     () => ({
       name: userProfile.firstName
@@ -103,6 +121,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
       state: userProfile.address?.state ?? '',
       city: userProfile.address?.city ?? '',
       zipcode: userProfile.address?.zipcode ?? '',
+      paymentType: 'cash',
       cardNumber: '',
       expiration: '',
       cardCode: '',
@@ -124,7 +143,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
     //resolver: yupResolver(schemaFormCheckout),
   })
   const {name} = getValues()
-  const onLoadingClose = () => setOpen(false)
+  const closeLoadingScreen = () => setOpen(false)
   const openLoadingSreen = () => setOpen(true)
 
   const onChangeAccordion =
@@ -158,23 +177,62 @@ export default function Checkout({params}: {params: {checkout: string}}) {
 
   const handlePlaceOrder: SubmitHandler<IFormInput> = async data => {
     openLoadingSreen()
-    alert(
-      `Your order includes ${totalQuantity} items with total ${formatCurrency(
-        subTotal + subTotal * 0.1 + tip,
-      )}`,
-    )
-    router.replace('/')
-    dispatch(emptyCart())
+    // const payload = prepareOrderPayload({data, shoppingCart, tip, discount})
+    // const confirmation = await createOrder(payload)
+    const confirmation =
+      Math.round(Math.random() * 1000).toString() +
+      'PiddRS5TyHp' +
+      Math.round(Math.random() * 1000).toString()
+    if (confirmation) {
+      setStatus(Status.SUCCESS)
+      setOrderConfirmation(confirmation)
+      dispatch(emptyCart())
+      return
+    }
+    closeLoadingScreen()
+    setStatus(Status.FAILED)
+    setTimeout(() => {
+      setStatus(Status.PENDING)
+    }, 3000)
   }
 
   const fetchOptions = async (inputValue: string) => {
     if (!inputValue) return
     const result = await fetchPlaceAutocomplete(inputValue)
-    const formattedOption = result?.map(
-      (el: TPlaceAutocomplete) => el.fullAddress,
-    )
+    const formattedOption = result?.length
+      ? result.map((el: TPlaceAutocomplete) => el.fullAddress)
+      : []
     setOptions(formattedOption)
     setPredictions(result)
+  }
+
+  const renderPaymentType = () => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const selected = (event.target as HTMLInputElement).value
+      setPaymentType(selected)
+      setFormValue('paymentType', selected)
+    }
+    return (
+      <FormControl>
+        <RadioGroup
+          row
+          aria-labelledby="demo-controlled-radio-buttons-group"
+          name="controlled-radio-buttons-group"
+          value={paymentType}
+          onChange={handleChange}>
+          <FormControlLabel
+            value="cash"
+            control={<Radio />}
+            label="Cash on Deliver"
+          />
+          <FormControlLabel
+            value="card"
+            control={<Radio />}
+            label="Credit or Debit Card"
+          />
+        </RadioGroup>
+      </FormControl>
+    )
   }
 
   const renderInputFields = () => (
@@ -335,65 +393,79 @@ export default function Checkout({params}: {params: {checkout: string}}) {
         <SectionText>Payment Details</SectionText>
       </Grid>
       <Grid item xs={12} md={12}>
-        <Controller
-          name="cardNumber"
-          control={control}
-          render={({field}) => (
-            <CustomTextField
-              {...field}
-              variant="outlined"
-              label="Card Number"
-              value={formatVisaCardNumber(field.value)}
-              onChange={e =>
-                field.onChange(
-                  e.target.value.length <= 19 ? e.target.value : field.value,
-                )
-              }
-              error={!!errors.cardNumber}
-            />
-          )}
-        />
+        {renderPaymentType()}
       </Grid>
-      <Grid item xs={12} md={6}>
-        <Controller
-          name="expiration"
-          control={control}
-          render={({field}) => (
-            <CustomTextField
-              {...field}
-              variant="outlined"
-              label="Expiration Date"
-              placeholder="MM/YY"
-              value={formatExpirationDate(field.value)}
-              onChange={e =>
-                field.onChange(
-                  e.target.value.length <= 5 ? e.target.value : field.value,
-                )
-              }
-              error={!!errors.expiration}
+      {paymentType === 'card' && (
+        <>
+          <Grid item xs={12} md={12}>
+            <Controller
+              name="cardNumber"
+              control={control}
+              render={({field}) => (
+                <CustomTextField
+                  {...field}
+                  variant="outlined"
+                  label="Card Number"
+                  value={formatVisaCardNumber(field.value)}
+                  onChange={e =>
+                    field.onChange(
+                      e.target.value.length <= 19
+                        ? e.target.value
+                        : field.value,
+                    )
+                  }
+                  error={!!errors.cardNumber}
+                />
+              )}
             />
-          )}
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <Controller
-          name="cardCode"
-          control={control}
-          render={({field}) => (
-            <CustomTextField
-              {...field}
-              variant="outlined"
-              label="CVV"
-              error={!!errors.cardCode}
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="expiration"
+              control={control}
+              render={({field}) => (
+                <CustomTextField
+                  {...field}
+                  variant="outlined"
+                  label="Expiration Date"
+                  placeholder="MM/YY"
+                  value={formatExpirationDate(field.value)}
+                  onChange={e =>
+                    field.onChange(
+                      e.target.value.length <= 5 ? e.target.value : field.value,
+                    )
+                  }
+                  error={!!errors.expiration}
+                />
+              )}
             />
-          )}
-        />
-      </Grid>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="cardCode"
+              control={control}
+              render={({field}) => (
+                <CustomTextField
+                  {...field}
+                  variant="outlined"
+                  label="CVV"
+                  error={!!errors.cardCode}
+                />
+              )}
+            />
+          </Grid>
+        </>
+      )}
     </Grid>
   )
 
   // TODO: handle this
   const readyToPlaceOrder = name
+
+  const goHome = () => {
+    setStatus(Status.LOADING)
+    router.replace('/')
+  }
 
   const renderBackDrop = () => {
     return (
@@ -404,14 +476,45 @@ export default function Checkout({params}: {params: {checkout: string}}) {
           backgroundColor: 'rgba(0, 0, 0, 0.8)',
           backdropFilter: 'blur(20px)',
         }}
-        open={open}
-        onClick={onLoadingClose}>
+        open={open}>
         <Stack spacing={2} display={'flex'} alignItems={'center'}>
-          <SuccessText>Order placed successfully!</SuccessText>
-          <SuccessText>Navigating back to home...</SuccessText>
-          <CircularProgress color="inherit" />
+          {orderConfirmation ? (
+            <>
+              <SuccessText>Order placed successfully!</SuccessText>
+              <SuccessText>Your confirmation below:</SuccessText>
+              <SuccessText>#{orderConfirmation}</SuccessText>
+              <Button
+                title="Return Home"
+                type="outlined"
+                titleColor={theme.color.background}
+                borderColor={theme.color.background}
+                onClick={goHome}
+                width="50%"
+                disabled={Boolean(!orderConfirmation)}
+                loading={status === Status.LOADING}
+              />
+            </>
+          ) : (
+            <CircularProgress color="inherit" />
+          )}
         </Stack>
       </Backdrop>
+    )
+  }
+
+  const renderPlaceOrderButton = () => {
+    const placeOrderTitle =
+      status === Status.FAILED ? 'Try again later' : 'Place Order'
+    return (
+      <Button
+        title={placeOrderTitle}
+        onClick={handleSubmit(handlePlaceOrder)}
+        width="100%"
+        disabled={Boolean(!readyToPlaceOrder)}
+        backgroundColor={
+          status === Status.FAILED ? theme.color.error : undefined
+        }
+      />
     )
   }
 
@@ -449,14 +552,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
             </Grid>
             {isMobile && (
               <Grid item xs={12}>
-                <Box p={1}>
-                  <Button
-                    title="Place Order"
-                    onClick={handleSubmit(handlePlaceOrder)}
-                    width="100%"
-                    disabled={Boolean(!readyToPlaceOrder)}
-                  />
-                </Box>
+                <Box p={1}>{renderPlaceOrderButton()}</Box>
               </Grid>
             )}
             <Grid item xs={12} md={4}>
@@ -467,7 +563,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
                 </Row>
                 <Row>
                   <PriceTitleWeak>Tax</PriceTitleWeak>
-                  <Price>{formatCurrency(subTotal * 0.1)}</Price>
+                  <Price>{formatCurrency(calTaxes(subTotal, discount))}</Price>
                 </Row>
                 <Row>
                   <PriceTitleWeak>Tip</PriceTitleWeak>
@@ -476,7 +572,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
                 <Row>
                   <PriceTitle>Total</PriceTitle>
                   <PriceTitle>
-                    {formatCurrency(subTotal + subTotal * 0.1 + tip)}
+                    {formatCurrency(calTotal(subTotal, tip, discount))}
                   </PriceTitle>
                 </Row>
               </RightHeader>
@@ -592,16 +688,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
           </AccordionDetails>
         </OrderDetails>
 
-        <Footer>
-          {!isMobile && (
-            <Button
-              title="Place Order"
-              onClick={handleSubmit(handlePlaceOrder)}
-              width="100%"
-              disabled={Boolean(!readyToPlaceOrder)}
-            />
-          )}
-        </Footer>
+        <Footer>{!isMobile && renderPlaceOrderButton()}</Footer>
       </Container>
     </>
   )
@@ -731,6 +818,8 @@ const SectionText = styled(Typography)`
   color: ${theme.color.text};
 `
 const SuccessText = styled(Typography)`
+  display: flex;
+  align-self: center;
   font-weight: 400;
   font-size: ${theme.font.size.l};
   color: ${theme.color.background};

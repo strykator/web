@@ -1,6 +1,6 @@
-import {Item, ICartSlice} from './cartSlice'
+import {TItem, ICartSlice} from './cartSlice'
 
-export const calculateTotalPriceAndQuantity = (items: Item[]) => {
+export const calculateTotalPriceAndQuantity = (items: TItem[]) => {
   let totalPrice = 0
   let totalQuantity = 0
   items.forEach(item => {
@@ -18,7 +18,7 @@ export const updateTotalPriceAndQuantity = (state: ICartSlice) => {
   state.totalQuantity = totalQuantity
 }
 
-export const handleUpdateItem = (state: ICartSlice, item: Item) => {
+export const handleUpdateItem = (state: ICartSlice, item: TItem) => {
   const updatedItem = item
   state.items = state.items.map(item => {
     if (item.itemId === updatedItem.itemId) {

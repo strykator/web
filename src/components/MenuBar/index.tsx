@@ -56,9 +56,6 @@ export default function MenuBar({bgColor, textColor, sticky}: IMenuBar) {
   const get = async () => {
     const unsubscribe = await getOrder('orderID', setData)
   }
-  const create = async () => {
-    await createOrder('')
-  }
   const getList = async () => await getListOrder()
 
   const renderRight = () => {
