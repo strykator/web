@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import {Button as MButton, Typography} from '@mui/material'
+import {Button as MButton, Typography, CircularProgress} from '@mui/material'
 import styled from 'styled-components'
 
 type ButtonType = 'text' | 'outlined' | 'contained'
@@ -14,6 +14,7 @@ interface IButton {
   backgroundColor?: string
   borderColor?: string
   titleColor?: string
+  loading?: boolean
   children?: React.ReactNode
 }
 
@@ -27,9 +28,19 @@ const Button = ({
   backgroundColor,
   borderColor,
   titleColor,
+  loading,
   children,
   ...props
 }: IButton) => {
+  const renderContent = () => {
+    if (loading) {
+      return <CircularProgress size={20} color="inherit" />
+    } else if (children) {
+      return children
+    } else {
+      return <Text titleColor={titleColor}>{title}</Text>
+    }
+  }
   return (
     <Container
       variant={type}
@@ -40,7 +51,7 @@ const Button = ({
       backgroundColor={backgroundColor}
       borderColor={borderColor}
       {...props}>
-      {children ? children : <Text titleColor={titleColor}>{title}</Text>}
+      {renderContent()}
     </Container>
   )
 }

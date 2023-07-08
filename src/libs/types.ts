@@ -23,4 +23,8 @@ export type TOrderPayload = {
   status: string
   timestamp: string
   totalAmount: number
+  totalQuantity: number
+  tip: number
+  taxes: number
+  promoCode: string
 }

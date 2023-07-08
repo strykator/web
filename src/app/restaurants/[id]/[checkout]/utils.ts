@@ -1,5 +1,6 @@
 import {IFormInput} from './page'
 import {TItem, ICartSlice} from '@/redux/cart/cartSlice'
+import {TOrderPayload} from '@/libs/types'
 
 export const calTaxes = (total: number, discount: number) =>
   parseFloat(((total - discount) * 0.1).toFixed(2))
@@ -21,7 +22,7 @@ export const prepareOrderPayload = ({
   shoppingCart,
   tip,
   discount,
-}: TPrepareOrderPayload) => {
+}: TPrepareOrderPayload): TOrderPayload => {
   const taxes = calTaxes(shoppingCart.totalPrice, discount)
   const totalAmount = calTotal(shoppingCart.totalPrice, tip, discount)
   const items = shoppingCart.items?.map((item: TItem) => ({

@@ -79,6 +79,13 @@ export interface IFormInput {
   promoCode: string
 }
 
+enum Status {
+  PENDING = 'pending',
+  SUCCESS = 'success',
+  FAILED = 'failed',
+  LOADING = 'loading',
+}
+
 export default function Checkout({params}: {params: {checkout: string}}) {
   const router = useRouter()
   const {isMobile, isTablet} = useResponsive()
@@ -93,13 +100,15 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   const subTotal = selectTotalPrice(appState)
   const totalQuantity = selectTotalQuantity(appState)
   const [expanded, setExpanded] = React.useState<string | false>('panel2')
-  const [value, setValue] = useState(0)
-  const [tip, setTip] = useState(0)
-  const [discount, setDiscount] = useState(0)
-  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState<number>(0)
+  const [tip, setTip] = useState<number>(0)
+  const [discount, setDiscount] = useState<number>(0)
+  const [open, setOpen] = useState<boolean>(false)
   const [options, setOptions] = useState<string[]>([])
   const [predictions, setPredictions] = useState<TPlaceAutocomplete[]>([])
-  const [paymentType, setPaymentType] = useState('cash')
+  const [paymentType, setPaymentType] = useState<string>('cash')
+  const [orderConfirmation, setOrderConfirmation] = useState<string>('')
+  const [status, setStatus] = useState<Status>(Status.PENDING)
   const defaultFormValues = useMemo(
     () => ({
       name: userProfile.firstName
@@ -134,7 +143,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
     //resolver: yupResolver(schemaFormCheckout),
   })
   const {name} = getValues()
-  const onLoadingClose = () => setOpen(false)
+  const closeLoadingScreen = () => setOpen(false)
   const openLoadingSreen = () => setOpen(true)
 
   const onChangeAccordion =
@@ -167,18 +176,24 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   }, [value, subTotal])
 
   const handlePlaceOrder: SubmitHandler<IFormInput> = async data => {
-    const payload = prepareOrderPayload({data, shoppingCart, tip, discount})
-    const orderConfirmation = await createOrder(payload)
     openLoadingSreen()
-    if (orderConfirmation) {
-      alert(
-        `Your order includes ${totalQuantity} items with total ${formatCurrency(
-          calTotal(subTotal, tip, discount),
-        )}`,
-      )
-      router.replace('/')
+    // const payload = prepareOrderPayload({data, shoppingCart, tip, discount})
+    // const confirmation = await createOrder(payload)
+    const confirmation =
+      Math.round(Math.random() * 1000).toString() +
+      'PiddRS5TyHp' +
+      Math.round(Math.random() * 1000).toString()
+    if (confirmation) {
+      setStatus(Status.SUCCESS)
+      setOrderConfirmation(confirmation)
       dispatch(emptyCart())
+      return
     }
+    closeLoadingScreen()
+    setStatus(Status.FAILED)
+    setTimeout(() => {
+      setStatus(Status.PENDING)
+    }, 3000)
   }
 
   const fetchOptions = async (inputValue: string) => {
@@ -447,6 +462,11 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   // TODO: handle this
   const readyToPlaceOrder = name
 
+  const goHome = () => {
+    setStatus(Status.LOADING)
+    router.replace('/')
+  }
+
   const renderBackDrop = () => {
     return (
       <Backdrop
@@ -456,14 +476,45 @@ export default function Checkout({params}: {params: {checkout: string}}) {
           backgroundColor: 'rgba(0, 0, 0, 0.8)',
           backdropFilter: 'blur(20px)',
         }}
-        open={open}
-        onClick={onLoadingClose}>
+        open={open}>
         <Stack spacing={2} display={'flex'} alignItems={'center'}>
-          <SuccessText>Order placed successfully!</SuccessText>
-          <SuccessText>Navigating back to home...</SuccessText>
-          <CircularProgress color="inherit" />
+          {orderConfirmation ? (
+            <>
+              <SuccessText>Order placed successfully!</SuccessText>
+              <SuccessText>Your confirmation below:</SuccessText>
+              <SuccessText>#{orderConfirmation}</SuccessText>
+              <Button
+                title="Return Home"
+                type="outlined"
+                titleColor={theme.color.background}
+                borderColor={theme.color.background}
+                onClick={goHome}
+                width="50%"
+                disabled={Boolean(!orderConfirmation)}
+                loading={status === Status.LOADING}
+              />
+            </>
+          ) : (
+            <CircularProgress color="inherit" />
+          )}
         </Stack>
       </Backdrop>
+    )
+  }
+
+  const renderPlaceOrderButton = () => {
+    const placeOrderTitle =
+      status === Status.FAILED ? 'Try again later' : 'Place Order'
+    return (
+      <Button
+        title={placeOrderTitle}
+        onClick={handleSubmit(handlePlaceOrder)}
+        width="100%"
+        disabled={Boolean(!readyToPlaceOrder)}
+        backgroundColor={
+          status === Status.FAILED ? theme.color.error : undefined
+        }
+      />
     )
   }
 
@@ -501,14 +552,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
             </Grid>
             {isMobile && (
               <Grid item xs={12}>
-                <Box p={1}>
-                  <Button
-                    title="Place Order"
-                    onClick={handleSubmit(handlePlaceOrder)}
-                    width="100%"
-                    disabled={Boolean(!readyToPlaceOrder)}
-                  />
-                </Box>
+                <Box p={1}>{renderPlaceOrderButton()}</Box>
               </Grid>
             )}
             <Grid item xs={12} md={4}>
@@ -644,16 +688,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
           </AccordionDetails>
         </OrderDetails>
 
-        <Footer>
-          {!isMobile && (
-            <Button
-              title="Place Order"
-              onClick={handleSubmit(handlePlaceOrder)}
-              width="100%"
-              disabled={Boolean(!readyToPlaceOrder)}
-            />
-          )}
-        </Footer>
+        <Footer>{!isMobile && renderPlaceOrderButton()}</Footer>
       </Container>
     </>
   )
@@ -783,6 +818,8 @@ const SectionText = styled(Typography)`
   color: ${theme.color.text};
 `
 const SuccessText = styled(Typography)`
+  display: flex;
+  align-self: center;
   font-weight: 400;
   font-size: ${theme.font.size.l};
   color: ${theme.color.background};
