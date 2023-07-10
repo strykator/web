@@ -267,7 +267,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
               {...field}
               onBlur={() => trigger('name')}
               variant="outlined"
-              label="Name"
+              label="Name*"
               error={!!errors.name}
             />
           )}
