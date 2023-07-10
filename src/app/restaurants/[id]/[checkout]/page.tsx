@@ -8,7 +8,6 @@ import {
   Box,
   Typography,
   Link,
-  IconButton,
   Accordion,
   AccordionDetails,
   AccordionSummary,
@@ -26,7 +25,6 @@ import {
   FormControl,
 } from '@mui/material'
 import {
-  ArrowBack,
   ExpandMore,
   CheckRounded,
   PriorityHighRounded,
@@ -46,6 +44,7 @@ import Button from '@/components/Button'
 import Image from '@/components/Image'
 import ShoppingCart from '@/components/ShoppingCart'
 import ErrorMessage from '@/components/ErrorMessage'
+import MenuBar from '@/components/MenuBar'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
 import {
@@ -175,6 +174,25 @@ export default function Checkout({params}: {params: {checkout: string}}) {
     setTip(parseFloat(tipFloat.toFixed(2)))
   }, [value, subTotal])
 
+  useEffect(() => {
+    const {name, email, phone, address, country, state, city, zipcode} =
+      getValues()
+    if (!name)
+      setFormValue(
+        'name',
+        userProfile.firstName
+          ? `${userProfile.firstName} ${userProfile.lastName}`
+          : '',
+      )
+    if (!email) setFormValue('email', userProfile.email ?? '')
+    if (!phone) setFormValue('phone', userProfile.phone ?? '')
+    if (!address) setFormValue('address', userProfile.address?.street ?? '')
+    if (!country) setFormValue('country', userProfile.address?.country ?? '')
+    if (!state) setFormValue('state', userProfile.address?.state ?? '')
+    if (!city) setFormValue('city', userProfile.address?.city ?? '')
+    if (!zipcode) setFormValue('zipcode', userProfile.address?.zipcode ?? '')
+  }, [userProfile])
+
   const handlePlaceOrder: SubmitHandler<IFormInput> = async data => {
     openLoadingSreen()
     // const payload = prepareOrderPayload({data, shoppingCart, tip, discount})
@@ -249,7 +267,7 @@ export default function Checkout({params}: {params: {checkout: string}}) {
               {...field}
               onBlur={() => trigger('name')}
               variant="outlined"
-              label="Name"
+              label="Name*"
               error={!!errors.name}
             />
           )}
@@ -521,12 +539,12 @@ export default function Checkout({params}: {params: {checkout: string}}) {
   return (
     <>
       {renderBackDrop()}
-      <TopBar>
-        <IconButton onClick={() => router.back()}>
-          <GoBackIcon />
-          <SubTitle>Back</SubTitle>
-        </IconButton>
-      </TopBar>
+      <MenuBar
+        sticky
+        textColor={theme.color.primaryDark}
+        bgColor={theme.color.background}
+        showBackIcon
+      />
       <Container isMobile={isMobile}>
         <Header variant="outlined">
           <Grid container spacing={2}>
@@ -552,7 +570,9 @@ export default function Checkout({params}: {params: {checkout: string}}) {
             </Grid>
             {isMobile && (
               <Grid item xs={12}>
-                <Box p={1}>{renderPlaceOrderButton()}</Box>
+                <Box pl={1} pr={1}>
+                  {renderPlaceOrderButton()}
+                </Box>
               </Grid>
             )}
             <Grid item xs={12} md={4}>
@@ -701,22 +721,6 @@ const Container = styled(Box)<{isMobile: boolean}>`
   padding-left: ${({isMobile}) => (isMobile ? '2%' : '25%')};
   box-sizing: border-box;
 `
-const TopBar = styled(Box)`
-  display: flex;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  height: 60px;
-  width: 100%;
-  padding-left: 5%;
-  background-color: ${theme.color.background};
-  box-sizing: border-box;
-`
-const GoBackIcon = styled(ArrowBack)`
-  color: ${theme.color.primaryDark};
-  margin-right: 5px;
-`
 const Title = styled(Link)`
   font-weight: 500;
   font-size: ${theme.font.size.m};
@@ -752,8 +756,6 @@ const Header = styled(Paper)`
   min-height: 100px;
   width: 100%;
   top: 60px;
-  z-index: 2;
-  position: sticky;
 `
 const LeftHeader = styled(Box)`
   display: flex;
@@ -770,6 +772,7 @@ const MiddleHeader = styled(Box)`
   padding: 10px;
   height: 100%;
   width: 100%;
+  box-sizing: border-box;
 `
 const RightHeader = styled(Box)`
   display: flex;

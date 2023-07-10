@@ -29,6 +29,7 @@ interface ILogin {
 
 const Login = ({onCloseModal}: ILogin) => {
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
   const {
     control,
     trigger,
@@ -55,6 +56,7 @@ const Login = ({onCloseModal}: ILogin) => {
 
   const onSubmit: SubmitHandler<IFormInput> = async data => {
     const {email, password} = data
+    setLoading(true)
     const user = await loginWithEmailAndPassword(email, password)
     if (user) {
       const payload = user
@@ -63,6 +65,7 @@ const Login = ({onCloseModal}: ILogin) => {
     } else {
       setError('root.serverError', {message: 'Invalid Input'})
     }
+    setLoading(false)
   }
 
   return (
@@ -141,7 +144,8 @@ const Login = ({onCloseModal}: ILogin) => {
         onClick={handleSubmit(onSubmit)}
         width="50%"
         height={40}
-        disabled={!email || !password}
+        disabled={!email || !password || loading}
+        loading={loading}
       />
     </Container>
   )
