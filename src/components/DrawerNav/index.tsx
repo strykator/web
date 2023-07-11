@@ -42,23 +42,23 @@ import {useResponsive} from '@/hooks'
 
 const menu = [
   {
-    key: 'users',
-    title: 'Users',
+    key: 'user',
+    title: 'User',
     subMenu: [
       {
-        key: 'users-profile',
+        key: 'user-profile',
         subTitle: 'Profile',
       },
       {
-        key: 'users-list',
+        key: 'user-list',
         subTitle: 'List',
       },
       {
-        key: 'users-create',
+        key: 'user-create',
         subTitle: 'Create',
       },
       {
-        key: 'users-edit',
+        key: 'user-edit',
         subTitle: 'Edit',
       },
     ],
@@ -86,23 +86,23 @@ const menu = [
     ],
   },
   {
-    key: 'orders',
-    title: 'Orders',
+    key: 'order',
+    title: 'Order',
     subMenu: [
       {
-        key: 'orders-list',
+        key: 'order-list',
         subTitle: 'List',
       },
       {
-        key: 'orders-details',
+        key: 'order-details',
         subTitle: 'Details',
       },
       {
-        key: 'orders-create',
+        key: 'order-create',
         subTitle: 'Create',
       },
       {
-        key: 'orders-edit',
+        key: 'order-edit',
         subTitle: 'Edit',
       },
     ],
