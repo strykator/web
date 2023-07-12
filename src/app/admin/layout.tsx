@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, Suspense} from 'react'
 import styled from 'styled-components'
 import {Poppins} from 'next/font/google'
 import {useRouter, usePathname} from 'next/navigation'
@@ -63,23 +63,14 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
   }
 
   return (
-    <html lang="en">
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, viewport-fit=cover"
-      />
-      <title>Admin Panel</title>
-      <body className={poppins.className}>
-        <>
-          {renderTopBar()}
-          <DrawerNav open={open} setOpen={setOpen} />
-          <Modal isOpen={showModal} onClose={onCloseModal}>
-            <Login onCloseModal={onCloseModal} />
-          </Modal>
-          <Container open={open && !isMobile}>{children}</Container>
-        </>
-      </body>
-    </html>
+    <>
+      {renderTopBar()}
+      <DrawerNav open={open} setOpen={setOpen} />
+      <Modal isOpen={showModal} onClose={onCloseModal}>
+        <Login onCloseModal={onCloseModal} />
+      </Modal>
+      <Container open={open && !isMobile}>{children}</Container>
+    </>
   )
 }
 

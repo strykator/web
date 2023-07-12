@@ -2,29 +2,19 @@
 
 import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
+import {useRouter} from 'next/navigation'
 import {
   Drawer as MuiDrawer,
   List as MuiList,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  IconButton,
   Backdrop,
   Divider,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Paper,
-  Box,
   Typography,
-  Rating,
-  Stack,
+  Collapse,
 } from '@mui/material'
 import {
-  Mail,
-  Inbox,
-  Menu,
-  ChevronLeft,
   ChevronRight,
   KeyboardDoubleArrowRight,
   KeyboardDoubleArrowLeft,
@@ -36,7 +26,6 @@ import {
   MenuBook,
   PriorityHighRounded,
 } from '@mui/icons-material'
-import {useRouter, usePathname} from 'next/navigation'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
 
@@ -115,20 +104,31 @@ interface IDrawerNav {
 }
 
 export default function DrawerNav({open, setOpen}: IDrawerNav) {
+  const router = useRouter()
   const {isMobile} = useResponsive()
   const [selected, setSelected] = useState<string>('')
   const [selectedSubMenu, setSelectedSubMenu] = useState<string>('')
+  const [expandedList, setExpandedList] = useState<string[]>([])
 
   const toggleDrawer = () => {
     setOpen(!open)
   }
 
-  const onSelectMenuItem = (item: string) => {
-    setSelected(item)
+  const onSelectMenuItem = (itemKey: string) => {
+    setSelected(itemKey)
+    if (itemKey === 'order') {
+      router.replace('/admin/order')
+    }
+    if (expandedList.includes(itemKey)) {
+      setExpandedList(expandedList.filter((key: string) => key !== itemKey))
+    } else {
+      setExpandedList([...expandedList, itemKey])
+    }
   }
   const onSelectSubMenuItem = (item: string) => {
     setSelectedSubMenu(item)
   }
+
   return (
     <>
       <Drawer variant="permanent" anchor="left" open={open}>
@@ -150,8 +150,8 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
               <>
                 <ListItemButton
                   key={item + index}
-                  onClick={() => onSelectMenuItem(item.title)}
-                  selected={selected === item.title}
+                  onClick={() => onSelectMenuItem(item.key)}
+                  selected={selected === item.key}
                   sx={{
                     minHeight: 48,
                     justifyContent: open ? 'initial' : 'center',
@@ -179,7 +179,10 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
                     </ListItemIcon>
                   )}
                 </ListItemButton>
-                {selected === item.title && open && (
+                <Collapse
+                  in={expandedList.includes(item.key) && open}
+                  timeout="auto"
+                  unmountOnExit>
                   <SubList>
                     {item.subMenu.map((subItem: any) => (
                       <ListItemButton
@@ -204,7 +207,7 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
                       </ListItemButton>
                     ))}
                   </SubList>
-                )}
+                </Collapse>
               </>
             )
           })}

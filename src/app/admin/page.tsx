@@ -9,11 +9,6 @@ import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
 import {RootState} from '@/redux'
 import {selectUserUid} from '@/redux/user/userSlice'
-import DrawerNav from '@/components/DrawerNav'
-import Modal from '@/components/Modal'
-import Login from '@/components/MenuBar/Login'
-import Button from '@/components/Button'
-import UserMenu from '@/components/MenuBar/UserMenu'
 
 export default function Admin() {
   const router = useRouter()

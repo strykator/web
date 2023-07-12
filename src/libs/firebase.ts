@@ -14,6 +14,9 @@ import {
   getDocs,
   onSnapshot,
   updateDoc,
+  query,
+  orderBy,
+  limit,
 } from 'firebase/firestore'
 import {transformUser} from '@/utils/transformer'
 import {TOrderPayload} from './types'
@@ -120,18 +123,58 @@ export const getOrder = async (orderId: string, onGetData: any) => {
   return unsubscribe
 }
 
-export const getListOrder = async () => {
+export const getListOrder = async ({queryKey}: any) => {
+  const [_key, {order: queryOrder, orderBy: queryOrderBy}] = queryKey
   const collectionRef = collection(db, 'orders')
-  const docsSnap = await getDocs(collectionRef)
+  const formatQueryOrderBy = (name: string | undefined) => {
+    if (name === 'customer') {
+      return 'customerName'
+    } else if (name === 'order') {
+      return 'Document ID'
+    } else if (name === 'date') {
+      return 'timestamp'
+    } else if (name === 'quantity') {
+      return 'totalQuantity'
+    } else if (name === 'total') {
+      return 'totalAmount'
+    } else if (name === 'status') {
+      return 'status'
+    } else {
+      return 'customerName'
+    }
+  }
+  const q = query(
+    collectionRef,
+    orderBy(formatQueryOrderBy(queryOrderBy), queryOrder),
+    limit(100),
+  )
 
-  if (docsSnap.size > 0) {
-    const orderList = docsSnap.docs.map(doc => {
+  const orderList: any[] = []
+  try {
+    // Execute the query
+    const querySnapshot = await getDocs(q)
+
+    // Process the query results
+    querySnapshot.forEach(doc => {
       const data = doc.data()
-      return {id: doc.id, ...data}
+      orderList.push({id: doc.id, ...data})
     })
     return orderList
-  } else {
+  } catch (error) {
+    console.log('Error getting documents:', error)
+    return orderList
   }
+  //const docsSnap = await getDocs(collectionRef)
+  // if (docsSnap.size > 0) {
+  //   const orderList = docsSnap.docs.map(doc => {
+  //     const data = doc.data()
+  //     return {id: doc.id, ...data}
+  //   })
+  //   console.log('orderList => ', orderList)
+  //   return orderList
+  // } else {
+  //   return null
+  // }
 }
 
 export const createOrder = async (orderData: TOrderPayload) => {

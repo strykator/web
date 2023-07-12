@@ -1,4 +1,5 @@
 import numeral from 'numeral'
+import {format} from 'date-fns'
 import {restaurants} from '@/constants'
 
 export {schemaFormCheckout, schemaFormProfile} from './schemas'
@@ -80,4 +81,8 @@ export const sanitizeData = (data: any) => {
   }
 
   return sanitizedData
+}
+
+export const formatDateAndTime = (timestamp: number) => {
+  return format(new Date(+timestamp), 'dd MMM yyyy hh:mm a')
 }
