@@ -25,10 +25,10 @@ import {
   Collapse,
   Menu,
   MenuItem,
-  Popover,
   ListItemIcon,
+  Chip,
+  Popover,
 } from '@mui/material'
-import makeStyles from '@mui/material/styles'
 import DeleteIcon from '@mui/icons-material/Delete'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import {
@@ -39,7 +39,7 @@ import {
   Visibility,
 } from '@mui/icons-material'
 import {visuallyHidden} from '@mui/utils'
-import {getListOrder, deleteOrder} from '@/libs/firebase'
+import {getListOrder, deleteOrder, updateOrder} from '@/libs/firebase'
 import {formatCurrency, formatDateAndTime} from '@/utils'
 import {theme} from '@/theme'
 
@@ -321,6 +321,96 @@ const MoreOptions = ({
   )
 }
 
+const StatusOptions = ({
+  id,
+  label,
+  onSelect,
+}: {
+  id: string
+  label: string
+  onSelect: any
+}) => {
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const onClick = (event: any) => {
+    if (anchorEl) {
+      setAnchorEl(null)
+    } else {
+      setAnchorEl(event.currentTarget)
+    }
+  }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+  const handleOnSelect = (option: string) => {
+    handleClose()
+    onSelect(option)
+  }
+
+  const options = ['pending', 'confirmed', 'completed', 'cancelled', 'refunded']
+  const getChipColor = (status: string) => {
+    if (status === 'pending') {
+      return 'warning'
+    } else if (status === 'confirmed') {
+      return 'primary'
+    } else if (status === 'completed') {
+      return 'success'
+    } else if (status === 'cancelled') {
+      return 'error'
+    } else if (status === 'refunded') {
+      return 'default'
+    } else {
+      return 'default'
+    }
+  }
+  return (
+    <>
+      <Chip
+        label={label}
+        onClick={onClick}
+        onDelete={onClick}
+        deleteIcon={<KeyboardArrowDown />}
+        color={getChipColor(label)}
+        variant="outlined"
+        size="small"
+      />
+      <Popover
+        id={id}
+        open={open}
+        onClose={handleClose}
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}>
+        <Box
+          sx={{
+            bgcolor: 'background.paper',
+            borderRadius: '4px',
+          }}>
+          {options.map((option: string) => {
+            if (option === label) return null
+            return (
+              <MenuItem key={option} onClick={() => handleOnSelect(option)}>
+                <Chip
+                  label={option}
+                  color={getChipColor(option)}
+                  variant="filled"
+                  size="small"
+                />
+              </MenuItem>
+            )
+          })}
+        </Box>
+      </Popover>
+    </>
+  )
+}
+
 export default function TableData() {
   const [order, setOrder] = React.useState<Order>('asc')
   const [orderBy, setOrderBy] = React.useState<keyof Data>('customer')
@@ -437,6 +527,15 @@ export default function TableData() {
       console.log('some thing went wrong')
     }
   }
+  const handleUpdateOrder = async (orderId: string, status: any) => {
+    const fields = {status}
+    const success = await updateOrder(orderId, fields)
+    if (success) {
+      refetch()
+    } else {
+      console.log('some thing went wrong')
+    }
+  }
   return (
     <Box sx={{width: '100%'}}>
       <Paper sx={{width: '100%', mb: 2}}>
@@ -468,8 +567,7 @@ export default function TableData() {
                       aria-checked={isItemSelected}
                       tabIndex={-1}
                       key={row.order}
-                      selected={isItemSelected}
-                      sx={{cursor: 'pointer'}}>
+                      selected={isItemSelected}>
                       <TableCell
                         padding="checkbox"
                         onClick={event =>
@@ -494,7 +592,15 @@ export default function TableData() {
                       <TableCell align="left">
                         {formatCurrency(row.total)}
                       </TableCell>
-                      <TableCell align="left">{row.status}</TableCell>
+                      <TableCell align="left">
+                        <StatusOptions
+                          id={row.order}
+                          label={row.status}
+                          onSelect={(status: string) =>
+                            handleUpdateOrder(row.order, status)
+                          }
+                        />
+                      </TableCell>
                       <TableCell align="left">
                         <Box sx={{display: 'flex', flexDirection: 'row'}}>
                           <IconButton

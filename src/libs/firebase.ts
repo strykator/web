@@ -18,6 +18,7 @@ import {
   orderBy,
   limit,
   deleteDoc,
+  setDoc,
 } from 'firebase/firestore'
 import {transformUser} from '@/utils/transformer'
 import {TOrderPayload} from './types'
@@ -183,6 +184,17 @@ export const deleteOrder = async (orderId: string) => {
     const collectionRef = collection(db, 'orders')
     const documentRef = doc(collectionRef, orderId)
     await deleteDoc(documentRef)
+    return true
+  } catch (error) {
+    return false
+  }
+}
+export const updateOrder = async (orderId: string, fields: any) => {
+  try {
+    const collectionRef = collection(db, 'orders')
+    const documentRef = doc(collectionRef, orderId)
+    const result = await setDoc(documentRef, fields, {merge: true})
+    console.log('updateOrder => ', result)
     return true
   } catch (error) {
     return false
