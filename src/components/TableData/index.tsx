@@ -28,6 +28,7 @@ import {
   ListItemIcon,
   Chip,
   Popover,
+  Stack,
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import FilterListIcon from '@mui/icons-material/FilterList'
@@ -536,6 +537,15 @@ export default function TableData() {
       console.log('some thing went wrong')
     }
   }
+  const renderDateTimeText = (timestamp: number) => {
+    const {date, time} = formatDateAndTime(timestamp)
+    return (
+      <Stack>
+        <CellText>{date}</CellText>
+        <CellText>{time}</CellText>
+      </Stack>
+    )
+  }
   return (
     <Box sx={{width: '100%'}}>
       <Paper sx={{width: '100%', mb: 2}}>
@@ -582,15 +592,19 @@ export default function TableData() {
                         />
                       </TableCell>
                       <TableCell align="left" padding="none" id={labelId}>
-                        {row.order}
+                        <CellText>{row.order}</CellText>
                       </TableCell>
-                      <TableCell align="left">{row.customer}</TableCell>
                       <TableCell align="left">
-                        {formatDateAndTime(row.date)}
+                        <CellText>{row.customer}</CellText>
                       </TableCell>
-                      <TableCell align="left">{row.quantity}</TableCell>
                       <TableCell align="left">
-                        {formatCurrency(row.total)}
+                        {renderDateTimeText(row.date)}
+                      </TableCell>
+                      <TableCell align="left">
+                        <CellText>{row.quantity}</CellText>
+                      </TableCell>
+                      <TableCell align="left">
+                        <CellText>{formatCurrency(row.total)}</CellText>
                       </TableCell>
                       <TableCell align="left">
                         <StatusOptions
@@ -718,5 +732,9 @@ const StyledMenu = styled(Menu)`
 `
 const Text = styled(Typography)`
   font-size: ${theme.font.size.s};
+  color: ${theme.color.text};
+`
+const CellText = styled(Typography)`
+  font-size: ${theme.font.size.m};
   color: ${theme.color.text};
 `

@@ -84,5 +84,8 @@ export const sanitizeData = (data: any) => {
 }
 
 export const formatDateAndTime = (timestamp: number) => {
-  return format(new Date(+timestamp), 'dd MMM yyyy hh:mm a')
+  return {
+    date: format(new Date(+timestamp), 'dd MMM yyyy'),
+    time: format(new Date(+timestamp), 'hh:mm a'),
+  }
 }

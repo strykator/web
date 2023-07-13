@@ -1,7 +1,7 @@
 const size = {
   xxs: '0.25em',
   xs: '0.5em',
-  s: '0.75em',
+  s: '0.80em',
   m: '1em',
   l: '1.25em',
   xl: '1.5em',
