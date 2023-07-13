@@ -50,9 +50,15 @@ interface IItem {
   quantity: number
   price: number
 }
+interface ICustomer {
+  name: string
+  email: string
+  phone: string
+  photoUrl: string
+}
 interface Data {
   order: string
-  customer: string
+  customer: ICustomer
   date: number
   quantity: number
   total: number
@@ -63,7 +69,7 @@ interface Data {
 
 function createData(
   order: string,
-  customer: string,
+  customer: ICustomer,
   date: number,
   quantity: number,
   total: number,
@@ -428,24 +434,31 @@ export default function TableData() {
   React.useEffect(() => {
     if (data) {
       const formattedRows: any = []
-      data?.forEach((item: any) =>
+      data?.forEach((item: any) => {
+        const customer = {
+          name: item.customerName,
+          email: item.customerEmail,
+          phone: item.customerPhone,
+          photoUrl: '',
+        }
+        const items = item.items.map((el: any) => ({
+          id: el.itemId,
+          name: el.itemName,
+          quantity: el.itemQuantity,
+          price: el.itemPrice,
+        }))
         formattedRows.push(
           createData(
             item.id,
-            item.customerName,
+            customer,
             item.timestamp,
             item.totalQuantity,
             item.totalAmount,
             item.status,
-            item.items.map((el: any) => ({
-              id: el.itemId,
-              name: el.itemName,
-              quantity: el.itemQuantity,
-              price: el.itemPrice,
-            })),
+            items,
           ),
-        ),
-      )
+        )
+      })
       setRows(formattedRows)
     }
   }, [data])
@@ -537,12 +550,21 @@ export default function TableData() {
       console.log('some thing went wrong')
     }
   }
-  const renderDateTimeText = (timestamp: number) => {
+  const renderDateCellContent = (timestamp: number) => {
     const {date, time} = formatDateAndTime(timestamp)
     return (
       <Stack>
         <CellText>{date}</CellText>
-        <CellText>{time}</CellText>
+        <CellTextWeak>{time}</CellTextWeak>
+      </Stack>
+    )
+  }
+  const renderCustomerCellContent = (customer: ICustomer) => {
+    const {name, email, phone, photoUrl} = customer
+    return (
+      <Stack>
+        <CellText>{name}</CellText>
+        <CellTextWeak>{email}</CellTextWeak>
       </Stack>
     )
   }
@@ -592,13 +614,13 @@ export default function TableData() {
                         />
                       </TableCell>
                       <TableCell align="left" padding="none" id={labelId}>
-                        <CellText>{row.order}</CellText>
+                        <CellTextWeak>{row.order}</CellTextWeak>
                       </TableCell>
                       <TableCell align="left">
-                        <CellText>{row.customer}</CellText>
+                        {renderCustomerCellContent(row.customer)}
                       </TableCell>
                       <TableCell align="left">
-                        {renderDateTimeText(row.date)}
+                        {renderDateCellContent(row.date)}
                       </TableCell>
                       <TableCell align="left">
                         <CellText>{row.quantity}</CellText>
@@ -657,14 +679,12 @@ export default function TableData() {
                         {row.items.map((el: IItem) => (
                           <ItemsContainer key={el.id}>
                             <ItemLeftContainer>
-                              <Typography>{el.name}</Typography>
-                              <Typography>{el.id}</Typography>
+                              <CellText>{el.name}</CellText>
+                              <CellTextWeak>{el.id}</CellTextWeak>
                             </ItemLeftContainer>
                             <ItemRightContainer>
-                              <Typography>{el.quantity}</Typography>
-                              <Typography>
-                                {formatCurrency(el.price)}
-                              </Typography>
+                              <CellText>{el.quantity}</CellText>
+                              <CellText>{formatCurrency(el.price)}</CellText>
                             </ItemRightContainer>
                           </ItemsContainer>
                         ))}
@@ -737,4 +757,8 @@ const Text = styled(Typography)`
 const CellText = styled(Typography)`
   font-size: ${theme.font.size.m};
   color: ${theme.color.text};
+`
+const CellTextWeak = styled(Typography)`
+  font-size: ${theme.font.size.s};
+  color: ${theme.color.textWeak};
 `
