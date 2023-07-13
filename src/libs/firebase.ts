@@ -17,6 +17,7 @@ import {
   query,
   orderBy,
   limit,
+  deleteDoc,
 } from 'firebase/firestore'
 import {transformUser} from '@/utils/transformer'
 import {TOrderPayload} from './types'
@@ -164,17 +165,6 @@ export const getListOrder = async ({queryKey}: any) => {
     console.log('Error getting documents:', error)
     return orderList
   }
-  //const docsSnap = await getDocs(collectionRef)
-  // if (docsSnap.size > 0) {
-  //   const orderList = docsSnap.docs.map(doc => {
-  //     const data = doc.data()
-  //     return {id: doc.id, ...data}
-  //   })
-  //   console.log('orderList => ', orderList)
-  //   return orderList
-  // } else {
-  //   return null
-  // }
 }
 
 export const createOrder = async (orderData: TOrderPayload) => {
@@ -186,5 +176,15 @@ export const createOrder = async (orderData: TOrderPayload) => {
     return newOrderRef.id
   } catch (error) {
     return null
+  }
+}
+export const deleteOrder = async (orderId: string) => {
+  try {
+    const collectionRef = collection(db, 'orders')
+    const documentRef = doc(collectionRef, orderId)
+    await deleteDoc(documentRef)
+    return true
+  } catch (error) {
+    return false
   }
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import styled from 'styled-components'
 import {useQuery} from '@tanstack/react-query'
 import {alpha} from '@mui/material/styles'
 import {
@@ -21,14 +22,33 @@ import {
   FormControlLabel,
   Switch,
   Checkbox,
+  Collapse,
+  Menu,
+  MenuItem,
+  Popover,
+  ListItemIcon,
 } from '@mui/material'
+import makeStyles from '@mui/material/styles'
 import DeleteIcon from '@mui/icons-material/Delete'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import {KeyboardArrowDown, MoreVert} from '@mui/icons-material'
+import {
+  KeyboardArrowRight,
+  KeyboardArrowDown,
+  MoreVert,
+  DeleteForever,
+  Visibility,
+} from '@mui/icons-material'
 import {visuallyHidden} from '@mui/utils'
-import {getListOrder} from '@/libs/firebase'
+import {getListOrder, deleteOrder} from '@/libs/firebase'
 import {formatCurrency, formatDateAndTime} from '@/utils'
+import {theme} from '@/theme'
 
+interface IItem {
+  id: string
+  name: string
+  quantity: number
+  price: number
+}
 interface Data {
   order: string
   customer: string
@@ -36,6 +56,7 @@ interface Data {
   quantity: number
   total: number
   status: string
+  items: IItem[]
   extras: string
 }
 
@@ -46,6 +67,7 @@ function createData(
   quantity: number,
   total: number,
   status: string,
+  items: IItem[],
   extras?: string,
 ): Data {
   return {
@@ -55,6 +77,7 @@ function createData(
     quantity,
     total,
     status,
+    items,
     extras: '',
   }
 }
@@ -241,6 +264,63 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 }
 type Order = 'asc' | 'desc'
 
+const MoreOptions = ({
+  id,
+  onDelete,
+  onView,
+}: {
+  id: string
+  onDelete: any
+  onView: any
+}) => {
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const onClickMore = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+  const handleDelete = () => {
+    handleClose()
+    onDelete()
+  }
+  const handleView = () => {
+    handleClose()
+    onView()
+  }
+
+  return (
+    <>
+      <IconButton onClick={onClickMore}>
+        <MoreVert fontSize="small" />
+      </IconButton>
+      <StyledMenu
+        id={id}
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        transformOrigin={{
+          vertical: 'center',
+          horizontal: 'right',
+        }}>
+        <MenuItem onClick={handleDelete}>
+          <ListItemIcon>
+            <DeleteForever fontSize="small" color="error" />
+          </ListItemIcon>
+          <Text>Delete</Text>
+        </MenuItem>
+        <MenuItem onClick={handleView}>
+          <ListItemIcon>
+            <Visibility fontSize="small" />
+          </ListItemIcon>
+          <Text>View</Text>
+        </MenuItem>
+      </StyledMenu>
+    </>
+  )
+}
+
 export default function TableData() {
   const [order, setOrder] = React.useState<Order>('asc')
   const [orderBy, setOrderBy] = React.useState<keyof Data>('customer')
@@ -249,7 +329,8 @@ export default function TableData() {
   const [dense, setDense] = React.useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const [rows, setRows] = React.useState<any[]>([])
-  const {data, isLoading, error} = useQuery({
+  const [selectedArrows, setSelectedArrows] = React.useState<any[]>([])
+  const {data, isLoading, error, refetch} = useQuery({
     queryKey: ['getListOrder', {order, orderBy}],
     queryFn: getListOrder,
   })
@@ -265,6 +346,12 @@ export default function TableData() {
             item.totalQuantity,
             item.totalAmount,
             item.status,
+            item.items.map((el: any) => ({
+              id: el.itemId,
+              name: el.itemName,
+              quantity: el.itemQuantity,
+              price: el.itemPrice,
+            })),
           ),
         ),
       )
@@ -333,6 +420,23 @@ export default function TableData() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0
 
+  const onSelectedArrow = (id: string) => {
+    if (selectedArrows.includes(id)) {
+      setSelectedArrows(selectedArrows.filter((item: string) => item !== id))
+    } else {
+      selectedArrows.push(id)
+      setSelectedArrows([...selectedArrows])
+    }
+  }
+
+  const handleDeleteOrder = async (orderId: string) => {
+    const success = await deleteOrder(orderId)
+    if (success) {
+      refetch()
+    } else {
+      console.log('some thing went wrong')
+    }
+  }
   return (
     <Box sx={{width: '100%'}}>
       <Paper sx={{width: '100%', mb: 2}}>
@@ -356,47 +460,97 @@ export default function TableData() {
                 const labelId = `enhanced-table-checkbox-${index}`
 
                 return (
-                  <TableRow
-                    hover
-                    onClick={event => handleClick(event, row.order as string)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.order}
-                    selected={isItemSelected}
-                    sx={{cursor: 'pointer'}}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{
-                          'aria-labelledby': labelId,
-                        }}
-                      />
+                  <>
+                    <TableRow
+                      hover
+                      onClick={() => {}}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row.order}
+                      selected={isItemSelected}
+                      sx={{cursor: 'pointer'}}>
+                      <TableCell
+                        padding="checkbox"
+                        onClick={event =>
+                          handleClick(event, row.order as string)
+                        }>
+                        <Checkbox
+                          color="primary"
+                          checked={isItemSelected}
+                          inputProps={{
+                            'aria-labelledby': labelId,
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell align="left" padding="none" id={labelId}>
+                        {row.order}
+                      </TableCell>
+                      <TableCell align="left">{row.customer}</TableCell>
+                      <TableCell align="left">
+                        {formatDateAndTime(row.date)}
+                      </TableCell>
+                      <TableCell align="left">{row.quantity}</TableCell>
+                      <TableCell align="left">
+                        {formatCurrency(row.total)}
+                      </TableCell>
+                      <TableCell align="left">{row.status}</TableCell>
+                      <TableCell align="left">
+                        <Box sx={{display: 'flex', flexDirection: 'row'}}>
+                          <IconButton
+                            onClick={() => onSelectedArrow(row.order)}>
+                            {selectedArrows.includes(row.order) ? (
+                              <KeyboardArrowDown
+                                fontSize="medium"
+                                color="info"
+                              />
+                            ) : (
+                              <KeyboardArrowRight fontSize="medium" />
+                            )}
+                          </IconButton>
+                          <MoreOptions
+                            id={row.order}
+                            onDelete={() => handleDeleteOrder(row.order)}
+                            onView={() => console.log('view =>> ', row.order)}
+                          />
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+
+                    <TableCell
+                      sx={{
+                        paddingBottom: selectedArrows.includes(row.order)
+                          ? '15px'
+                          : '0px',
+                        paddingTop: selectedArrows.includes(row.order)
+                          ? '15px'
+                          : '0px',
+                        flexDirection: 'column',
+                        backgroundColor: '#F6F6F6',
+                      }}
+                      align="left"
+                      colSpan={8}>
+                      <Collapse
+                        in={selectedArrows.includes(row.order)}
+                        timeout="auto"
+                        unmountOnExit>
+                        {row.items.map((el: IItem) => (
+                          <ItemsContainer key={el.id}>
+                            <ItemLeftContainer>
+                              <Typography>{el.name}</Typography>
+                              <Typography>{el.id}</Typography>
+                            </ItemLeftContainer>
+                            <ItemRightContainer>
+                              <Typography>{el.quantity}</Typography>
+                              <Typography>
+                                {formatCurrency(el.price)}
+                              </Typography>
+                            </ItemRightContainer>
+                          </ItemsContainer>
+                        ))}
+                      </Collapse>
                     </TableCell>
-                    <TableCell align="left" padding="none" id={labelId}>
-                      {row.order}
-                    </TableCell>
-                    <TableCell align="left">{row.customer}</TableCell>
-                    <TableCell align="left">
-                      {formatDateAndTime(row.date)}
-                    </TableCell>
-                    <TableCell align="left">{row.quantity}</TableCell>
-                    <TableCell align="left">
-                      {formatCurrency(row.total)}
-                    </TableCell>
-                    <TableCell align="left">{row.status}</TableCell>
-                    <TableCell align="left">
-                      <Box sx={{display: 'flex', flexDirection: 'row'}}>
-                        <IconButton>
-                          <KeyboardArrowDown fontSize="small" />
-                        </IconButton>
-                        <IconButton>
-                          <MoreVert fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                  </>
                 )
               })}
               {emptyRows > 0 && (
@@ -427,3 +581,36 @@ export default function TableData() {
     </Box>
   )
 }
+
+const ItemsContainer = styled(TableCell)`
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  padding: 10px 15px 10px 15px;
+`
+const ItemLeftContainer = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+`
+const ItemRightContainer = styled(Box)`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 20%;
+`
+const StyledMenu = styled(Menu)`
+  & .MuiMenu-paper {
+    box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px,
+      rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 5px 10px -3px,
+      rgba(0, 0, 0, 0.05) 0px 1px 1px -2px;
+  }
+  & .MuiMenu-List {
+    padding: 4px 0px;
+  }
+`
+const Text = styled(Typography)`
+  font-size: ${theme.font.size.s};
+  color: ${theme.color.text};
+`

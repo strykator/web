@@ -18,6 +18,8 @@ import {
   ChevronRight,
   KeyboardDoubleArrowRight,
   KeyboardDoubleArrowLeft,
+  KeyboardArrowDown,
+  KeyboardArrowRight,
   ExpandMore,
   AssignmentInd,
   ShoppingCart,
@@ -175,7 +177,11 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
                         ml: 3,
                         justifyContent: 'flex-end',
                       }}>
-                      <ChevronRight />
+                      {expandedList.includes(item.key) ? (
+                        <KeyboardArrowDown fontSize="medium" />
+                      ) : (
+                        <KeyboardArrowRight fontSize="medium" />
+                      )}
                     </ListItemIcon>
                   )}
                 </ListItemButton>
