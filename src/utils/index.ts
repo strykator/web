@@ -1,6 +1,7 @@
 import numeral from 'numeral'
 import {format} from 'date-fns'
 import {restaurants} from '@/constants'
+import {TemplateContext} from 'next/dist/shared/lib/app-router-context'
 
 export {schemaFormCheckout, schemaFormProfile} from './schemas'
 
@@ -88,4 +89,11 @@ export const formatDateAndTime = (timestamp: number) => {
     date: format(new Date(+timestamp), 'dd MMM yyyy'),
     time: format(new Date(+timestamp), 'hh:mm a'),
   }
+}
+export const convertDateToTimestamp = (date: Date) => {
+  const temp = new Date(date)
+  temp.setHours(23)
+  temp.setMinutes(59)
+  temp.setSeconds(59)
+  return temp.getTime()
 }

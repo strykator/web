@@ -21,7 +21,7 @@ export type TOrderPayload = {
     country?: string
   }
   status: string
-  timestamp: string
+  timestamp: number
   totalAmount: number
   totalQuantity: number
   tip: number

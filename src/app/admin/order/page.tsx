@@ -110,6 +110,7 @@ const FilterContainer = styled(Box)`
 const TableContainer = styled(Box)`
   display: flex;
   width: 100%;
+  min-width: 750px;
 `
 const Text = styled(Typography)`
   color: ${theme.color.text};

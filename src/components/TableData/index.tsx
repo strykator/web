@@ -30,6 +30,9 @@ import {
   Stack,
   Divider,
 } from '@mui/material'
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns'
+import {DatePicker} from '@mui/x-date-pickers/DatePicker'
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider'
 import DeleteIcon from '@mui/icons-material/Delete'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import {
@@ -42,7 +45,11 @@ import {
 } from '@mui/icons-material'
 import {visuallyHidden} from '@mui/utils'
 import {getListOrder, deleteOrder, updateOrder} from '@/libs/firebase'
-import {formatCurrency, formatDateAndTime} from '@/utils'
+import {
+  formatCurrency,
+  formatDateAndTime,
+  convertDateToTimestamp,
+} from '@/utils'
 import {theme} from '@/theme'
 
 interface IItem {
@@ -228,12 +235,15 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 interface EnhancedTableToolbarProps {
   numSelected: number
   onRefresh: any
+  startDate: any
+  endDate: any
+  setStartDate: any
+  setEndDate: any
 }
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   const [showFilter, setShowFilter] = React.useState<boolean>(false)
-  const {numSelected, onRefresh} = props
-
+  const {onRefresh, startDate, endDate, setStartDate, setEndDate} = props
   return (
     <Stack
       sx={{
@@ -261,8 +271,20 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
       <Collapse in={showFilter} timeout="auto" unmountOnExit>
         <Divider light />
         <Box sx={{flex: 1, px: 2, py: 1}}>
-          <CellText>Filter</CellText>
-          <CellText>bgcolor</CellText>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              sx={{my: 2}}
+              value={startDate}
+              onChange={(newValue: any) => setStartDate(newValue)}
+              label="Start Date"
+            />
+            <DatePicker
+              sx={{mx: 2, my: 2}}
+              value={endDate}
+              onChange={(newValue: any) => setEndDate(newValue)}
+              label="End Date"
+            />
+          </LocalizationProvider>
         </Box>
         <Divider light />
       </Collapse>
@@ -427,8 +449,19 @@ export default function TableData() {
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const [rows, setRows] = React.useState<any[]>([])
   const [selectedArrows, setSelectedArrows] = React.useState<any[]>([])
+  const [startDate, setStartDate] = React.useState<any>()
+  const [endDate, setEndDate] = React.useState<any>()
   const {data, isLoading, error, refetch} = useQuery({
-    queryKey: ['getListOrder', {order, orderBy}],
+    queryKey: [
+      'getListOrder',
+      {
+        order,
+        orderBy,
+        startDate: startDate ? convertDateToTimestamp(startDate) : null,
+        endDate: endDate ? convertDateToTimestamp(endDate) : null,
+        limit: 100,
+      },
+    ],
     queryFn: getListOrder,
   })
   React.useEffect(() => {
@@ -463,7 +496,7 @@ export default function TableData() {
     }
   }, [data])
 
-  if (rows.length === 0) return null
+  // if (rows.length === 0) return null
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -574,6 +607,10 @@ export default function TableData() {
         <EnhancedTableToolbar
           numSelected={selected.length}
           onRefresh={refetch}
+          startDate={startDate}
+          endDate={endDate}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
         />
         <TableContainer>
           <Table

@@ -48,7 +48,7 @@ export const prepareOrderPayload = ({
       country: data.country.trim(),
     },
     status: 'pending',
-    timestamp: `${new Date().getTime()}`,
+    timestamp: new Date().getTime(),
     totalAmount,
     totalQuantity: shoppingCart.totalQuantity,
     tip,

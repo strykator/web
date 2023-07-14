@@ -19,6 +19,7 @@ import {
   limit,
   deleteDoc,
   setDoc,
+  where,
 } from 'firebase/firestore'
 import {transformUser} from '@/utils/transformer'
 import {TOrderPayload} from './types'
@@ -126,7 +127,16 @@ export const getOrder = async (orderId: string, onGetData: any) => {
 }
 
 export const getListOrder = async ({queryKey}: any) => {
-  const [_key, {order: queryOrder, orderBy: queryOrderBy}] = queryKey
+  const [
+    _key,
+    {
+      order: queryOrder,
+      orderBy: queryOrderBy,
+      startDate,
+      endDate,
+      limit: queryLimit,
+    },
+  ] = queryKey
   const collectionRef = collection(db, 'orders')
   const formatQueryOrderBy = (name: string | undefined) => {
     if (name === 'customer') {
@@ -145,13 +155,14 @@ export const getListOrder = async ({queryKey}: any) => {
       return 'customerName'
     }
   }
+
+  // NOTE: where() doesn't work with orderBy
   const q = query(
     collectionRef,
     orderBy(formatQueryOrderBy(queryOrderBy), queryOrder),
-    limit(100),
+    limit(queryLimit ?? 100),
   )
-
-  const orderList: any[] = []
+  let orderList: any[] = []
   try {
     // Execute the query
     const querySnapshot = await getDocs(q)
@@ -161,6 +172,17 @@ export const getListOrder = async ({queryKey}: any) => {
       const data = doc.data()
       orderList.push({id: doc.id, ...data})
     })
+    // TODO: should handle in backend api
+    if (startDate && endDate) {
+      orderList = orderList.filter(
+        (item: any) => item.timestamp >= startDate && item.timestamp <= endDate,
+      )
+    } else if (startDate) {
+      orderList = orderList.filter((item: any) => item.timestamp >= startDate)
+    } else if (endDate) {
+      orderList = orderList.filter((item: any) => item.timestamp <= endDate)
+    }
+
     return orderList
   } catch (error) {
     console.log('Error getting documents:', error)
