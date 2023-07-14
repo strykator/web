@@ -29,6 +29,7 @@ import {
   Popover,
   Stack,
   Divider,
+  InputBase,
 } from '@mui/material'
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns'
 import {DatePicker} from '@mui/x-date-pickers/DatePicker'
@@ -42,6 +43,7 @@ import {
   DeleteForever,
   Visibility,
   Refresh,
+  Search,
 } from '@mui/icons-material'
 import {visuallyHidden} from '@mui/utils'
 import {getListOrder, deleteOrder, updateOrder} from '@/libs/firebase'
@@ -237,13 +239,29 @@ interface EnhancedTableToolbarProps {
   onRefresh: any
   startDate: any
   endDate: any
+  search: string
   setStartDate: any
   setEndDate: any
+  setSearch: any
 }
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   const [showFilter, setShowFilter] = React.useState<boolean>(false)
-  const {onRefresh, startDate, endDate, setStartDate, setEndDate} = props
+  const {
+    onRefresh,
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate,
+    search,
+    setSearch,
+  } = props
+
+  const handleSearch = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
+    setSearch(event.target.value)
+  }
   return (
     <Stack
       sx={{
@@ -270,7 +288,36 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 
       <Collapse in={showFilter} timeout="auto" unmountOnExit>
         <Divider light />
-        <Box sx={{flex: 1, px: 2, py: 1}}>
+        <Box
+          sx={{
+            flex: 1,
+            px: 2,
+            py: 1,
+            flexDirection: 'row',
+            display: 'flex',
+            alignItems: 'center',
+          }}>
+          <Paper
+            component="form"
+            elevation={2}
+            sx={{
+              p: '3.5px 2px',
+              display: 'flex',
+              mr: 2,
+              alignItems: 'center',
+              width: 400,
+            }}>
+            <InputBase
+              sx={{ml: 1, flex: 1}}
+              value={search}
+              onChange={handleSearch}
+              placeholder="Search for customer name or email"
+              inputProps={{'aria-label': 'Search for customer name or email'}}
+            />
+            <IconButton type="button" sx={{p: '10px'}} aria-label="search">
+              <Search />
+            </IconButton>
+          </Paper>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               sx={{my: 2}}
@@ -451,6 +498,7 @@ export default function TableData() {
   const [selectedArrows, setSelectedArrows] = React.useState<any[]>([])
   const [startDate, setStartDate] = React.useState<any>()
   const [endDate, setEndDate] = React.useState<any>()
+  const [search, setSearch] = React.useState<any>('23')
   const {data, isLoading, error, refetch} = useQuery({
     queryKey: [
       'getListOrder',
@@ -495,8 +543,6 @@ export default function TableData() {
       setRows(formattedRows)
     }
   }, [data])
-
-  // if (rows.length === 0) return null
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -609,8 +655,10 @@ export default function TableData() {
           onRefresh={refetch}
           startDate={startDate}
           endDate={endDate}
+          search={search}
           setStartDate={setStartDate}
           setEndDate={setEndDate}
+          setSearch={setSearch}
         />
         <TableContainer>
           <Table
