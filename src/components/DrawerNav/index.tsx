@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
-import {useRouter} from 'next/navigation'
+import {useRouter, usePathname} from 'next/navigation'
 import {
   Drawer as MuiDrawer,
   List as MuiList,
@@ -15,18 +15,14 @@ import {
   Collapse,
 } from '@mui/material'
 import {
-  ChevronRight,
   KeyboardDoubleArrowRight,
   KeyboardDoubleArrowLeft,
   KeyboardArrowDown,
   KeyboardArrowRight,
-  ExpandMore,
   AssignmentInd,
   ShoppingCart,
-  RadioButtonUnchecked,
   Circle,
   MenuBook,
-  PriorityHighRounded,
 } from '@mui/icons-material'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
@@ -88,14 +84,6 @@ const menu = [
         key: 'order-details',
         subTitle: 'Details',
       },
-      {
-        key: 'order-create',
-        subTitle: 'Create',
-      },
-      {
-        key: 'order-edit',
-        subTitle: 'Edit',
-      },
     ],
   },
 ]
@@ -107,10 +95,22 @@ interface IDrawerNav {
 
 export default function DrawerNav({open, setOpen}: IDrawerNav) {
   const router = useRouter()
+  const pathName = usePathname()
   const {isMobile} = useResponsive()
   const [selected, setSelected] = useState<string>('')
   const [selectedSubMenu, setSelectedSubMenu] = useState<string>('')
   const [expandedList, setExpandedList] = useState<string[]>([])
+
+  useEffect(() => {
+    const patternList = /\/admin\/order$/
+    const patternDetails = /\/admin\/order\/\[\w+\]$/
+    console.log('pathName => ', pathName)
+    if (patternList.test(pathName)) {
+      console.log('MATCH')
+    } else {
+      console.log('NOT MATCH')
+    }
+  }, [pathName])
 
   const toggleDrawer = () => {
     setOpen(!open)
@@ -120,6 +120,13 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
     setSelected(itemKey)
     if (itemKey === 'order') {
       router.replace('/admin/order')
+      setSelectedSubMenu('order-list')
+    } else if (itemKey === 'menu') {
+      //router.replace('/admin/order')
+      setSelectedSubMenu('menu-list')
+    } else if (itemKey === 'user') {
+      //router.replace('/admin/order')
+      setSelectedSubMenu('user-list')
     }
     if (expandedList.includes(itemKey)) {
       setExpandedList(expandedList.filter((key: string) => key !== itemKey))

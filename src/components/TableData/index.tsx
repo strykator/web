@@ -15,7 +15,6 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  Toolbar,
   Typography,
   Paper,
   Tooltip,
@@ -29,6 +28,7 @@ import {
   Chip,
   Popover,
   Stack,
+  Divider,
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import FilterListIcon from '@mui/icons-material/FilterList'
@@ -38,6 +38,7 @@ import {
   MoreVert,
   DeleteForever,
   Visibility,
+  Refresh,
 } from '@mui/icons-material'
 import {visuallyHidden} from '@mui/utils'
 import {getListOrder, deleteOrder, updateOrder} from '@/libs/firebase'
@@ -226,47 +227,46 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface EnhancedTableToolbarProps {
   numSelected: number
+  onRefresh: any
 }
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  const {numSelected} = props
+  const [showFilter, setShowFilter] = React.useState<boolean>(false)
+  const {numSelected, onRefresh} = props
 
   return (
-    <Toolbar
+    <Stack
       sx={{
-        pl: {sm: 2},
-        pr: {xs: 1, sm: 1},
-        ...(numSelected > 0 && {
-          bgcolor: theme =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity,
-            ),
-        }),
+        flex: 1,
       }}>
-      {numSelected > 0 && (
-        <Typography
-          sx={{flex: '1 1 100%'}}
-          color="inherit"
-          variant="subtitle1"
-          component="div">
-          {numSelected} selected
-        </Typography>
-      )}
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton>
-            <DeleteIcon />
+      <Box
+        sx={{
+          p: 0.5,
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}>
+        <Tooltip title="Refresh">
+          <IconButton onClick={onRefresh}>
+            <Refresh color="info" />
           </IconButton>
         </Tooltip>
-      ) : (
         <Tooltip title="Filter list">
-          <IconButton>
+          <IconButton onClick={() => setShowFilter(!showFilter)}>
             <FilterListIcon />
           </IconButton>
         </Tooltip>
-      )}
-    </Toolbar>
+      </Box>
+
+      <Collapse in={showFilter} timeout="auto" unmountOnExit>
+        <Divider light />
+        <Box sx={{flex: 1, px: 2, py: 1}}>
+          <CellText>Filter</CellText>
+          <CellText>bgcolor</CellText>
+        </Box>
+        <Divider light />
+      </Collapse>
+    </Stack>
   )
 }
 type Order = 'asc' | 'desc'
@@ -570,8 +570,11 @@ export default function TableData() {
   }
   return (
     <Box sx={{width: '100%'}}>
-      <Paper sx={{width: '100%', mb: 2}}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+      <Paper sx={{width: '100%'}}>
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          onRefresh={refetch}
+        />
         <TableContainer>
           <Table
             sx={{minWidth: 750}}
@@ -704,20 +707,28 @@ export default function TableData() {
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+        <Box
+          sx={{
+            display: 'flex',
+            pl: 2,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          <FormControlLabel
+            control={<Switch checked={dense} onChange={handleChangeDense} />}
+            label="Dense"
+          />
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Box>
       </Paper>
-      <FormControlLabel
-        control={<Switch checked={dense} onChange={handleChangeDense} />}
-        label="Dense"
-      />
     </Box>
   )
 }

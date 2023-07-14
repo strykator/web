@@ -66,7 +66,64 @@ export default function OrderList() {
         </Breadcrumbs>
       </Stack>
       <Body elevation={1}>
-        <BodyTop>
+        <TableContainer>
+          <TableData />
+        </TableContainer>
+      </Body>
+    </Container>
+  )
+}
+
+const Container = styled('div')`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding-bottom: 75px;
+`
+const Title = styled(Typography)`
+  color: ${theme.color.text};
+  font-size: ${theme.font.size.xl};
+  font-family: ${theme.font.family};
+  font-weight: 500;
+`
+const Body = styled(Paper)`
+  display: flex;
+  margin-top: 40px;
+  flex-direction: column;
+  background-color: transparent;
+`
+const BodyTop = styled(Box)`
+  display: flex;
+  align-items: 'center';
+  width: 100%;
+  padding: 5px 15px 5px 15px;
+  box-sizing: border-box;
+`
+const FilterContainer = styled(Box)`
+  display: flex;
+  width: 100%;
+  height: 60px;
+  padding-left: 15px;
+  box-sizing: border-box;
+`
+const TableContainer = styled(Box)`
+  display: flex;
+  width: 100%;
+`
+const Text = styled(Typography)`
+  color: ${theme.color.text};
+  font-size: ${theme.font.size.m};
+  font-family: ${theme.font.family};
+  font-weight: 400;
+`
+
+/*
+
+        <Divider />
+        <FilterContainer></FilterContainer>
+        <Divider />
+<BodyTop>
           <Box sx={{width: '100%', bgcolor: 'background.paper'}}>
             <Tabs
               value={selectedStatus}
@@ -113,56 +170,4 @@ export default function OrderList() {
             </Tabs>
           </Box>
         </BodyTop>
-        <Divider />
-        <FilterContainer></FilterContainer>
-        <Divider />
-        <TableContainer>
-          <TableData />
-        </TableContainer>
-      </Body>
-    </Container>
-  )
-}
-
-const Container = styled('div')`
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  box-sizing: border-box;
-`
-const Title = styled(Typography)`
-  color: ${theme.color.text};
-  font-size: ${theme.font.size.xl};
-  font-family: ${theme.font.family};
-  font-weight: 500;
-`
-const Body = styled(Paper)`
-  display: flex;
-  margin-top: 40px;
-  flex-direction: column;
-`
-const BodyTop = styled(Box)`
-  display: flex;
-  align-items: 'center';
-  width: 100%;
-  padding: 5px 15px 5px 15px;
-  box-sizing: border-box;
-`
-const FilterContainer = styled(Box)`
-  display: flex;
-  width: 100%;
-  height: 60px;
-  padding-left: 15px;
-  box-sizing: border-box;
-`
-const TableContainer = styled(Box)`
-  display: flex;
-  width: 100%;
-  height: 250px;
-`
-const Text = styled(Typography)`
-  color: ${theme.color.text};
-  font-size: ${theme.font.size.m};
-  font-family: ${theme.font.family};
-  font-weight: 400;
-`
+*/
