@@ -34,7 +34,6 @@ import {
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns'
 import {DatePicker} from '@mui/x-date-pickers/DatePicker'
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider'
-import DeleteIcon from '@mui/icons-material/Delete'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import {
   KeyboardArrowRight,
@@ -44,13 +43,16 @@ import {
   Visibility,
   Refresh,
   Search,
+  Clear,
 } from '@mui/icons-material'
 import {visuallyHidden} from '@mui/utils'
 import {getListOrder, deleteOrder, updateOrder} from '@/libs/firebase'
+import Button from '../Button'
 import {
   formatCurrency,
   formatDateAndTime,
   convertDateToTimestamp,
+  getOrderStatusChipColor,
 } from '@/utils'
 import {theme} from '@/theme'
 
@@ -159,6 +161,14 @@ const headCells: readonly HeadCell[] = [
   },
 ]
 
+const statusArray = [
+  'pending',
+  'confirmed',
+  'completed',
+  'cancelled',
+  'refunded',
+]
+type TStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded'
 interface EnhancedTableProps {
   numSelected: number
   onRequestSort: (
@@ -243,6 +253,8 @@ interface EnhancedTableToolbarProps {
   setStartDate: any
   setEndDate: any
   setSearch: any
+  statuses: string[]
+  setStatuses: any
 }
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
@@ -255,12 +267,26 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
     setEndDate,
     search,
     setSearch,
+    statuses,
+    setStatuses,
   } = props
 
   const handleSearch = (
     event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
   ) => {
     setSearch(event.target.value)
+  }
+  const toggleStatus = (status: string) => {
+    if (statuses.includes(status)) {
+      setStatuses(statuses.filter((el: string) => el !== status))
+    } else {
+      setStatuses([...statuses, status])
+    }
+  }
+  const handleClearFilter = () => {
+    startDate && setStartDate(null)
+    endDate && setEndDate(null)
+    search && setSearch('')
   }
   return (
     <Stack
@@ -269,19 +295,44 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
       }}>
       <Box
         sx={{
-          p: 0.5,
+          p: 0.8,
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
+          alignItems: 'center',
         }}>
+        <Tooltip title="Filter List">
+          <IconButton onClick={() => setShowFilter(!showFilter)}>
+            <FilterListIcon color={showFilter ? 'info' : 'inherit'} />
+          </IconButton>
+        </Tooltip>
+        <Box
+          sx={{
+            width: '70%',
+            maxWidth: '500px',
+            p: 0.5,
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-evenly',
+          }}>
+          {statusArray.map((status: string) => {
+            return (
+              <Tooltip key={status} title={`filter ${status} status`}>
+                <Chip
+                  onClick={() => toggleStatus(status)}
+                  label={status}
+                  variant={statuses.includes(status) ? 'filled' : 'outlined'}
+                  color={getOrderStatusChipColor(status)}
+                  size="small"
+                />
+              </Tooltip>
+            )
+          })}
+        </Box>
         <Tooltip title="Refresh">
           <IconButton onClick={onRefresh}>
             <Refresh color="info" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Filter list">
-          <IconButton onClick={() => setShowFilter(!showFilter)}>
-            <FilterListIcon />
           </IconButton>
         </Tooltip>
       </Box>
@@ -295,11 +346,13 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             py: 1,
             flexDirection: 'row',
             display: 'flex',
+            justifyContent: 'center',
             alignItems: 'center',
+            backgroundColor: '#F6F6F6',
           }}>
           <Paper
             component="form"
-            elevation={2}
+            elevation={3}
             sx={{
               p: '3.5px 2px',
               display: 'flex',
@@ -319,19 +372,28 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             </IconButton>
           </Paper>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              sx={{my: 2}}
-              value={startDate}
-              onChange={(newValue: any) => setStartDate(newValue)}
-              label="Start Date"
-            />
-            <DatePicker
-              sx={{mx: 2, my: 2}}
-              value={endDate}
-              onChange={(newValue: any) => setEndDate(newValue)}
-              label="End Date"
-            />
+            <Paper elevation={1} sx={{my: 2, mr: 2}}>
+              <DatePicker
+                value={startDate}
+                onChange={(newValue: any) => setStartDate(newValue)}
+                label="Start Date"
+              />
+            </Paper>
+            <Paper elevation={1} sx={{my: 2}}>
+              <DatePicker
+                value={endDate}
+                onChange={(newValue: any) => setEndDate(newValue)}
+                label="End Date"
+              />
+            </Paper>
           </LocalizationProvider>
+          <Tooltip sx={{ml: 2}} title="Clear Filter">
+            <IconButton onClick={handleClearFilter}>
+              <Clear
+                color={search || startDate || endDate ? 'error' : 'inherit'}
+              />
+            </IconButton>
+          </Tooltip>
         </Box>
         <Divider light />
       </Collapse>
@@ -423,22 +485,6 @@ const StatusOptions = ({
     onSelect(option)
   }
 
-  const options = ['pending', 'confirmed', 'completed', 'cancelled', 'refunded']
-  const getChipColor = (status: string) => {
-    if (status === 'pending') {
-      return 'warning'
-    } else if (status === 'confirmed') {
-      return 'primary'
-    } else if (status === 'completed') {
-      return 'success'
-    } else if (status === 'cancelled') {
-      return 'error'
-    } else if (status === 'refunded') {
-      return 'default'
-    } else {
-      return 'default'
-    }
-  }
   return (
     <>
       <Chip
@@ -446,7 +492,7 @@ const StatusOptions = ({
         onClick={onClick}
         onDelete={onClick}
         deleteIcon={<KeyboardArrowDown />}
-        color={getChipColor(label)}
+        color={getOrderStatusChipColor(label)}
         variant="outlined"
         size="small"
       />
@@ -468,13 +514,13 @@ const StatusOptions = ({
             bgcolor: 'background.paper',
             borderRadius: '4px',
           }}>
-          {options.map((option: string) => {
+          {statusArray.map((option: string) => {
             if (option === label) return null
             return (
               <MenuItem key={option} onClick={() => handleOnSelect(option)}>
                 <Chip
                   label={option}
-                  color={getChipColor(option)}
+                  color={getOrderStatusChipColor(option)}
                   variant="filled"
                   size="small"
                 />
@@ -486,27 +532,36 @@ const StatusOptions = ({
     </>
   )
 }
-
+const defaultOrder = {
+  order: 'desc',
+  orderBy: 'date',
+}
 export default function TableData() {
-  const [order, setOrder] = React.useState<Order>('asc')
-  const [orderBy, setOrderBy] = React.useState<keyof Data>('customer')
+  const [order, setOrder] = React.useState<Order>(defaultOrder.order as Order)
+  const [orderBy, setOrderBy] = React.useState<keyof Data>(
+    defaultOrder.orderBy as keyof Data,
+  )
   const [selected, setSelected] = React.useState<readonly string[]>([])
   const [page, setPage] = React.useState(0)
   const [dense, setDense] = React.useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const [rows, setRows] = React.useState<any[]>([])
   const [selectedArrows, setSelectedArrows] = React.useState<any[]>([])
+  // Filters
   const [startDate, setStartDate] = React.useState<any>()
   const [endDate, setEndDate] = React.useState<any>()
-  const [search, setSearch] = React.useState<any>('23')
+  const [search, setSearch] = React.useState<string>('')
+  const [statuses, setStatuses] = React.useState<string[]>([])
+  // Query API
   const {data, isLoading, error, refetch} = useQuery({
     queryKey: [
       'getListOrder',
       {
         order,
         orderBy,
-        startDate: startDate ? convertDateToTimestamp(startDate) : null,
+        startDate: startDate ? convertDateToTimestamp(startDate, true) : null,
         endDate: endDate ? convertDateToTimestamp(endDate) : null,
+        statuses,
         limit: 100,
       },
     ],
@@ -602,6 +657,10 @@ export default function TableData() {
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0
+  const visibleRows = React.useMemo(
+    () => rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [order, orderBy, page, rowsPerPage, rows],
+  )
 
   const onSelectedArrow = (id: string) => {
     if (selectedArrows.includes(id)) {
@@ -656,9 +715,11 @@ export default function TableData() {
           startDate={startDate}
           endDate={endDate}
           search={search}
+          statuses={statuses}
           setStartDate={setStartDate}
           setEndDate={setEndDate}
           setSearch={setSearch}
+          setStatuses={setStatuses}
         />
         <TableContainer>
           <Table
@@ -674,7 +735,7 @@ export default function TableData() {
               rowCount={rows.length}
             />
             <TableBody>
-              {rows.map((row, index) => {
+              {visibleRows.map((row, index) => {
                 const isItemSelected = isSelected(row.order as string)
                 const labelId = `enhanced-table-checkbox-${index}`
 

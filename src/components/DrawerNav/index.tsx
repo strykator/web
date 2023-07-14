@@ -104,11 +104,8 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
   useEffect(() => {
     const patternList = /\/admin\/order$/
     const patternDetails = /\/admin\/order\/\[\w+\]$/
-    console.log('pathName => ', pathName)
     if (patternList.test(pathName)) {
-      console.log('MATCH')
     } else {
-      console.log('NOT MATCH')
     }
   }, [pathName])
 

@@ -135,6 +135,7 @@ export const getListOrder = async ({queryKey}: any) => {
       startDate,
       endDate,
       limit: queryLimit,
+      statuses,
     },
   ] = queryKey
   const collectionRef = collection(db, 'orders')
@@ -172,6 +173,14 @@ export const getListOrder = async ({queryKey}: any) => {
       const data = doc.data()
       orderList.push({id: doc.id, ...data})
     })
+
+    // TODO: should handle in backend api
+    if (statuses.length !== 0) {
+      orderList = orderList.filter((item: any) =>
+        statuses.includes(item.status),
+      )
+    }
+
     // TODO: should handle in backend api
     if (startDate && endDate) {
       orderList = orderList.filter(
@@ -215,8 +224,7 @@ export const updateOrder = async (orderId: string, fields: any) => {
   try {
     const collectionRef = collection(db, 'orders')
     const documentRef = doc(collectionRef, orderId)
-    const result = await setDoc(documentRef, fields, {merge: true})
-    console.log('updateOrder => ', result)
+    await setDoc(documentRef, fields, {merge: true})
     return true
   } catch (error) {
     return false

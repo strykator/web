@@ -90,10 +90,25 @@ export const formatDateAndTime = (timestamp: number) => {
     time: format(new Date(+timestamp), 'hh:mm a'),
   }
 }
-export const convertDateToTimestamp = (date: Date) => {
+export const convertDateToTimestamp = (date: Date, startDay?: boolean) => {
   const temp = new Date(date)
-  temp.setHours(23)
-  temp.setMinutes(59)
-  temp.setSeconds(59)
+  temp.setHours(startDay ? 0 : 23)
+  temp.setMinutes(startDay ? 0 : 59)
+  temp.setSeconds(startDay ? 1 : 59)
   return temp.getTime()
+}
+export const getOrderStatusChipColor = (status: string) => {
+  if (status === 'pending') {
+    return 'warning'
+  } else if (status === 'confirmed') {
+    return 'primary'
+  } else if (status === 'completed') {
+    return 'success'
+  } else if (status === 'cancelled') {
+    return 'error'
+  } else if (status === 'refunded') {
+    return 'default'
+  } else {
+    return 'default'
+  }
 }
