@@ -377,6 +377,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 value={startDate}
                 onChange={(newValue: any) => setStartDate(newValue)}
                 label="Start Date"
+                maxDate={endDate}
               />
             </Paper>
             <Paper elevation={1} sx={{my: 2}}>
@@ -384,10 +385,11 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 value={endDate}
                 onChange={(newValue: any) => setEndDate(newValue)}
                 label="End Date"
+                minDate={startDate}
               />
             </Paper>
           </LocalizationProvider>
-          <Tooltip sx={{ml: 2}} title="Clear Filter">
+          <Tooltip sx={{ml: 1}} title="Clear Filter">
             <IconButton onClick={handleClearFilter}>
               <Clear
                 color={search || startDate || endDate ? 'error' : 'inherit'}
