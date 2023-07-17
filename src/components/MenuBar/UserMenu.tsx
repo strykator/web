@@ -10,7 +10,7 @@ import {
   Divider,
   Typography,
 } from '@mui/material'
-import {AdminPanelSettings} from '@mui/icons-material'
+import {AdminPanelSettings, Home} from '@mui/icons-material'
 import {useRouter, usePathname} from 'next/navigation'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {useDispatch, useSelector} from 'react-redux'
@@ -77,18 +77,35 @@ const UserMenu = () => {
     handleClose()
   }
 
-  const renderAdminMenuItem = () =>
-    useRoles?.includes('Admin') ? (
-      <>
-        <MenuItem onClick={() => router.push('/admin')}>
-          <ListItemIcon>
-            <AdminPanelSettings fontSize="small" />
-          </ListItemIcon>
-          <Text>Admin</Text>
-        </MenuItem>
-        <Divider />
-      </>
-    ) : null
+  const renderAdminMenuItem = () => {
+    if (useRoles?.includes('Admin') && pathName.includes('admin')) {
+      return (
+        <>
+          <MenuItem onClick={() => router.replace('/')}>
+            <ListItemIcon>
+              <Home fontSize="small" />
+            </ListItemIcon>
+            <Text>Home</Text>
+          </MenuItem>
+          <Divider />
+        </>
+      )
+    } else if (useRoles?.includes('Admin') && !pathName.includes('admin')) {
+      return (
+        <>
+          <MenuItem onClick={() => router.push('/admin')}>
+            <ListItemIcon>
+              <AdminPanelSettings fontSize="small" />
+            </ListItemIcon>
+            <Text>Admin</Text>
+          </MenuItem>
+          <Divider />
+        </>
+      )
+    } else {
+      return null
+    }
+  }
 
   return (
     <>

@@ -20,11 +20,10 @@ export interface IData {
   items: IItem[]
   extras: string
 }
-export interface IHeadCell {
+export interface IHeadCell<THeadData> {
   disablePadding: boolean
-  id: keyof IData
+  id: keyof THeadData
   label: string
-  numeric: boolean
   width: string
 }
 export type TOrder = 'asc' | 'desc'

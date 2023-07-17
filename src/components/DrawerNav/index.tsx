@@ -33,20 +33,12 @@ const menu = [
     title: 'User',
     subMenu: [
       {
-        key: 'user-profile',
-        subTitle: 'Profile',
-      },
-      {
         key: 'user-list',
         subTitle: 'List',
       },
       {
         key: 'user-create',
         subTitle: 'Create',
-      },
-      {
-        key: 'user-edit',
-        subTitle: 'Edit',
       },
     ],
   },
@@ -59,16 +51,8 @@ const menu = [
         subTitle: 'List',
       },
       {
-        key: 'menu-details',
-        subTitle: 'Details',
-      },
-      {
         key: 'menu-create',
         subTitle: 'Create',
-      },
-      {
-        key: 'menu-edit',
-        subTitle: 'Edit',
       },
     ],
   },
@@ -79,10 +63,6 @@ const menu = [
       {
         key: 'order-list',
         subTitle: 'List',
-      },
-      {
-        key: 'order-details',
-        subTitle: 'Details',
       },
     ],
   },

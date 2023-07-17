@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 import {useQuery} from '@tanstack/react-query'
 import {
@@ -176,6 +176,49 @@ const StatusOptions = ({
     </>
   )
 }
+const CollapseArrowButton = ({onSelectedArrow, selectedArrows, row}: any) => {
+  return (
+    <IconButton onClick={() => onSelectedArrow(row.order)}>
+      {selectedArrows.includes(row.order) ? (
+        <KeyboardArrowDown fontSize="medium" color="info" />
+      ) : (
+        <KeyboardArrowRight fontSize="medium" />
+      )}
+    </IconButton>
+  )
+}
+const CollapseOrderDetails = ({selectedArrows, row}: any) => {
+  return (
+    <TableCell
+      sx={{
+        paddingBottom: selectedArrows.includes(row.order) ? '15px' : '0px',
+        paddingTop: selectedArrows.includes(row.order) ? '15px' : '0px',
+        flexDirection: 'column',
+        backgroundColor: '#F6F6F6',
+      }}
+      align="left"
+      colSpan={8}>
+      <Collapse
+        in={selectedArrows.includes(row.order)}
+        timeout="auto"
+        unmountOnExit>
+        {row.items.map((el: IItem) => (
+          <ItemsContainer key={el.id}>
+            <ItemLeftContainer>
+              <CellText>{el.name}</CellText>
+              <CellTextWeak>{el.id}</CellTextWeak>
+            </ItemLeftContainer>
+            <ItemRightContainer>
+              <CellText>{el.quantity}</CellText>
+              <CellText>{formatCurrency(el.price)}</CellText>
+            </ItemRightContainer>
+          </ItemsContainer>
+        ))}
+      </Collapse>
+    </TableCell>
+  )
+}
+
 const defaultOrder = {
   order: 'desc',
   orderBy: 'date',
@@ -211,7 +254,7 @@ export default function TableData() {
     ],
     queryFn: getListOrder,
   })
-  React.useEffect(() => {
+  useEffect(() => {
     if (data) {
       const formattedRows: any = []
       data?.forEach((item: any) => {
@@ -431,13 +474,11 @@ export default function TableData() {
                     </TableCell>
                     <TableCell align="left">
                       <Box sx={{display: 'flex', flexDirection: 'row'}}>
-                        <IconButton onClick={() => onSelectedArrow(row.order)}>
-                          {selectedArrows.includes(row.order) ? (
-                            <KeyboardArrowDown fontSize="medium" color="info" />
-                          ) : (
-                            <KeyboardArrowRight fontSize="medium" />
-                          )}
-                        </IconButton>
+                        <CollapseArrowButton
+                          row={row}
+                          selectedArrows={selectedArrows}
+                          onSelectedArrow={onSelectedArrow}
+                        />
                         <MoreOptions
                           id={row.order}
                           onDelete={() => handleDeleteOrder(row.order)}
@@ -446,38 +487,10 @@ export default function TableData() {
                       </Box>
                     </TableCell>
                   </TableRow>
-
-                  <TableCell
-                    sx={{
-                      paddingBottom: selectedArrows.includes(row.order)
-                        ? '15px'
-                        : '0px',
-                      paddingTop: selectedArrows.includes(row.order)
-                        ? '15px'
-                        : '0px',
-                      flexDirection: 'column',
-                      backgroundColor: '#F6F6F6',
-                    }}
-                    align="left"
-                    colSpan={8}>
-                    <Collapse
-                      in={selectedArrows.includes(row.order)}
-                      timeout="auto"
-                      unmountOnExit>
-                      {row.items.map((el: IItem) => (
-                        <ItemsContainer key={el.id}>
-                          <ItemLeftContainer>
-                            <CellText>{el.name}</CellText>
-                            <CellTextWeak>{el.id}</CellTextWeak>
-                          </ItemLeftContainer>
-                          <ItemRightContainer>
-                            <CellText>{el.quantity}</CellText>
-                            <CellText>{formatCurrency(el.price)}</CellText>
-                          </ItemRightContainer>
-                        </ItemsContainer>
-                      ))}
-                    </Collapse>
-                  </TableCell>
+                  <CollapseOrderDetails
+                    row={row}
+                    selectedArrows={selectedArrows}
+                  />
                 </>
               )
             })}

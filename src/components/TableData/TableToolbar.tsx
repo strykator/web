@@ -56,9 +56,9 @@ export default function TableToolbar({
   return (
     <Container>
       <Header>
-        <Tooltip title="Filter List">
-          <IconButton onClick={() => setShowFilter(!showFilter)}>
-            <FilterList color={activeFilter ? 'info' : 'inherit'} />
+        <Tooltip title="Refresh">
+          <IconButton onClick={onRefresh}>
+            <RefreshIcon color="info" />
           </IconButton>
         </Tooltip>
         <StatusContainer>
@@ -76,9 +76,9 @@ export default function TableToolbar({
             )
           })}
         </StatusContainer>
-        <Tooltip title="Refresh">
-          <IconButton onClick={onRefresh}>
-            <Refresh color="info" />
+        <Tooltip title={activeFilter ? 'Active Filter List' : 'Filter List'}>
+          <IconButton onClick={() => setShowFilter(!showFilter)}>
+            <FilterList color={activeFilter ? 'info' : 'inherit'} />
           </IconButton>
         </Tooltip>
       </Header>
@@ -163,5 +163,11 @@ const SearchBar = styled(Paper)`
   display: flex;
   margin-right: 15px;
   align-items: center;
-  width: 400px;
+  width: 370px;
+`
+const RefreshIcon = styled(Refresh)`
+  transition: transform 0.6s ease-in-out;
+  &:hover {
+    transform: rotate(360deg);
+  }
 `
