@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useMemo} from 'react'
 import {
   IconButton,
   Box,
@@ -31,7 +31,10 @@ export default function TableToolbar({
   setStatuses,
 }: ITableToolbarProps) {
   const [showFilter, setShowFilter] = useState<boolean>(false)
-
+  const activeFilter = useMemo(() => {
+    if (startDate || endDate || search) return true
+    return false
+  }, [startDate, endDate, search])
   const handleSearch = (
     event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
   ) => {
@@ -64,7 +67,7 @@ export default function TableToolbar({
         }}>
         <Tooltip title="Filter List">
           <IconButton onClick={() => setShowFilter(!showFilter)}>
-            <FilterList color={showFilter ? 'info' : 'inherit'} />
+            <FilterList color={activeFilter ? 'info' : 'inherit'} />
           </IconButton>
         </Tooltip>
         <Box
@@ -150,13 +153,13 @@ export default function TableToolbar({
               />
             </Paper>
           </LocalizationProvider>
-          <Tooltip sx={{ml: 1}} title="Clear Filter">
-            <IconButton onClick={handleClearFilter}>
-              <Clear
-                color={search || startDate || endDate ? 'error' : 'inherit'}
-              />
-            </IconButton>
-          </Tooltip>
+          {activeFilter && (
+            <Tooltip sx={{ml: 1}} title="Clear All Filters">
+              <IconButton onClick={handleClearFilter}>
+                <Clear color="error" />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
         <Divider light />
       </Collapse>
