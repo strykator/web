@@ -1,9 +1,8 @@
 'use client'
 
-import * as React from 'react'
+import React, {useState} from 'react'
 import styled from 'styled-components'
 import {useQuery} from '@tanstack/react-query'
-import {alpha} from '@mui/material/styles'
 import {
   IconButton,
   Box,
@@ -11,10 +10,8 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TablePagination,
   TableRow,
-  TableSortLabel,
   Typography,
   Paper,
   Tooltip,
@@ -28,26 +25,15 @@ import {
   Chip,
   Popover,
   Stack,
-  Divider,
-  InputBase,
 } from '@mui/material'
-import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns'
-import {DatePicker} from '@mui/x-date-pickers/DatePicker'
-import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider'
-import FilterListIcon from '@mui/icons-material/FilterList'
 import {
   KeyboardArrowRight,
   KeyboardArrowDown,
   MoreVert,
   DeleteForever,
   Visibility,
-  Refresh,
-  Search,
-  Clear,
 } from '@mui/icons-material'
-import {visuallyHidden} from '@mui/utils'
 import {getListOrder, deleteOrder, updateOrder} from '@/libs/firebase'
-import Button from '../Button'
 import {
   formatCurrency,
   formatDateAndTime,
@@ -55,354 +41,10 @@ import {
   getOrderStatusChipColor,
 } from '@/utils'
 import {theme} from '@/theme'
-
-interface IItem {
-  id: string
-  name: string
-  quantity: number
-  price: number
-}
-interface ICustomer {
-  name: string
-  email: string
-  phone: string
-  photoUrl: string
-}
-interface Data {
-  order: string
-  customer: ICustomer
-  date: number
-  quantity: number
-  total: number
-  status: string
-  items: IItem[]
-  extras: string
-}
-
-function createData(
-  order: string,
-  customer: ICustomer,
-  date: number,
-  quantity: number,
-  total: number,
-  status: string,
-  items: IItem[],
-  extras?: string,
-): Data {
-  return {
-    order,
-    customer,
-    date,
-    quantity,
-    total,
-    status,
-    items,
-    extras: '',
-  }
-}
-
-interface HeadCell {
-  disablePadding: boolean
-  id: keyof Data
-  label: string
-  numeric: boolean
-  width: string
-}
-
-const headCells: readonly HeadCell[] = [
-  {
-    id: 'order',
-    numeric: false,
-    disablePadding: true,
-    width: '10%',
-    label: 'Order',
-  },
-  {
-    id: 'customer',
-    numeric: false,
-    disablePadding: false,
-    width: '30%',
-    label: 'Customer',
-  },
-  {
-    id: 'date',
-    numeric: true,
-    disablePadding: false,
-    width: '20%',
-    label: 'Date',
-  },
-  {
-    id: 'quantity',
-    numeric: true,
-    disablePadding: false,
-    width: '10%',
-    label: 'Quantity',
-  },
-  {
-    id: 'total',
-    numeric: true,
-    disablePadding: false,
-    width: '10%',
-    label: 'Total',
-  },
-  {
-    id: 'status',
-    numeric: false,
-    disablePadding: false,
-    width: '15%',
-    label: 'Status',
-  },
-  {
-    id: 'extras',
-    numeric: false,
-    disablePadding: false,
-    width: '10%',
-    label: '',
-  },
-]
-
-const statusArray = [
-  'pending',
-  'confirmed',
-  'completed',
-  'cancelled',
-  'refunded',
-]
-type TStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded'
-interface EnhancedTableProps {
-  numSelected: number
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    property: keyof Data,
-  ) => void
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void
-  order: Order
-  orderBy: string
-  rowCount: number
-}
-
-function EnhancedTableHead(props: EnhancedTableProps) {
-  const {
-    onSelectAllClick,
-    order,
-    orderBy,
-    numSelected,
-    rowCount,
-    onRequestSort,
-  } = props
-  const createSortHandler =
-    (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, property)
-    }
-
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              'aria-label': 'select all orders',
-            }}
-          />
-        </TableCell>
-        {headCells.map(headCell => (
-          <TableCell
-            key={headCell.id}
-            sx={{
-              width: headCell.width,
-            }}
-            align="left"
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={orderBy === headCell.id ? order : false}>
-            {headCell.id !== 'extras' && (
-              <TableSortLabel
-                active={orderBy === headCell.id}
-                direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={
-                  headCell.id !== 'order'
-                    ? createSortHandler(headCell.id)
-                    : () => {}
-                }>
-                {headCell.label}
-                {orderBy === headCell.id ? (
-                  <Box component="span" sx={visuallyHidden}>
-                    {order === 'desc'
-                      ? 'sorted descending'
-                      : 'sorted ascending'}
-                  </Box>
-                ) : null}
-              </TableSortLabel>
-            )}
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  )
-}
-
-interface EnhancedTableToolbarProps {
-  numSelected: number
-  onRefresh: any
-  startDate: any
-  endDate: any
-  search: string
-  setStartDate: any
-  setEndDate: any
-  setSearch: any
-  statuses: string[]
-  setStatuses: any
-}
-
-function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  const [showFilter, setShowFilter] = React.useState<boolean>(false)
-  const {
-    onRefresh,
-    startDate,
-    endDate,
-    setStartDate,
-    setEndDate,
-    search,
-    setSearch,
-    statuses,
-    setStatuses,
-  } = props
-
-  const handleSearch = (
-    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-  ) => {
-    setSearch(event.target.value)
-  }
-  const toggleStatus = (status: string) => {
-    if (statuses.includes(status)) {
-      setStatuses(statuses.filter((el: string) => el !== status))
-    } else {
-      setStatuses([...statuses, status])
-    }
-  }
-  const handleClearFilter = () => {
-    startDate && setStartDate(null)
-    endDate && setEndDate(null)
-    search && setSearch('')
-  }
-  return (
-    <Stack
-      sx={{
-        flex: 1,
-      }}>
-      <Box
-        sx={{
-          p: 0.8,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-        <Tooltip title="Filter List">
-          <IconButton onClick={() => setShowFilter(!showFilter)}>
-            <FilterListIcon color={showFilter ? 'info' : 'inherit'} />
-          </IconButton>
-        </Tooltip>
-        <Box
-          sx={{
-            width: '70%',
-            maxWidth: '500px',
-            p: 0.5,
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
-          }}>
-          {statusArray.map((status: string) => {
-            return (
-              <Tooltip key={status} title={`filter ${status} status`}>
-                <Chip
-                  onClick={() => toggleStatus(status)}
-                  label={status}
-                  variant={statuses.includes(status) ? 'filled' : 'outlined'}
-                  color={getOrderStatusChipColor(status)}
-                  size="small"
-                />
-              </Tooltip>
-            )
-          })}
-        </Box>
-        <Tooltip title="Refresh">
-          <IconButton onClick={onRefresh}>
-            <Refresh color="info" />
-          </IconButton>
-        </Tooltip>
-      </Box>
-
-      <Collapse in={showFilter} timeout="auto" unmountOnExit>
-        <Divider light />
-        <Box
-          sx={{
-            flex: 1,
-            px: 2,
-            py: 1,
-            flexDirection: 'row',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#F6F6F6',
-          }}>
-          <Paper
-            component="form"
-            elevation={3}
-            sx={{
-              p: '3.5px 2px',
-              display: 'flex',
-              mr: 2,
-              alignItems: 'center',
-              width: 400,
-            }}>
-            <InputBase
-              sx={{ml: 1, flex: 1}}
-              value={search}
-              onChange={handleSearch}
-              placeholder="Search for customer name or email"
-              inputProps={{'aria-label': 'Search for customer name or email'}}
-            />
-            <IconButton type="button" sx={{p: '10px'}} aria-label="search">
-              <Search />
-            </IconButton>
-          </Paper>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Paper elevation={1} sx={{my: 2, mr: 2}}>
-              <DatePicker
-                value={startDate}
-                onChange={(newValue: any) => setStartDate(newValue)}
-                label="Start Date"
-                maxDate={endDate}
-              />
-            </Paper>
-            <Paper elevation={1} sx={{my: 2}}>
-              <DatePicker
-                value={endDate}
-                onChange={(newValue: any) => setEndDate(newValue)}
-                label="End Date"
-                minDate={startDate}
-              />
-            </Paper>
-          </LocalizationProvider>
-          <Tooltip sx={{ml: 1}} title="Clear Filter">
-            <IconButton onClick={handleClearFilter}>
-              <Clear
-                color={search || startDate || endDate ? 'error' : 'inherit'}
-              />
-            </IconButton>
-          </Tooltip>
-        </Box>
-        <Divider light />
-      </Collapse>
-    </Stack>
-  )
-}
-type Order = 'asc' | 'desc'
+import {IItem, ICustomer, IData, TOrder} from './types'
+import {statusArray, createData} from './utils'
+import TableToolbar from './TableToolbar'
+import TableHead from './TableHead'
 
 const MoreOptions = ({
   id,
@@ -413,7 +55,7 @@ const MoreOptions = ({
   onDelete: any
   onView: any
 }) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const onClickMore = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -470,7 +112,7 @@ const StatusOptions = ({
   label: string
   onSelect: any
 }) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const onClick = (event: any) => {
     if (anchorEl) {
@@ -539,21 +181,21 @@ const defaultOrder = {
   orderBy: 'date',
 }
 export default function TableData() {
-  const [order, setOrder] = React.useState<Order>(defaultOrder.order as Order)
-  const [orderBy, setOrderBy] = React.useState<keyof Data>(
-    defaultOrder.orderBy as keyof Data,
+  const [order, setOrder] = useState<TOrder>(defaultOrder.order as TOrder)
+  const [orderBy, setOrderBy] = useState<keyof IData>(
+    defaultOrder.orderBy as keyof IData,
   )
-  const [selected, setSelected] = React.useState<readonly string[]>([])
-  const [page, setPage] = React.useState(0)
-  const [dense, setDense] = React.useState(false)
-  const [rowsPerPage, setRowsPerPage] = React.useState(5)
-  const [rows, setRows] = React.useState<any[]>([])
-  const [selectedArrows, setSelectedArrows] = React.useState<any[]>([])
+  const [selected, setSelected] = useState<readonly string[]>([])
+  const [page, setPage] = useState(0)
+  const [dense, setDense] = useState(false)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [rows, setRows] = useState<any[]>([])
+  const [selectedArrows, setSelectedArrows] = useState<any[]>([])
   // Filters
-  const [startDate, setStartDate] = React.useState<any>()
-  const [endDate, setEndDate] = React.useState<any>()
-  const [search, setSearch] = React.useState<string>('')
-  const [statuses, setStatuses] = React.useState<string[]>([])
+  const [startDate, setStartDate] = useState<any>()
+  const [endDate, setEndDate] = useState<any>()
+  const [search, setSearch] = useState<string>('')
+  const [statuses, setStatuses] = useState<string[]>([])
   // Query API
   const {data, isLoading, error, refetch} = useQuery({
     queryKey: [
@@ -603,7 +245,7 @@ export default function TableData() {
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
-    property: keyof Data,
+    property: keyof IData,
   ) => {
     const isAsc = orderBy === property && order === 'asc'
     setOrder(isAsc ? 'desc' : 'asc')
@@ -709,175 +351,163 @@ export default function TableData() {
     )
   }
   return (
-    <Box sx={{width: '100%'}}>
-      <Paper sx={{width: '100%'}}>
-        <EnhancedTableToolbar
-          numSelected={selected.length}
-          onRefresh={refetch}
-          startDate={startDate}
-          endDate={endDate}
-          search={search}
-          statuses={statuses}
-          setStartDate={setStartDate}
-          setEndDate={setEndDate}
-          setSearch={setSearch}
-          setStatuses={setStatuses}
-        />
-        <TableContainer>
-          <Table
-            sx={{minWidth: 750}}
-            aria-labelledby="tableTitle"
-            size={dense ? 'small' : 'medium'}>
-            <EnhancedTableHead
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.order as string)
-                const labelId = `enhanced-table-checkbox-${index}`
+    <Paper sx={{width: '100%'}}>
+      <TableToolbar
+        numSelected={selected.length}
+        onRefresh={refetch}
+        startDate={startDate}
+        endDate={endDate}
+        search={search}
+        statuses={statuses}
+        setStartDate={setStartDate}
+        setEndDate={setEndDate}
+        setSearch={setSearch}
+        setStatuses={setStatuses}
+      />
+      <TableContainer>
+        <Table
+          sx={{minWidth: 750}}
+          aria-labelledby="tableTitle"
+          size={dense ? 'small' : 'medium'}>
+          <TableHead
+            numSelected={selected.length}
+            order={order}
+            orderBy={orderBy}
+            onSelectAllClick={handleSelectAllClick}
+            onRequestSort={handleRequestSort}
+            rowCount={rows.length}
+          />
+          <TableBody>
+            {visibleRows.map((row, index) => {
+              const isItemSelected = isSelected(row.order as string)
+              const labelId = `enhanced-table-checkbox-${index}`
 
-                return (
-                  <>
-                    <TableRow
-                      hover
-                      onClick={() => {}}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.order}
-                      selected={isItemSelected}>
-                      <TableCell
-                        padding="checkbox"
-                        onClick={event =>
-                          handleClick(event, row.order as string)
-                        }>
-                        <Checkbox
-                          color="primary"
-                          checked={isItemSelected}
-                          inputProps={{
-                            'aria-labelledby': labelId,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="left" padding="none" id={labelId}>
-                        <CellTextWeak>{row.order}</CellTextWeak>
-                      </TableCell>
-                      <TableCell align="left">
-                        {renderCustomerCellContent(row.customer)}
-                      </TableCell>
-                      <TableCell align="left">
-                        {renderDateCellContent(row.date)}
-                      </TableCell>
-                      <TableCell align="left">
-                        <CellText>{row.quantity}</CellText>
-                      </TableCell>
-                      <TableCell align="left">
-                        <CellText>{formatCurrency(row.total)}</CellText>
-                      </TableCell>
-                      <TableCell align="left">
-                        <StatusOptions
-                          id={row.order}
-                          label={row.status}
-                          onSelect={(status: string) =>
-                            handleUpdateOrder(row.order, status)
-                          }
-                        />
-                      </TableCell>
-                      <TableCell align="left">
-                        <Box sx={{display: 'flex', flexDirection: 'row'}}>
-                          <IconButton
-                            onClick={() => onSelectedArrow(row.order)}>
-                            {selectedArrows.includes(row.order) ? (
-                              <KeyboardArrowDown
-                                fontSize="medium"
-                                color="info"
-                              />
-                            ) : (
-                              <KeyboardArrowRight fontSize="medium" />
-                            )}
-                          </IconButton>
-                          <MoreOptions
-                            id={row.order}
-                            onDelete={() => handleDeleteOrder(row.order)}
-                            onView={() => console.log('view =>> ', row.order)}
-                          />
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-
+              return (
+                <>
+                  <TableRow
+                    hover
+                    onClick={() => {}}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={row.order}
+                    selected={isItemSelected}>
                     <TableCell
-                      sx={{
-                        paddingBottom: selectedArrows.includes(row.order)
-                          ? '15px'
-                          : '0px',
-                        paddingTop: selectedArrows.includes(row.order)
-                          ? '15px'
-                          : '0px',
-                        flexDirection: 'column',
-                        backgroundColor: '#F6F6F6',
-                      }}
-                      align="left"
-                      colSpan={8}>
-                      <Collapse
-                        in={selectedArrows.includes(row.order)}
-                        timeout="auto"
-                        unmountOnExit>
-                        {row.items.map((el: IItem) => (
-                          <ItemsContainer key={el.id}>
-                            <ItemLeftContainer>
-                              <CellText>{el.name}</CellText>
-                              <CellTextWeak>{el.id}</CellTextWeak>
-                            </ItemLeftContainer>
-                            <ItemRightContainer>
-                              <CellText>{el.quantity}</CellText>
-                              <CellText>{formatCurrency(el.price)}</CellText>
-                            </ItemRightContainer>
-                          </ItemsContainer>
-                        ))}
-                      </Collapse>
+                      padding="checkbox"
+                      onClick={event =>
+                        handleClick(event, row.order as string)
+                      }>
+                      <Checkbox
+                        color="primary"
+                        checked={isItemSelected}
+                        inputProps={{
+                          'aria-labelledby': labelId,
+                        }}
+                      />
                     </TableCell>
-                  </>
-                )
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}>
-                  <TableCell colSpan={8} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Box
-          sx={{
-            display: 'flex',
-            pl: 2,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
-          <FormControlLabel
-            control={<Switch checked={dense} onChange={handleChangeDense} />}
-            label="Dense"
-          />
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
-        </Box>
-      </Paper>
-    </Box>
+                    <TableCell align="left" padding="none" id={labelId}>
+                      <CellTextWeak>{row.order}</CellTextWeak>
+                    </TableCell>
+                    <TableCell align="left">
+                      {renderCustomerCellContent(row.customer)}
+                    </TableCell>
+                    <TableCell align="left">
+                      {renderDateCellContent(row.date)}
+                    </TableCell>
+                    <TableCell align="left">
+                      <CellText>{row.quantity}</CellText>
+                    </TableCell>
+                    <TableCell align="left">
+                      <CellText>{formatCurrency(row.total)}</CellText>
+                    </TableCell>
+                    <TableCell align="left">
+                      <StatusOptions
+                        id={row.order}
+                        label={row.status}
+                        onSelect={(status: string) =>
+                          handleUpdateOrder(row.order, status)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell align="left">
+                      <Box sx={{display: 'flex', flexDirection: 'row'}}>
+                        <IconButton onClick={() => onSelectedArrow(row.order)}>
+                          {selectedArrows.includes(row.order) ? (
+                            <KeyboardArrowDown fontSize="medium" color="info" />
+                          ) : (
+                            <KeyboardArrowRight fontSize="medium" />
+                          )}
+                        </IconButton>
+                        <MoreOptions
+                          id={row.order}
+                          onDelete={() => handleDeleteOrder(row.order)}
+                          onView={() => console.log('view =>> ', row.order)}
+                        />
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+
+                  <TableCell
+                    sx={{
+                      paddingBottom: selectedArrows.includes(row.order)
+                        ? '15px'
+                        : '0px',
+                      paddingTop: selectedArrows.includes(row.order)
+                        ? '15px'
+                        : '0px',
+                      flexDirection: 'column',
+                      backgroundColor: '#F6F6F6',
+                    }}
+                    align="left"
+                    colSpan={8}>
+                    <Collapse
+                      in={selectedArrows.includes(row.order)}
+                      timeout="auto"
+                      unmountOnExit>
+                      {row.items.map((el: IItem) => (
+                        <ItemsContainer key={el.id}>
+                          <ItemLeftContainer>
+                            <CellText>{el.name}</CellText>
+                            <CellTextWeak>{el.id}</CellTextWeak>
+                          </ItemLeftContainer>
+                          <ItemRightContainer>
+                            <CellText>{el.quantity}</CellText>
+                            <CellText>{formatCurrency(el.price)}</CellText>
+                          </ItemRightContainer>
+                        </ItemsContainer>
+                      ))}
+                    </Collapse>
+                  </TableCell>
+                </>
+              )
+            })}
+            {emptyRows > 0 && (
+              <TableRow
+                style={{
+                  height: (dense ? 33 : 53) * emptyRows,
+                }}>
+                <TableCell colSpan={8} />
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Footer>
+        <FormControlLabel
+          control={<Switch checked={dense} onChange={handleChangeDense} />}
+          label="Dense"
+        />
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={rows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </Footer>
+    </Paper>
   )
 }
 
@@ -920,4 +550,10 @@ const CellText = styled(Typography)`
 const CellTextWeak = styled(Typography)`
   font-size: ${theme.font.size.s};
   color: ${theme.color.textWeak};
+`
+const Footer = styled(Box)`
+  display: flex;
+  padding-left: 20px;
+  flex-direction: row;
+  justify-content: space-between;
 `
