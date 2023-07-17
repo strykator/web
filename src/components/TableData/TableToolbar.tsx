@@ -1,4 +1,5 @@
 import React, {useState, useMemo} from 'react'
+import styled from 'styled-components'
 import {
   IconButton,
   Box,
@@ -53,33 +54,14 @@ export default function TableToolbar({
     search && setSearch('')
   }
   return (
-    <Stack
-      sx={{
-        flex: 1,
-      }}>
-      <Box
-        sx={{
-          p: 0.8,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
+    <Container>
+      <Header>
         <Tooltip title="Filter List">
           <IconButton onClick={() => setShowFilter(!showFilter)}>
             <FilterList color={activeFilter ? 'info' : 'inherit'} />
           </IconButton>
         </Tooltip>
-        <Box
-          sx={{
-            width: '70%',
-            maxWidth: '500px',
-            p: 0.5,
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
-          }}>
+        <StatusContainer>
           {statusArray.map((status: string) => {
             return (
               <Tooltip key={status} title={`filter ${status} status`}>
@@ -93,37 +75,18 @@ export default function TableToolbar({
               </Tooltip>
             )
           })}
-        </Box>
+        </StatusContainer>
         <Tooltip title="Refresh">
           <IconButton onClick={onRefresh}>
             <Refresh color="info" />
           </IconButton>
         </Tooltip>
-      </Box>
+      </Header>
 
       <Collapse in={showFilter} timeout="auto" unmountOnExit>
         <Divider light />
-        <Box
-          sx={{
-            flex: 1,
-            px: 2,
-            py: 1,
-            flexDirection: 'row',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#F6F6F6',
-          }}>
-          <Paper
-            component="form"
-            elevation={3}
-            sx={{
-              p: '3.5px 2px',
-              display: 'flex',
-              mr: 2,
-              alignItems: 'center',
-              width: 400,
-            }}>
+        <FilterInputContainer>
+          <SearchBar elevation={3}>
             <InputBase
               sx={{ml: 1, flex: 1}}
               value={search}
@@ -134,7 +97,7 @@ export default function TableToolbar({
             <IconButton type="button" sx={{p: '10px'}} aria-label="search">
               <Search />
             </IconButton>
-          </Paper>
+          </SearchBar>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Paper elevation={1} sx={{my: 2, mr: 2}}>
               <DatePicker
@@ -160,9 +123,45 @@ export default function TableToolbar({
               </IconButton>
             </Tooltip>
           )}
-        </Box>
+        </FilterInputContainer>
         <Divider light />
       </Collapse>
-    </Stack>
+    </Container>
   )
 }
+
+const Container = styled(Stack)`
+  flex: 1;
+`
+const Header = styled(Box)`
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+`
+const StatusContainer = styled(Box)`
+  width: 70%;
+  max-width: 500px;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+`
+const FilterInputContainer = styled(Box)`
+  display: flex;
+  flex: 1;
+  padding: 3px 5px 3px 5px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: #f6f6f6;
+`
+const SearchBar = styled(Paper)`
+  padding: 5px 3px 5px 2px;
+  display: flex;
+  margin-right: 15px;
+  align-items: center;
+  width: 400px;
+`
