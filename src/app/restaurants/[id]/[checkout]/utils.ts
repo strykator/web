@@ -53,6 +53,7 @@ export const prepareOrderPayload = ({
     totalQuantity: shoppingCart.totalQuantity,
     tip,
     taxes,
+    discount,
     promoCode: data.promoCode.trim(),
   }
   return payload

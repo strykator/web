@@ -2,6 +2,7 @@
 
 import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
+import {useRouter} from 'next/navigation'
 import {useQuery} from '@tanstack/react-query'
 import {
   IconButton,
@@ -224,6 +225,7 @@ const defaultOrder = {
   orderBy: 'date',
 }
 export default function TableData() {
+  const router = useRouter()
   const [order, setOrder] = useState<TOrder>(defaultOrder.order as TOrder)
   const [orderBy, setOrderBy] = useState<keyof IData>(
     defaultOrder.orderBy as keyof IData,
@@ -482,7 +484,9 @@ export default function TableData() {
                         <MoreOptions
                           id={row.order}
                           onDelete={() => handleDeleteOrder(row.order)}
-                          onView={() => console.log('view =>> ', row.order)}
+                          onView={() =>
+                            router.push(`/admin/order/${row.order}`)
+                          }
                         />
                       </Box>
                     </TableCell>

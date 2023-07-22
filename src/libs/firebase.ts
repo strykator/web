@@ -111,19 +111,28 @@ export const Logout = async () => {
 /*********************************************
    orders collection
 **********************************************/
-export const getOrder = async (orderId: string, onGetData: any) => {
+export const getOrderById = async ({queryKey}: any) => {
+  const [_key, {orderId}] = queryKey
   const docRef = doc(db, 'orders', orderId)
+  const docSnap = await getDoc(docRef)
 
-  const unsubscribe = onSnapshot(docRef, docSnap => {
-    if (docSnap.exists()) {
-      onGetData(docSnap.data())
-      console.log('Document data:', docSnap.data())
-    } else {
-      console.log('No such document!')
-    }
-  })
+  if (docSnap.exists()) {
+    console.log('Document data:', docSnap.data())
+    return docSnap.data()
+  } else {
+    return null
+  }
 
-  return unsubscribe
+  // realtime
+  // const unsubscribe = onSnapshot(docRef, docSnap => {
+  //   if (docSnap.exists()) {
+  //     onGetData(docSnap.data())
+  //     console.log('Document data:', docSnap.data())
+  //   } else {
+  //     console.log('No such document!')
+  //   }
+  // })
+  // return unsubscribe
 }
 
 export const getListOrder = async ({queryKey}: any) => {
