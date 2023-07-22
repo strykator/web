@@ -117,7 +117,6 @@ export const getOrderById = async ({queryKey}: any) => {
   const docSnap = await getDoc(docRef)
 
   if (docSnap.exists()) {
-    console.log('Document data:', docSnap.data())
     return docSnap.data()
   } else {
     return null

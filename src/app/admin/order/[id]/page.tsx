@@ -22,7 +22,13 @@ import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
 import Button from '@/components/Button'
 import {getOrderById} from '@/libs/firebase'
-import {getOrderStatusChipColor, formatCurrency} from '@/utils'
+import {
+  getOrderStatusChipColor,
+  formatCurrency,
+  formatDateAndTime,
+  formatAddress,
+  formatPhoneInput,
+} from '@/utils'
 
 export default function Page({params}: {params: {id: string}}) {
   const orderId = params.id
@@ -37,9 +43,56 @@ export default function Page({params}: {params: {id: string}}) {
     ],
     queryFn: getOrderById,
   })
-
+  if (!data?.customerEmail) {
+    return null
+  }
+  // const data = {
+  //   customerEmail: 'veronica@test.com',
+  //   customerName: 'Veronica',
+  //   customerPhone: '4567891665',
+  //   discount: 0,
+  //   entityId: 'Chick-fil-A',
+  //   items: [
+  //     {
+  //       itemId: 'key1689694142572',
+  //       itemName: 'Chick-fil-A® Nuggets Meal',
+  //       itemOptions: [],
+  //       itemPrice: 11.65,
+  //       itemQuantity: 3,
+  //     },
+  //     {
+  //       itemId: 'key1689694142572',
+  //       itemName: 'Chick-fil-A® Nuggets Meal',
+  //       itemOptions: [],
+  //       itemPrice: 11.65,
+  //       itemQuantity: 3,
+  //     },
+  //     {
+  //       itemId: 'key1689694142572',
+  //       itemName: 'Chick-fil-A® Nuggets Meal',
+  //       itemOptions: [],
+  //       itemPrice: 11.65,
+  //       itemQuantity: 3,
+  //     },
+  //   ],
+  //   paymentMethod: 'cash',
+  //   promoCode: '',
+  //   shippingAddress: {
+  //     city: 'Herndon',
+  //     country: 'USA',
+  //     state: 'VA',
+  //     street: '698 Elden Street',
+  //     zipcode: '20170',
+  //   },
+  //   status: 'confirmed',
+  //   taxes: 10.4,
+  //   timestamp: 1689694182197,
+  //   tip: 20.8,
+  //   totalAmount: 135.2,
+  //   totalQuantity: 8,
+  // }
   const subtotal = data?.totalAmount - data?.tip - data?.taxes - data?.discount
-
+  const {date, time} = formatDateAndTime(data?.timestamp)
   return (
     <Container>
       <Header>
@@ -49,7 +102,7 @@ export default function Page({params}: {params: {id: string}}) {
           </IconButton>
           <Stack mx={0.7}>
             <Title>Order {orderId}</Title>
-            <TextWeak>22 Jul 2023 11:57 AM</TextWeak>
+            <TextWeak>{`${date} ${time}`}</TextWeak>
           </Stack>
           <Chip
             label={data?.status}
@@ -98,7 +151,35 @@ export default function Page({params}: {params: {id: string}}) {
             </Row>
           </BodyLeftFooter>
         </BodyLeft>
-        <BodyRight></BodyRight>
+
+        <BodyRight>
+          <Title>Customer</Title>
+          <InfoContainer>
+            <Row>
+              <Text>Name</Text>
+              <Text>{data?.customerName}</Text>
+            </Row>
+            <Row>
+              <Text>Email</Text>
+              <Text>{data?.customerEmail}</Text>
+            </Row>
+            <Row>
+              <Text>Phone</Text>
+              <Text>{formatPhoneInput(data?.customerPhone)}</Text>
+            </Row>
+          </InfoContainer>
+          <Title>Shipping</Title>
+          <InfoContainer>
+            <Text>{formatAddress(data?.shippingAddress)}</Text>
+          </InfoContainer>
+          <Title>Payment</Title>
+          <InfoContainer>
+            <Row>
+              <Text>Payment Method</Text>
+              <Text>{data?.paymentMethod}</Text>
+            </Row>
+          </InfoContainer>
+        </BodyRight>
       </Body>
     </Container>
   )
@@ -153,10 +234,11 @@ const BodyLeft = styled(Paper)`
 `
 const BodyRight = styled(Paper)`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  padding: 10px 15px 10px 15px;
   width: 33%;
   min-height: 40vh;
-  background-color: burlywood;
+  box-sizing: border-box;
 `
 const Row = styled(Box)`
   display: flex;
@@ -178,4 +260,9 @@ const BodyLeftFooter = styled(Box)`
   align-self: flex-end;
   margin-top: 20px;
   margin-bottom: 15px;
+`
+const InfoContainer = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
 `

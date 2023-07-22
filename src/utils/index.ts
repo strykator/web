@@ -1,7 +1,7 @@
 import numeral from 'numeral'
 import {format} from 'date-fns'
 import {restaurants} from '@/constants'
-import {TemplateContext} from 'next/dist/shared/lib/app-router-context'
+import {IAddress} from './types'
 
 export {schemaFormCheckout, schemaFormProfile} from './schemas'
 
@@ -111,4 +111,11 @@ export const getOrderStatusChipColor = (status: string) => {
   } else {
     return 'default'
   }
+}
+export const formatAddress = (address: IAddress) => {
+  if (!address) return ''
+  const {street, city, state, zipcode, country} = address
+  return `${street ? `${street}, ` : null}${city ? `${city}, ` : null}${
+    state ? `${state} ` : null
+  }${zipcode ? `${zipcode}, ` : null}${country ? `${country}, ` : null}`
 }
