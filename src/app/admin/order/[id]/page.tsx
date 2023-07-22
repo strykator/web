@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import {useRouter} from 'next/navigation'
 import {useQuery} from '@tanstack/react-query'
@@ -8,19 +8,14 @@ import {
   Paper,
   Box,
   Typography,
-  Breadcrumbs,
-  Link,
   Divider,
   Stack,
-  Tabs,
-  Tab,
   Chip,
   IconButton,
 } from '@mui/material'
 import {ArrowBack} from '@mui/icons-material'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
-import Button from '@/components/Button'
 import {getOrderById} from '@/libs/firebase'
 import {
   getOrderStatusChipColor,
@@ -33,8 +28,9 @@ import {
 export default function Page({params}: {params: {id: string}}) {
   const orderId = params.id
   const router = useRouter()
+  const {isMobile} = useResponsive()
   // Query API
-  const {data, isLoading, error, refetch} = useQuery({
+  const {data, isLoading, error} = useQuery({
     queryKey: [
       'getOrderById',
       {
@@ -113,8 +109,8 @@ export default function Page({params}: {params: {id: string}}) {
         </HeaderLeft>
       </Header>
 
-      <Body>
-        <BodyLeft>
+      <Body isMobile={isMobile}>
+        <BodyLeft isMobile={isMobile}>
           <Title>Details</Title>
           {data?.items?.map((el: any) => (
             <Box key={el.itemName}>
@@ -152,7 +148,7 @@ export default function Page({params}: {params: {id: string}}) {
           </BodyLeftFooter>
         </BodyLeft>
 
-        <BodyRight>
+        <BodyRight isMobile={isMobile}>
           <Title>Customer</Title>
           <InfoContainer>
             <Row>
@@ -168,10 +164,14 @@ export default function Page({params}: {params: {id: string}}) {
               <Text>{formatPhoneInput(data?.customerPhone)}</Text>
             </Row>
           </InfoContainer>
+          <InfoDivider light />
+
           <Title>Shipping</Title>
           <InfoContainer>
             <Text>{formatAddress(data?.shippingAddress)}</Text>
           </InfoContainer>
+          <InfoDivider light />
+
           <Title>Payment</Title>
           <InfoContainer>
             <Row>
@@ -216,29 +216,32 @@ const Title = styled(Typography)`
   color: ${theme.color.text};
   font-weight: 500;
 `
-const Body = styled(Box)`
+const Body = styled(Box)<{isMobile: boolean}>`
   display: flex;
-  flex-direction: row;
+  flex-direction: ${({isMobile}) => (isMobile ? 'column' : 'row')};
   justify-content: space-between;
   width: 100%;
   margin-top: 20px;
   margin-bottom: 20px;
 `
-const BodyLeft = styled(Paper)`
+const BodyLeft = styled(Paper)<{isMobile: boolean}>`
   display: flex;
   flex-direction: column;
   padding: 10px 15px 10px 15px;
-  width: 65%;
+  width: ${({isMobile}) => (isMobile ? '100%' : '65%')};
+  min-width: 300px;
   min-height: 40vh;
   box-sizing: border-box;
 `
-const BodyRight = styled(Paper)`
+const BodyRight = styled(Paper)<{isMobile: boolean}>`
   display: flex;
   flex-direction: column;
   padding: 10px 15px 10px 15px;
-  width: 33%;
+  width: ${({isMobile}) => (isMobile ? '100%' : '33%')};
   min-height: 40vh;
+  min-width: ${({isMobile}) => (isMobile ? '300px' : '150px')};
   box-sizing: border-box;
+  margin-top: ${({isMobile}) => (isMobile ? '20px' : '0px')};
 `
 const Row = styled(Box)`
   display: flex;
@@ -252,6 +255,7 @@ const ItemContainer = styled(Row)`
 `
 const RowItem = styled(Row)`
   width: 30%;
+  min-width: 80px;
 `
 const BodyLeftFooter = styled(Box)`
   display: flex;
@@ -265,4 +269,7 @@ const InfoContainer = styled(Box)`
   display: flex;
   flex-direction: column;
   padding: 10px;
+`
+const InfoDivider = styled(Divider)`
+  margin: 10px 0px 10px 0px;
 `
