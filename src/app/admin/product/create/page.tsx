@@ -17,15 +17,13 @@ import {
   Input,
   IconButton,
 } from '@mui/material'
-import {CloudUploadOutlined} from '@mui/icons-material'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
 import {RootState} from '@/redux'
 import {selectUserUid} from '@/redux/user/userSlice'
 import Button from '@/components/Button'
+import UploadFile, {IFile} from '@/components/UploadFile'
 import {uploadImage} from '@/libs/firebase'
-
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB in bytes
 
 export default function ProductCreate() {
   const router = useRouter()
@@ -34,12 +32,14 @@ export default function ProductCreate() {
   const appState = useSelector((state: RootState) => state)
   const userId = selectUserUid(appState)
   const [selectedStatus, setSelectedStatus] = useState(1)
-  const [selectedFile, setSelectedFile] = useState(null)
+  const [selectedFile, setSelectedFile] = useState<IFile | null | undefined>(
+    null,
+  )
   const [imgUrl, setImgUrl] = useState('')
 
-  const handleFileChange = (event: any) => {
-    console.log('File => ', event.target.files[0])
-    setSelectedFile(event.target.files[0])
+  const handleOnReceivedFile = (file: any) => {
+    if (!file) return
+    setSelectedFile(file)
   }
   const onUpload = async () => {
     const url = await uploadImage(
@@ -47,7 +47,6 @@ export default function ProductCreate() {
       selectedFile?.name ?? 'temp.png',
     )
     setImgUrl(url)
-    console.log('done => ', url)
   }
   function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     event.preventDefault()
@@ -84,7 +83,6 @@ export default function ProductCreate() {
         </Breadcrumbs>
       </Stack>
       <Body elevation={1}>
-        <UploadFile type="file" onChange={handleFileChange} id="inputFile" />
         <Button
           title="upload"
           width={50}
@@ -92,11 +90,7 @@ export default function ProductCreate() {
           onClick={onUpload}
           disabled={!selectedFile}
         />
-        <label htmlFor="inputFile">
-          <IconButton component="span">
-            <CloudUploadOutlined />
-          </IconButton>
-        </label>
+        <UploadFile onReceived={handleOnReceivedFile} />
       </Body>
     </Container>
   )
@@ -125,13 +119,9 @@ const Body = styled(Paper)`
   flex-direction: column;
   box-sizing: border-box;
 `
-
 const Text = styled(Typography)`
   color: ${theme.color.text};
   font-size: ${theme.font.size.m};
   font-family: ${theme.font.family};
   font-weight: 400;
-`
-const UploadFile = styled(Input)`
-  display: none;
 `
