@@ -14,21 +14,41 @@ import {
   Stack,
   Tabs,
   Tab,
+  Input,
+  IconButton,
 } from '@mui/material'
+import {CloudUploadOutlined} from '@mui/icons-material'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
 import {RootState} from '@/redux'
 import {selectUserUid} from '@/redux/user/userSlice'
-import TableData from '@/components/TableData'
+import Button from '@/components/Button'
+import {uploadImage} from '@/libs/firebase'
 
-export default function OrderList() {
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB in bytes
+
+export default function ProductCreate() {
   const router = useRouter()
   const pathName = usePathname()
   const {isMobile} = useResponsive()
   const appState = useSelector((state: RootState) => state)
   const userId = selectUserUid(appState)
   const [selectedStatus, setSelectedStatus] = useState(1)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [imgUrl, setImgUrl] = useState('')
 
+  const handleFileChange = (event: any) => {
+    console.log('File => ', event.target.files[0])
+    setSelectedFile(event.target.files[0])
+  }
+  const onUpload = async () => {
+    const url = await uploadImage(
+      selectedFile,
+      selectedFile?.name ?? 'temp.png',
+    )
+    setImgUrl(url)
+    console.log('done => ', url)
+  }
   function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     event.preventDefault()
     console.info('You clicked a breadcrumb.')
@@ -46,29 +66,37 @@ export default function OrderList() {
       underline="hover"
       key="2"
       color="inherit"
-      href="/admin/order"
+      href="/admin/product"
       onClick={handleClick}>
-      Order
+      Product
     </Link>,
     <Typography key="3" color="text.primary">
-      List
+      Create
     </Typography>,
   ]
-  const onChangeTab = (event: React.SyntheticEvent, newValue: number) => {
-    setSelectedStatus(newValue)
-  }
+
   return (
     <Container>
-      <Title>Order List</Title>
+      <Title>Create a new product</Title>
       <Stack spacing={2}>
         <Breadcrumbs separator="›" aria-label="breadcrumb">
           {breadcrumbs}
         </Breadcrumbs>
       </Stack>
       <Body elevation={1}>
-        <TableContainer>
-          <TableData />
-        </TableContainer>
+        <UploadFile type="file" onChange={handleFileChange} id="inputFile" />
+        <Button
+          title="upload"
+          width={50}
+          height={50}
+          onClick={onUpload}
+          disabled={!selectedFile}
+        />
+        <label htmlFor="inputFile">
+          <IconButton component="span">
+            <CloudUploadOutlined />
+          </IconButton>
+        </label>
       </Body>
     </Container>
   )
@@ -89,32 +117,21 @@ const Title = styled(Typography)`
 `
 const Body = styled(Paper)`
   display: flex;
-  margin-top: 40px;
   flex-direction: column;
-  background-color: transparent;
-`
-const BodyTop = styled(Box)`
-  display: flex;
-  align-items: 'center';
+  margin-top: 20px;
   width: 100%;
-  padding: 5px 15px 5px 15px;
+  padding: 20px;
+  min-height: 40vh;
+  flex-direction: column;
   box-sizing: border-box;
 `
-const FilterContainer = styled(Box)`
-  display: flex;
-  width: 100%;
-  height: 60px;
-  padding-left: 15px;
-  box-sizing: border-box;
-`
-const TableContainer = styled(Box)`
-  display: flex;
-  width: 100%;
-  min-width: 750px;
-`
+
 const Text = styled(Typography)`
   color: ${theme.color.text};
   font-size: ${theme.font.size.m};
   font-family: ${theme.font.family};
   font-weight: 400;
+`
+const UploadFile = styled(Input)`
+  display: none;
 `

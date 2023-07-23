@@ -14,14 +14,21 @@ import {
   Stack,
   Tabs,
   Tab,
+  Input,
+  IconButton,
 } from '@mui/material'
+import {CloudUploadOutlined} from '@mui/icons-material'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
 import {RootState} from '@/redux'
 import {selectUserUid} from '@/redux/user/userSlice'
 import TableData from '@/components/TableData'
+import Button from '@/components/Button'
+import {uploadImage} from '@/libs/firebase'
 
-export default function OrderList() {
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB in bytes
+
+export default function ProductList() {
   const router = useRouter()
   const pathName = usePathname()
   const {isMobile} = useResponsive()
@@ -46,9 +53,9 @@ export default function OrderList() {
       underline="hover"
       key="2"
       color="inherit"
-      href="/admin/order"
+      href="/admin/product"
       onClick={handleClick}>
-      Order
+      Product
     </Link>,
     <Typography key="3" color="text.primary">
       List
@@ -59,16 +66,14 @@ export default function OrderList() {
   }
   return (
     <Container>
-      <Title>Order List</Title>
+      <Title>Product List</Title>
       <Stack spacing={2}>
         <Breadcrumbs separator="›" aria-label="breadcrumb">
           {breadcrumbs}
         </Breadcrumbs>
       </Stack>
       <Body elevation={1}>
-        <TableContainer>
-          <TableData />
-        </TableContainer>
+        <TableContainer></TableContainer>
       </Body>
     </Container>
   )

@@ -23,6 +23,7 @@ import {
   ShoppingCart,
   Circle,
   MenuBook,
+  Category,
 } from '@mui/icons-material'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
@@ -43,15 +44,15 @@ const menu = [
     ],
   },
   {
-    key: 'menu',
-    title: 'Menu',
+    key: 'product',
+    title: 'Product',
     subMenu: [
       {
-        key: 'menu-list',
+        key: 'product-list',
         subTitle: 'List',
       },
       {
-        key: 'menu-create',
+        key: 'product-create',
         subTitle: 'Create',
       },
     ],
@@ -94,25 +95,33 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
   }
 
   const onSelectMenuItem = (itemKey: string) => {
-    setSelected(itemKey)
-    if (itemKey === 'order') {
+    if (itemKey === 'order-list') {
+      setSelected('order')
       router.replace('/admin/order')
       setSelectedSubMenu('order-list')
-    } else if (itemKey === 'menu') {
-      //router.replace('/admin/order')
-      setSelectedSubMenu('menu-list')
-    } else if (itemKey === 'user') {
-      //router.replace('/admin/order')
+    } else if (itemKey === 'product-list') {
+      setSelected('product')
+      router.replace('/admin/product')
+      setSelectedSubMenu('product-list')
+    } else if (itemKey === 'product-create') {
+      setSelected('product')
+      router.replace('/admin/product/create')
+      setSelectedSubMenu('product-create')
+    } else if (itemKey === 'user-list') {
+      setSelected('user')
+      //router.replace('/admin/user')
       setSelectedSubMenu('user-list')
+    } else if (itemKey === 'user-create') {
+      setSelected('user')
+      //router.replace('/admin/user/create')
+      setSelectedSubMenu('user-create')
     }
+
     if (expandedList.includes(itemKey)) {
       setExpandedList(expandedList.filter((key: string) => key !== itemKey))
     } else {
       setExpandedList([...expandedList, itemKey])
     }
-  }
-  const onSelectSubMenuItem = (item: string) => {
-    setSelectedSubMenu(item)
   }
 
   return (
@@ -150,7 +159,7 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
                       justifyContent: 'center',
                     }}>
                     {index === 0 && <AssignmentInd />}
-                    {index === 1 && <MenuBook />}
+                    {index === 1 && <Category />}
                     {index === 2 && <ShoppingCart />}
                   </ListItemIcon>
                   {open && <ListItemText primary={item.title} />}
@@ -177,7 +186,7 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
                     {item.subMenu.map((subItem: any) => (
                       <ListItemButton
                         key={subItem.key}
-                        onClick={() => onSelectSubMenuItem(subItem.key)}
+                        onClick={() => onSelectMenuItem(subItem.key)}
                         selected={selectedSubMenu === subItem.key}
                         sx={{
                           minHeight: 48,
@@ -253,8 +262,8 @@ const SubList = styled(MuiList)({
   },
 })
 const StyledDot = styled(Circle)`
-  width: 10px;
-  height: 10px;
+  width: 7px;
+  height: 7px;
 `
 const Text = styled(Typography)`
   color: ${theme.color.text};
