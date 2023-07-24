@@ -26,6 +26,7 @@ import {
   Snackbar,
   Alert,
   Stack,
+  InputAdornment,
 } from '@mui/material'
 import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
@@ -201,18 +202,23 @@ export default function ProductCreate() {
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <Controller
-                name="price"
-                control={control}
-                render={({field}) => (
-                  <CustomTextField
-                    {...field}
-                    variant="outlined"
-                    label="Price*"
-                    error={!!errors.price}
-                  />
-                )}
-              />
+              <FormControl fullWidth>
+                <InputLabel>Price*</InputLabel>
+                <Controller
+                  name="price"
+                  control={control}
+                  render={({field}) => (
+                    <CustomOutlinedInput
+                      {...field}
+                      startAdornment={
+                        <InputAdornment position="start">$</InputAdornment>
+                      }
+                      label="Price*"
+                      error={!!errors.price}
+                    />
+                  )}
+                />
+              </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
@@ -384,8 +390,13 @@ const CustomTextField = styled(TextField)`
   width: 100%;
   border-radius: 5px;
   & .MuiInputBase-root {
-    height: 50px;
+    height: 55px;
   }
+`
+const CustomOutlinedInput = styled(OutlinedInput)`
+  display: flex;
+  width: 100%;
+  border-radius: 5px;
 `
 const MultilineTextField = styled(TextField)`
   display: flex;
