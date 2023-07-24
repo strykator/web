@@ -57,4 +57,5 @@ export const schemaFormProductCreate = yup.object().shape({
   rating: yup.number(),
   storeIds: yup.array().min(1, 'At least one store is required.'),
   options: yup.string(),
+  status: yup.string().required(),
 })

@@ -48,6 +48,7 @@ interface IFormInput {
   rating: number
   options?: string
   storeIds: string[]
+  status: string
 }
 const defaultFormValues = {
   name: '',
@@ -59,6 +60,7 @@ const defaultFormValues = {
   rating: 0,
   storeIds: [],
   options: '',
+  status: 'draft',
 }
 
 const handleClick = (
@@ -104,6 +106,7 @@ export default function ProductCreate() {
   )
   const [storeNames, setStoreNames] = React.useState<string[]>([])
   const originalStoreNames = userStores?.map(obj => obj.name)
+  const originalStatues = ['draft', 'published']
 
   const {
     control,
@@ -134,12 +137,13 @@ export default function ProductCreate() {
   const handleCreate: SubmitHandler<IFormInput> = async data => {
     setOpenLoading(true)
     let newProductId: any = ''
+    const createdAt = new Date().getTime()
     if (selectedFile?.name) {
       const imageUrl = await uploadImage(selectedFile, selectedFile?.name)
-      const payload = {...data, imageUrl}
+      const payload = {...data, imageUrl, createdAt}
       newProductId = await createProduct(payload)
     } else {
-      newProductId = await createProduct(data)
+      newProductId = await createProduct({...data, createdAt})
     }
     setOpenLoading(false)
 
@@ -175,6 +179,9 @@ export default function ProductCreate() {
     setStoreNames(arrValues)
     clearErrors('storeIds')
   }
+  const onChangeStatus = (event: SelectChangeEvent) => {
+    setValue('status', event.target.value as string)
+  }
   return (
     <Container>
       <Title>Create a new product</Title>
@@ -186,7 +193,7 @@ export default function ProductCreate() {
       <Body elevation={1}>
         <Box p={3} sx={{flexGrow: 1}}>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={12}>
+            <Grid item xs={12} md={6}>
               <Controller
                 name="name"
                 control={control}
@@ -200,6 +207,29 @@ export default function ProductCreate() {
                   />
                 )}
               />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth error={!!errors.status}>
+                <InputLabel>Status*</InputLabel>
+                <Controller
+                  name="status"
+                  control={control}
+                  defaultValue="draft"
+                  render={({field}) => (
+                    <Select
+                      {...field}
+                      label="Status*"
+                      value={field.value}
+                      onChange={onChangeStatus}>
+                      {originalStatues?.map(name => (
+                        <MenuItem key={name} value={name}>
+                          {name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>

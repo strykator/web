@@ -39,4 +39,6 @@ export type TProductPayload = {
   rating: number
   options?: string
   storeIds: string[]
+  createdAt: number
+  status: string
 }
