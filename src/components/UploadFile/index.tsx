@@ -9,19 +9,20 @@ export interface IFile {
   name: string
 }
 interface IUploadFIle {
+  setSelectedFile: any
+  selectedFile: IFile | null | undefined
   onReceived: (file: any) => void
   maxSize?: number
   types?: string[] // image | application | pdf | video
 }
 
 export default function UploadFile({
+  setSelectedFile,
+  selectedFile,
   onReceived,
   maxSize = MAX_FILE_SIZE_BYTES,
   types = ['image'],
 }: IUploadFIle) {
-  const [selectedFile, setSelectedFile] = useState<IFile | null | undefined>(
-    null,
-  )
   const [dragging, setDragging] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
 
@@ -91,7 +92,10 @@ export default function UploadFile({
       </label>
       {selectedFile?.name && <FileName>{selectedFile?.name}</FileName>}
       <Instruction hasFile={!!selectedFile?.name}>
-        Drag and Drop Image Here or Click Icon to Browse
+        Drag and Drop File Here
+      </Instruction>
+      <Instruction hasFile={!!selectedFile?.name}>
+        or Click Icon to Browse
       </Instruction>
       <Instruction hasFile={!!selectedFile?.name}>Max 5 MB</Instruction>
       {error && <Error>{error}</Error>}
@@ -105,6 +109,7 @@ const DropArea = styled('div')<{dragging: boolean}>`
   justify-content: center;
   align-items: center;
   width: 100%;
+  min-width: 200px;
   min-height: 200px;
   background-color: #f6f7f9;
   border: ${({dragging}) =>

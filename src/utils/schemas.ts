@@ -35,7 +35,6 @@ export const schemaFormProfile = yup.object().shape({
   email: yup.string().email(),
   phone: yup
     .string()
-    .required()
     .matches(
       /^\d{3}-\d{3}-\d{4}$/,
       'Phone number must have the format XXX-XXX-XXXX',
@@ -46,4 +45,16 @@ export const schemaFormProfile = yup.object().shape({
   city: yup.string(),
   zipcode: yup.string(),
   bio: yup.string(),
+})
+
+export const schemaFormProductCreate = yup.object().shape({
+  name: yup.string().required(),
+  description: yup.string(),
+  category: yup.string(),
+  imageUrl: yup.string(),
+  price: yup.number().required(),
+  quantity: yup.number().required(),
+  rating: yup.number(),
+  storeIds: yup.array().min(1, 'At least one store is required.'),
+  options: yup.string(),
 })

@@ -36,14 +36,14 @@ const Profile = () => {
   const dispatch = useDispatch()
   const defaultFormValues = {
     name: `${userProfile.firstName} ${userProfile.lastName}`,
-    email: userProfile.email,
+    email: userProfile.email ?? '',
     phone: formatPhoneInput(userProfile?.phone),
     address: userProfile.address?.street ?? '',
     country: userProfile.address?.country ?? '',
     state: userProfile.address?.state ?? '',
     city: userProfile.address?.city ?? '',
     zipcode: userProfile.address?.zipcode ?? '',
-    bio: userProfile.bio,
+    bio: userProfile.bio ?? '',
   }
   const {
     control,
@@ -52,7 +52,7 @@ const Profile = () => {
     formState: {errors},
   } = useForm<IFormInput>({
     defaultValues: defaultFormValues,
-    resolver: yupResolver(schemaFormProfile),
+    resolver: yupResolver(schemaFormProfile) as any,
   })
 
   const handleSave: SubmitHandler<IFormInput> = async data => {

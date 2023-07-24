@@ -12,6 +12,10 @@ export type TAddress = {
   country: string
   zipcode: string
 }
+export type TStore = {
+  id: string
+  name: string
+}
 interface IUserState {
   uid: string
   firstName?: string
@@ -21,6 +25,7 @@ interface IUserState {
   address?: TAddress
   bio?: string
   roles?: string[]
+  stores?: TStore[]
   accessToken?: string
   refreshToken?: string
   expirationTime?: number
@@ -44,6 +49,7 @@ const initialState: IUserState = {
   },
   bio: '',
   roles: [],
+  stores: [],
   accessToken: '',
   refreshToken: '',
   expirationTime: 0,
@@ -65,6 +71,7 @@ export const userSlice = createSlice({
       state.address = action.payload?.address ?? state.address
       state.bio = action.payload?.bio ?? state.bio
       state.roles = action.payload?.roles ?? state.roles
+      state.stores = action.payload?.stores ?? state.stores
       state.accessToken = action.payload?.accessToken ?? state.accessToken
       state.refreshToken = action.payload?.refreshToken ?? state.refreshToken
       state.expirationTime =
@@ -79,6 +86,7 @@ export const userSlice = createSlice({
       state.address = initialState.address
       state.bio = initialState.bio
       state.roles = initialState.roles
+      state.stores = initialState.stores
       state.accessToken = initialState.accessToken
       state.refreshToken = initialState.refreshToken
       state.expirationTime = initialState.expirationTime
@@ -102,6 +110,7 @@ export const selectUserPhone = (state: RootState) => state.user.phone
 export const selectUserAddress = (state: RootState) => state.user.address
 export const selectUserBio = (state: RootState) => state.user.bio
 export const selectUserRoles = (state: RootState) => state.user.roles
+export const selectUserStores = (state: RootState) => state.user.stores
 export const selectUserAccessToken = (state: RootState) =>
   state.user.accessToken
 export const selectUserRefreshToken = (state: RootState) =>

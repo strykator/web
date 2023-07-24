@@ -23,7 +23,7 @@ import {
 } from 'firebase/firestore'
 import {getStorage, ref, uploadBytes, getDownloadURL} from 'firebase/storage'
 import {transformUser} from '@/utils/transformer'
-import {TOrderPayload} from './types'
+import {TOrderPayload, TProductPayload} from './types'
 
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? '',
@@ -245,10 +245,27 @@ export const updateOrder = async (orderId: string, fields: any) => {
 }
 
 /*********************************************
+   product collection
+**********************************************/
+export const createProduct = async (payload: TProductPayload) => {
+  if (!payload) return
+
+  try {
+    const collectionRef = collection(db, 'products')
+    const newProductRef = await addDoc(collectionRef, payload)
+    return newProductRef.id
+  } catch (error) {
+    return null
+  }
+}
+
+/*********************************************
    STORAGE
 **********************************************/
 export const uploadImage = async (file: any, name: string) => {
-  const path = `images/${name}`
+  const timestamp = new Date().getTime()
+  const path = `images/${timestamp}-${name}`
+
   try {
     const imageRef = ref(storage, path)
     await uploadBytes(imageRef, file)

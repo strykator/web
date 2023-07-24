@@ -105,7 +105,7 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
       setSelectedSubMenu('product-list')
     } else if (itemKey === 'product-create') {
       setSelected('product')
-      router.replace('/admin/product/create')
+      router.push('/admin/product/create')
       setSelectedSubMenu('product-create')
     } else if (itemKey === 'user-list') {
       setSelected('user')
@@ -113,7 +113,7 @@ export default function DrawerNav({open, setOpen}: IDrawerNav) {
       setSelectedSubMenu('user-list')
     } else if (itemKey === 'user-create') {
       setSelected('user')
-      //router.replace('/admin/user/create')
+      //router.push('/admin/user/create')
       setSelectedSubMenu('user-create')
     }
 
