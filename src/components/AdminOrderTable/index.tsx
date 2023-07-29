@@ -224,7 +224,7 @@ const defaultOrder = {
   order: 'desc',
   orderBy: 'date',
 }
-export default function TableData() {
+export default function AdminOrderTable() {
   const router = useRouter()
   const [order, setOrder] = useState<TOrder>(defaultOrder.order as TOrder)
   const [orderBy, setOrderBy] = useState<keyof IData>(

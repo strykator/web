@@ -22,7 +22,6 @@ import {theme} from '@/theme'
 import {useResponsive} from '@/hooks'
 import {RootState} from '@/redux'
 import {selectUserUid} from '@/redux/user/userSlice'
-import TableData from '@/components/TableData'
 import Button from '@/components/Button'
 import {uploadImage} from '@/libs/firebase'
 
