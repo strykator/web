@@ -1,45 +1,45 @@
-import {IHeadCell, ICustomer, IItem, IData} from './types'
-
-export const headCells: readonly IHeadCell<IData>[] = [
+import {ICustomer, IItem, ITableHead} from './types'
+import {IHeadCell} from '@/components/table/types'
+export const headCells: IHeadCell[] = [
   {
     id: 'order',
-    disablePadding: true,
+    align: 'left',
     width: '10%',
     label: 'Order',
   },
   {
     id: 'customer',
-    disablePadding: false,
+    align: 'left',
     width: '30%',
     label: 'Customer',
   },
   {
     id: 'date',
-    disablePadding: false,
+    align: 'left',
     width: '20%',
     label: 'Date',
   },
   {
     id: 'quantity',
-    disablePadding: false,
+    align: 'left',
     width: '10%',
     label: 'Quantity',
   },
   {
     id: 'total',
-    disablePadding: false,
+    align: 'left',
     width: '10%',
     label: 'Total',
   },
   {
     id: 'status',
-    disablePadding: false,
+    align: 'left',
     width: '15%',
     label: 'Status',
   },
   {
     id: 'extras',
-    disablePadding: false,
+    align: 'left',
     width: '10%',
     label: '',
   },
@@ -62,7 +62,7 @@ export const createData = (
   status: string,
   items: IItem[],
   extras?: string,
-): IData => {
+): ITableHead => {
   return {
     order,
     customer,

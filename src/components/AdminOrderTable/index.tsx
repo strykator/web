@@ -11,13 +11,9 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TablePagination,
   TableRow,
   Typography,
   Paper,
-  Tooltip,
-  FormControlLabel,
-  Switch,
   Checkbox,
   Collapse,
   Menu,
@@ -42,10 +38,15 @@ import {
   getOrderStatusChipColor,
 } from '@/utils'
 import {theme} from '@/theme'
-import {IItem, ICustomer, IData, TOrder} from './types'
+import {IItem, ICustomer} from './types'
 import {statusArray, createData} from './utils'
 import TableToolbar from './TableToolbar'
-import TableHead from './TableHead'
+import TableHead from '@/components/table/TableHead'
+import TableFooter from '@/components/table/TableFooter'
+import EmptyRows from '@/components/table/EmptyRows'
+import {TOrder} from '@/components/table/types'
+import {headCells} from './utils'
+import {getVisibleRows} from '@/utils'
 
 const MoreOptions = ({
   id,
@@ -226,16 +227,17 @@ const defaultOrder = {
 }
 export default function AdminOrderTable() {
   const router = useRouter()
-  const [order, setOrder] = useState<TOrder>(defaultOrder.order as TOrder)
-  const [orderBy, setOrderBy] = useState<keyof IData>(
-    defaultOrder.orderBy as keyof IData,
-  )
+  // Misc
   const [selected, setSelected] = useState<readonly string[]>([])
-  const [page, setPage] = useState(0)
+  const [selectedArrows, setSelectedArrows] = useState<any[]>([])
+  // Sort
+  const [order, setOrder] = useState<TOrder>(defaultOrder.order as TOrder)
+  const [orderBy, setOrderBy] = useState<string>(defaultOrder.orderBy)
+  // Footer
   const [dense, setDense] = useState(false)
+  const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [rows, setRows] = useState<any[]>([])
-  const [selectedArrows, setSelectedArrows] = useState<any[]>([])
   // Filters
   const [startDate, setStartDate] = useState<any>()
   const [endDate, setEndDate] = useState<any>()
@@ -288,15 +290,6 @@ export default function AdminOrderTable() {
     }
   }, [data])
 
-  const handleRequestSort = (
-    event: React.MouseEvent<unknown>,
-    property: keyof IData,
-  ) => {
-    const isAsc = orderBy === property && order === 'asc'
-    setOrder(isAsc ? 'desc' : 'asc')
-    setOrderBy(property)
-  }
-
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       const newSelected = rows.map(n => n.order)
@@ -326,29 +319,11 @@ export default function AdminOrderTable() {
     setSelected(newSelected)
   }
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
-
-  const handleChangeDense = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDense(event.target.checked)
-  }
-
   const isSelected = (name: string) => selected.indexOf(name) !== -1
 
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0
   const visibleRows = React.useMemo(
-    () => rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage, rows],
+    () => getVisibleRows(rows, page, rowsPerPage),
+    [page, rowsPerPage, rows],
   )
 
   const onSelectedArrow = (id: string) => {
@@ -417,10 +392,12 @@ export default function AdminOrderTable() {
           <TableHead
             numSelected={selected.length}
             order={order}
+            setOrder={setOrder}
             orderBy={orderBy}
+            setOrderBy={setOrderBy}
             onSelectAllClick={handleSelectAllClick}
-            onRequestSort={handleRequestSort}
             rowCount={rows.length}
+            headCells={headCells}
           />
           <TableBody>
             {visibleRows.map((row, index) => {
@@ -498,32 +475,24 @@ export default function AdminOrderTable() {
                 </>
               )
             })}
-            {emptyRows > 0 && (
-              <TableRow
-                style={{
-                  height: (dense ? 33 : 53) * emptyRows,
-                }}>
-                <TableCell colSpan={8} />
-              </TableRow>
-            )}
+            <EmptyRows
+              page={page}
+              rowsPerPage={rowsPerPage}
+              rowsLength={rows.length}
+              dense={dense}
+            />
           </TableBody>
         </Table>
       </TableContainer>
-      <Footer>
-        <FormControlLabel
-          control={<Switch checked={dense} onChange={handleChangeDense} />}
-          label="Dense"
-        />
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Footer>
+      <TableFooter
+        count={rows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        dense={dense}
+        setPage={setPage}
+        setDense={setDense}
+        setRowsPerPage={setRowsPerPage}
+      />
     </Paper>
   )
 }

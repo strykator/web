@@ -8,20 +8,36 @@ import {
   Checkbox,
 } from '@mui/material'
 import {visuallyHidden} from '@mui/utils'
-import {IData, IEnhancedTableProps} from './types'
-import {headCells} from './utils'
+import {IHeadCell, TOrder} from '../types'
+
+export type THeadCellId = IHeadCell['id']
+
+export interface ITableHead {
+  numSelected: number
+  onSelectAllClick: any
+  order: TOrder
+  setOrder: any
+  setOrderBy: any
+  orderBy: string
+  rowCount: number
+  headCells: IHeadCell[]
+}
 
 export default function TableHead({
   onSelectAllClick,
   order,
+  setOrder,
   orderBy,
+  setOrderBy,
   numSelected,
   rowCount,
-  onRequestSort,
-}: IEnhancedTableProps) {
-  const createSortHandler =
-    (property: keyof IData) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, property)
+  headCells,
+}: ITableHead) {
+  const onRequestSort =
+    (headCellId: THeadCellId) => (event: React.MouseEvent<unknown>) => {
+      const isAsc = orderBy === headCellId && order === 'asc'
+      setOrder(isAsc ? 'desc' : 'asc')
+      setOrderBy(headCellId)
     }
 
   return (
@@ -44,8 +60,8 @@ export default function TableHead({
             sx={{
               width: headCell.width,
             }}
-            align="left"
-            padding={headCell.disablePadding ? 'none' : 'normal'}
+            align={headCell.align}
+            padding="normal"
             sortDirection={orderBy === headCell.id ? order : false}>
             {headCell.id !== 'extras' && (
               <TableSortLabel
@@ -53,7 +69,7 @@ export default function TableHead({
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={
                   headCell.id !== 'order'
-                    ? createSortHandler(headCell.id)
+                    ? onRequestSort(headCell.id)
                     : () => {}
                 }>
                 {headCell.label}

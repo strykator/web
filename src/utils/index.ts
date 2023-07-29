@@ -119,3 +119,8 @@ export const formatAddress = (address: IAddress) => {
     state ? `${state} ` : null
   }${zipcode ? `${zipcode}, ` : null}${country ? `${country}, ` : null}`
 }
+export const getVisibleRows = (
+  rows: any[],
+  page: number,
+  rowsPerPage: number,
+) => rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)

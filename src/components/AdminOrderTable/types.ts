@@ -10,7 +10,7 @@ export interface ICustomer {
   phone: string
   photoUrl: string
 }
-export interface IData {
+export interface ITableHead {
   order: string
   customer: ICustomer
   date: number
@@ -19,24 +19,6 @@ export interface IData {
   status: string
   items: IItem[]
   extras: string
-}
-export interface IHeadCell<THeadData> {
-  disablePadding: boolean
-  id: keyof THeadData
-  label: string
-  width: string
-}
-export type TOrder = 'asc' | 'desc'
-export interface IEnhancedTableProps {
-  numSelected: number
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    property: keyof IData,
-  ) => void
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void
-  order: TOrder
-  orderBy: string
-  rowCount: number
 }
 export interface ITableToolbarProps {
   numSelected: number
