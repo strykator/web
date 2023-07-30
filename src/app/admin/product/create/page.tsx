@@ -1,8 +1,9 @@
 'use client'
 
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
-import {useRouter, usePathname} from 'next/navigation'
+import {useRouter, useSearchParams} from 'next/navigation'
+import {useQuery} from '@tanstack/react-query'
 import {useSelector} from 'react-redux'
 import {useForm, Controller, SubmitHandler} from 'react-hook-form'
 import {yupResolver} from '@hookform/resolvers/yup'
@@ -34,9 +35,15 @@ import {RootState} from '@/redux'
 import {selectUserUid} from '@/redux/user/userSlice'
 import Button from '@/components/Button'
 import UploadFile, {IFile} from '@/components/UploadFile'
-import {uploadImage, createProduct} from '@/libs/firebase'
+import {
+  uploadImage,
+  createProduct,
+  updateProduct,
+  getProductById,
+} from '@/libs/firebase'
 import {schemaFormProductCreate} from '@/utils/schemas'
 import {selectUserStores} from '@/redux/user/userSlice'
+import {TStore} from '@/libs/types'
 
 interface IFormInput {
   name: string
@@ -47,7 +54,7 @@ interface IFormInput {
   quantity: number
   rating: number
   options?: string
-  storeIds: string[]
+  stores: TStore[]
   status: string
 }
 const defaultFormValues = {
@@ -58,7 +65,7 @@ const defaultFormValues = {
   price: 0,
   quantity: 999,
   rating: 0,
-  storeIds: [],
+  stores: [],
   options: '',
   status: 'draft',
 }
@@ -93,7 +100,8 @@ const breadcrumbs = [
 
 export default function ProductCreate() {
   const router = useRouter()
-  const pathName = usePathname()
+  const searchParams = useSearchParams()
+  const existProductId = searchParams.get('id')
   const {isMobile} = useResponsive()
   const appState = useSelector((state: RootState) => state)
   const userStores = selectUserStores(appState)
@@ -107,6 +115,15 @@ export default function ProductCreate() {
   const [storeNames, setStoreNames] = React.useState<string[]>([])
   const originalStoreNames = userStores?.map(obj => obj.name)
   const originalStatues = ['draft', 'published']
+  const {data, isLoading, error} = useQuery({
+    queryKey: [
+      'getProductById',
+      {
+        id: existProductId,
+      },
+    ],
+    queryFn: getProductById,
+  })
 
   const {
     control,
@@ -121,9 +138,27 @@ export default function ProductCreate() {
     defaultValues: defaultFormValues,
     resolver: yupResolver(schemaFormProductCreate) as any,
   })
-  const {name, price, quantity, storeIds} = getValues()
-  const readyToCreate = name && price >= 0 && quantity && storeIds.length !== 0
 
+  useEffect(() => {
+    if (data) {
+      setValue('name', data.name ?? '')
+      setValue('description', data.description ?? '')
+      setValue('category', data.category ?? '')
+      setValue('imageUrl', data.imageUrl ?? '')
+      setValue('price', data.price ?? 0)
+      setValue('quantity', data.quantity ?? 999)
+      setValue('rating', data.rating ?? 0)
+      setValue('stores', data.stores ?? [])
+      setValue('options', data.options ?? '')
+      setValue('status', data.status ?? 'draft')
+
+      const names = data.stores?.map((obj: TStore) => obj.name) ?? []
+      setStoreNames(names)
+    }
+  }, [data])
+
+  const {name, price, quantity, stores} = getValues()
+  const readyToCreate = name && price >= 0 && quantity && stores.length !== 0
   const handleOnReceivedFile = (file: any) => {
     if (!file) return
     setValue('imageUrl', '')
@@ -134,17 +169,29 @@ export default function ProductCreate() {
     setStoreNames([])
     reset()
   }
-  const handleCreate: SubmitHandler<IFormInput> = async data => {
+  const handleCreateOrUpdate: SubmitHandler<IFormInput> = async data => {
     setOpenLoading(true)
     let newProductId: any = ''
     const createdAt = new Date().getTime()
-    if (selectedFile?.name) {
-      const imageUrl = await uploadImage(selectedFile, selectedFile?.name)
-      const payload = {...data, imageUrl, createdAt}
-      newProductId = await createProduct(payload)
+    if (existProductId) {
+      let payload = {}
+      if (selectedFile?.name) {
+        const imageUrl = await uploadImage(selectedFile, selectedFile?.name)
+        payload = {...data, imageUrl}
+      }
+      const {imageUrl, ...restData} = data
+      payload = restData
+      newProductId = await updateProduct(existProductId, payload)
     } else {
-      newProductId = await createProduct({...data, createdAt})
+      if (selectedFile?.name) {
+        const imageUrl = await uploadImage(selectedFile, selectedFile?.name)
+        const payload = {...data, imageUrl, createdAt}
+        newProductId = await createProduct(payload)
+      } else {
+        newProductId = await createProduct({...data, createdAt})
+      }
     }
+
     setOpenLoading(false)
 
     if (newProductId) {
@@ -173,14 +220,23 @@ export default function ProductCreate() {
     const selectedStores = userStores?.filter((el: any) =>
       arrValues.includes(el.name),
     )
-    const storeKeys = selectedStores?.map(obj => obj.id) ?? []
+    //const storeKeys = selectedStores?.map(obj => obj.id) ?? []
 
-    setValue('storeIds', storeKeys)
+    setValue('stores', selectedStores ?? [])
     setStoreNames(arrValues)
-    clearErrors('storeIds')
+    clearErrors('stores')
   }
   const onChangeStatus = (event: SelectChangeEvent) => {
     setValue('status', event.target.value as string)
+  }
+  const getSnackBarMessage = () => {
+    if (success) {
+      if (existProductId) return 'Successfully updated the product!'
+      return 'Successfully created a new product!'
+    } else {
+      if (existProductId) return 'Failed to update the product!'
+      return 'Failed to create a new product'
+    }
   }
   return (
     <Container>
@@ -294,10 +350,10 @@ export default function ProductCreate() {
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth error={!!errors.storeIds}>
+              <FormControl fullWidth error={!!errors.stores}>
                 <InputLabel>Store*</InputLabel>
                 <Controller
-                  name="storeIds"
+                  name="stores"
                   control={control}
                   defaultValue={[]}
                   render={({field}) => (
@@ -353,8 +409,8 @@ export default function ProductCreate() {
             flexDirection="row"
             marginTop={3}>
             <Button
-              title={'Create'}
-              onClick={handleSubmit(handleCreate)}
+              title={existProductId ? 'Update' : 'Create'}
+              onClick={handleSubmit(handleCreateOrUpdate)}
               backgroundColor={undefined}
               width="200px"
               height="40px"
@@ -377,9 +433,7 @@ export default function ProductCreate() {
           onClose={handleClose}
           severity={success ? 'success' : 'error'}
           sx={{width: '100%'}}>
-          {success
-            ? 'Successfully Created a New Product!'
-            : 'Failed to Create a New Product'}
+          {getSnackBarMessage()}
         </Alert>
       </Snackbar>
     </Container>

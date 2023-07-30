@@ -24,6 +24,7 @@ import {RootState} from '@/redux'
 import {selectUserUid} from '@/redux/user/userSlice'
 import Button from '@/components/Button'
 import {uploadImage} from '@/libs/firebase'
+import AdminProductTable from '@/components/AdminProductTable'
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB in bytes
 
@@ -72,7 +73,9 @@ export default function ProductList() {
         </Breadcrumbs>
       </Stack>
       <Body elevation={1}>
-        <TableContainer></TableContainer>
+        <TableContainer>
+          <AdminProductTable />
+        </TableContainer>
       </Body>
     </Container>
   )

@@ -28,7 +28,10 @@ export type TOrderPayload = {
   taxes: number
   promoCode: string
 }
-
+export type TStore = {
+  id: string
+  name: string
+}
 export type TProductPayload = {
   name: string
   description: string
@@ -38,7 +41,7 @@ export type TProductPayload = {
   quantity: number
   rating: number
   options?: string
-  storeIds: string[]
+  stores: TStore[]
   createdAt: number
   status: string
 }

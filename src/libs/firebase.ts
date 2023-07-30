@@ -247,6 +247,69 @@ export const updateOrder = async (orderId: string, fields: any) => {
 /*********************************************
    product collection
 **********************************************/
+export const getProductById = async ({queryKey}: any) => {
+  const [_key, {id}] = queryKey
+  const docRef = doc(db, 'products', id)
+  const docSnap = await getDoc(docRef)
+
+  if (docSnap.exists()) {
+    return docSnap.data()
+  } else {
+    return null
+  }
+}
+export const getProductList = async ({queryKey}: any) => {
+  const [
+    _key,
+    {order: queryOrder, orderBy: queryOrderBy, limit: queryLimit, statuses},
+  ] = queryKey
+  const collectionRef = collection(db, 'products')
+  const formatQueryOrderBy = (name: string | undefined) => {
+    if (name === 'product') {
+      return 'name'
+    } else if (name === 'category') {
+      return 'category'
+    } else if (name === 'stock') {
+      return 'quantity'
+    } else if (name === 'price') {
+      return 'price'
+    } else if (name === 'status') {
+      return 'status'
+    } else {
+      return 'name'
+    }
+  }
+  // NOTE: where() doesn't work with orderBy
+  const q = query(
+    collectionRef,
+    orderBy(formatQueryOrderBy(queryOrderBy), queryOrder),
+    limit(queryLimit ?? 100),
+  )
+  let productList: any[] = []
+  try {
+    // Execute the query
+    const querySnapshot = await getDocs(q)
+
+    // Process the query results
+    querySnapshot.forEach(doc => {
+      const data = doc.data()
+      productList.push({id: doc.id, ...data})
+    })
+
+    // TODO: should handle in backend api
+    if (statuses.length !== 0) {
+      productList = productList.filter((item: any) =>
+        statuses.includes(item.status),
+      )
+    }
+
+    return productList
+  } catch (error) {
+    console.log('Error getting products:', error)
+    return productList
+  }
+}
+
 export const createProduct = async (payload: TProductPayload) => {
   if (!payload) return
 
@@ -256,6 +319,26 @@ export const createProduct = async (payload: TProductPayload) => {
     return newProductRef.id
   } catch (error) {
     return null
+  }
+}
+export const updateProduct = async (id: string, fields: any) => {
+  try {
+    const collectionRef = collection(db, 'products')
+    const documentRef = doc(collectionRef, id)
+    await setDoc(documentRef, fields, {merge: true})
+    return true
+  } catch (error) {
+    return false
+  }
+}
+export const deleteProduct = async (id: string) => {
+  try {
+    const collectionRef = collection(db, 'products')
+    const documentRef = doc(collectionRef, id)
+    await deleteDoc(documentRef)
+    return true
+  } catch (error) {
+    return false
   }
 }
 
