@@ -157,7 +157,7 @@ export default function ProductCreate() {
     }
   }, [data])
 
-  const {name, price, quantity, stores} = getValues()
+  const {name, price, quantity, stores, imageUrl} = getValues()
   const readyToCreate = name && price >= 0 && quantity && stores.length !== 0
   const handleOnReceivedFile = (file: any) => {
     if (!file) return
@@ -397,6 +397,7 @@ export default function ProductCreate() {
             </Grid>
             <Grid item xs={12} md={12}>
               <UploadFile
+                imageUrl={imageUrl}
                 selectedFile={selectedFile}
                 setSelectedFile={setSelectedFile}
                 onReceived={handleOnReceivedFile}

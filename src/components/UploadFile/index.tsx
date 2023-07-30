@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import styled from 'styled-components'
 import {Typography, Input, IconButton} from '@mui/material'
 import {CloudUploadOutlined} from '@mui/icons-material'
+import Image from '@/components/Image'
 import {theme} from '@/theme'
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB in bytes
@@ -9,6 +10,7 @@ export interface IFile {
   name: string
 }
 interface IUploadFIle {
+  imageUrl?: string
   setSelectedFile: any
   selectedFile: IFile | null | undefined
   onReceived: (file: any) => void
@@ -17,6 +19,7 @@ interface IUploadFIle {
 }
 
 export default function UploadFile({
+  imageUrl,
   setSelectedFile,
   selectedFile,
   onReceived,
@@ -25,6 +28,7 @@ export default function UploadFile({
 }: IUploadFIle) {
   const [dragging, setDragging] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
+  const [imageSrc, setImageSrc] = useState<any>(undefined)
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
@@ -40,6 +44,13 @@ export default function UploadFile({
     })
     if (correctFile && fileSize <= maxSize) {
       setError('')
+      const reader = new FileReader()
+
+      reader.onloadend = () => {
+        setImageSrc(reader.result)
+      }
+      reader.readAsDataURL(file)
+
       setSelectedFile(file)
       onReceived(file)
     } else {
@@ -90,14 +101,29 @@ export default function UploadFile({
           <CloudUploadOutlined fontSize="large" />
         </IconButton>
       </label>
-      {selectedFile?.name && <FileName>{selectedFile?.name}</FileName>}
-      <Instruction hasFile={!!selectedFile?.name}>
-        Drag and Drop File Here
-      </Instruction>
-      <Instruction hasFile={!!selectedFile?.name}>
-        or Click Icon to Browse
-      </Instruction>
-      <Instruction hasFile={!!selectedFile?.name}>Max 5 MB</Instruction>
+
+      {selectedFile || imageUrl ? (
+        <>
+          <DisplayImage
+            src={imageSrc || (imageUrl as any)}
+            alt="Selected Image"
+            type="contain"
+            width={60}
+            height={60}
+          />
+          <FileName>{selectedFile?.name}</FileName>
+        </>
+      ) : (
+        <>
+          <Instruction hasFile={!!selectedFile?.name}>
+            Drag and Drop File Here
+          </Instruction>
+          <Instruction hasFile={!!selectedFile?.name}>
+            or Click Icon to Browse
+          </Instruction>
+          <Instruction hasFile={!!selectedFile?.name}>Max 5 MB</Instruction>
+        </>
+      )}
       {error && <Error>{error}</Error>}
     </DropArea>
   )
@@ -129,4 +155,7 @@ const UploadInput = styled(Input)`
 `
 const Error = styled(Instruction)`
   color: ${theme.color.error};
+`
+const DisplayImage = styled(Image)`
+  border-radius: 7px;
 `
