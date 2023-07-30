@@ -112,6 +112,15 @@ export const getOrderStatusChipColor = (status: string) => {
     return 'default'
   }
 }
+export const getProductStatusChipColor = (status: string) => {
+  if (status === 'published') {
+    return 'success'
+  } else if (status === 'draft') {
+    return 'default'
+  } else {
+    return 'default'
+  }
+}
 export const formatAddress = (address: IAddress) => {
   if (!address) return ''
   const {street, city, state, zipcode, country} = address

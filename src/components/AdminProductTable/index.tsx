@@ -31,7 +31,7 @@ import {
   Edit,
 } from '@mui/icons-material'
 import {getProductList, deleteProduct, updateProduct} from '@/libs/firebase'
-import {formatCurrency, getOrderStatusChipColor} from '@/utils'
+import {formatCurrency, getProductStatusChipColor} from '@/utils'
 import {theme} from '@/theme'
 import {statusArray, createData} from './utils'
 import TableHead from '@/components/table/TableHead'
@@ -147,7 +147,7 @@ const StatusOptions = ({
         onClick={onClick}
         onDelete={onClick}
         deleteIcon={<KeyboardArrowDown />}
-        color={getOrderStatusChipColor(label)}
+        color={getProductStatusChipColor(label)}
         variant="outlined"
         size="small"
       />
@@ -175,7 +175,7 @@ const StatusOptions = ({
               <MenuItem key={option} onClick={() => handleOnSelect(option)}>
                 <Chip
                   label={option}
-                  color={getOrderStatusChipColor(option)}
+                  color={getProductStatusChipColor(option)}
                   variant="filled"
                   size="small"
                 />
@@ -283,13 +283,13 @@ export default function AdminProductTable() {
     }
   }
   const handleUpdate = async (id: string, status: any) => {
-    // const fields = {status}
-    // const success = await updateProduct(id, fields)
-    // if (success) {
-    //   refetch()
-    // } else {
-    //   console.log('some thing went wrong')
-    // }
+    const fields = {status}
+    const success = await updateProduct(id, fields)
+    if (success) {
+      refetch()
+    } else {
+      console.log('some thing went wrong')
+    }
   }
 
   return (
@@ -352,7 +352,7 @@ export default function AdminProductTable() {
                         id={row.id}
                         label={row.status}
                         onSelect={(status: string) =>
-                          console.log(row.id, status)
+                          handleUpdate(row.id, status)
                         }
                       />
                     </TableCell>
