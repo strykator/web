@@ -16,11 +16,6 @@ import Login from '@/components/MenuBar/Login'
 import Button from '@/components/Button'
 import UserMenu from '@/components/MenuBar/UserMenu'
 
-const poppins = Poppins({
-  weight: ['100', '200', '300', '400', '500', '600', '700'],
-  subsets: ['latin'],
-})
-
 export default function AdminLayout({children}: {children: React.ReactNode}) {
   const router = useRouter()
   const pathName = usePathname()
@@ -37,9 +32,9 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
   }, [isMobile])
 
   useEffect(() => {
-    // if(!userRoles?.includes('Admin')) {
-    //   router.push('/')
-    // }
+    if (!userRoles?.includes('Admin')) {
+      router.push('/')
+    }
   }, [userRoles])
 
   const renderTopBar = () => {
