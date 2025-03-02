@@ -14,15 +14,26 @@ import ThemeProvider from '@/theme'
 import {Typography} from '@mui/material'
 import ShoppingCart from '@/components/ShoppingCart'
 import Analytics from '@/components/Analyctics'
+import {
+  ThemeProvider as MuiThemeProvider,
+  createTheme,
+} from '@mui/material/styles'
 
 const inter = Inter({subsets: ['latin']})
 const poppins = Poppins({
   weight: ['100', '200', '300', '400', '500', '600', '700'],
   subsets: ['latin'],
 })
-
 // React Query Client
 const queryClient = new QueryClient()
+
+const theme = createTheme({
+  typography: {
+    allVariants: {
+      fontFamily: "'Poppins', sans-serif",
+    },
+  },
+})
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
@@ -40,13 +51,15 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <ApolloProvider client={client}>
-              <ThemeProvider>
-                <PersistGate loading={null} persistor={persistor}>
-                  {children}
-                  <ShoppingCart />
-                </PersistGate>
-                <Typography />
-              </ThemeProvider>
+              <MuiThemeProvider theme={theme}>
+                <ThemeProvider>
+                  <PersistGate loading={null} persistor={persistor}>
+                    {children}
+                    <ShoppingCart />
+                  </PersistGate>
+                  <Typography />
+                </ThemeProvider>
+              </MuiThemeProvider>
             </ApolloProvider>
           </QueryClientProvider>
         </Provider>
