@@ -195,12 +195,12 @@ export default function Checkout({params}: {params: {checkout: string}}) {
 
   const handlePlaceOrder: SubmitHandler<IFormInput> = async data => {
     openLoadingSreen()
-    // const payload = prepareOrderPayload({data, shoppingCart, tip, discount})
-    // const confirmation = await createOrder(payload)
-    const confirmation =
-      Math.round(Math.random() * 1000).toString() +
-      'PiddRS5TyHp' +
-      Math.round(Math.random() * 1000).toString()
+    const payload = prepareOrderPayload({data, shoppingCart, tip, discount})
+    const confirmation = await createOrder(payload)
+    // const confirmation =
+    //   Math.round(Math.random() * 1000).toString() +
+    //   'PiddRS5TyHp' +
+    //   Math.round(Math.random() * 1000).toString()
     if (confirmation) {
       setStatus(Status.SUCCESS)
       setOrderConfirmation(confirmation)

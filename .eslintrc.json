@@ -1,9 +1,12 @@
 {
   "extends": "next/core-web-vitals",
+  "plugins": ["@tanstack/query"],
   "rules": {
     "react-hooks/rules-of-hooks": "error",
     "no-unused-vars": "warn",
     "no-console": "warn",
-    "eol-last": "warn"
+    "eol-last": "warn",
+    "@tanstack/query/exhaustive-deps": "error",
+    "@tanstack/query/prefer-query-object-syntax": "error"
   }
 }

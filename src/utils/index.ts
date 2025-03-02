@@ -1,5 +1,7 @@
 import numeral from 'numeral'
+import {format} from 'date-fns'
 import {restaurants} from '@/constants'
+import {IAddress} from './types'
 
 export {schemaFormCheckout, schemaFormProfile} from './schemas'
 
@@ -81,3 +83,53 @@ export const sanitizeData = (data: any) => {
 
   return sanitizedData
 }
+
+export const formatDateAndTime = (timestamp: number) => {
+  return {
+    date: format(new Date(+timestamp), 'dd MMM yyyy'),
+    time: format(new Date(+timestamp), 'hh:mm a'),
+  }
+}
+export const convertDateToTimestamp = (date: Date, startDay?: boolean) => {
+  const temp = new Date(date)
+  temp.setHours(startDay ? 0 : 23)
+  temp.setMinutes(startDay ? 0 : 59)
+  temp.setSeconds(startDay ? 1 : 59)
+  return temp.getTime()
+}
+export const getOrderStatusChipColor = (status: string) => {
+  if (status === 'pending') {
+    return 'warning'
+  } else if (status === 'confirmed') {
+    return 'primary'
+  } else if (status === 'completed') {
+    return 'success'
+  } else if (status === 'cancelled') {
+    return 'error'
+  } else if (status === 'refunded') {
+    return 'default'
+  } else {
+    return 'default'
+  }
+}
+export const getProductStatusChipColor = (status: string) => {
+  if (status === 'published') {
+    return 'success'
+  } else if (status === 'draft') {
+    return 'default'
+  } else {
+    return 'default'
+  }
+}
+export const formatAddress = (address: IAddress) => {
+  if (!address) return ''
+  const {street, city, state, zipcode, country} = address
+  return `${street ? `${street}, ` : null}${city ? `${city}, ` : null}${
+    state ? `${state} ` : null
+  }${zipcode ? `${zipcode}, ` : null}${country ? `${country}, ` : null}`
+}
+export const getVisibleRows = (
+  rows: any[],
+  page: number,
+  rowsPerPage: number,
+) => rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)

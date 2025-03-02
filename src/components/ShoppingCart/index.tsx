@@ -65,7 +65,7 @@ export default function ShoppingCart({horizontal}: IShoppingCar) {
       !pathName.includes('restaurants') ||
       pathName.includes('checkout')
     ) {
-      dispatch(toggleShowShoppingCart(false))
+      shouldShowShoppingCart && dispatch(toggleShowShoppingCart(false))
     } else {
       dispatch(toggleShowShoppingCart(true))
     }

@@ -21,10 +21,27 @@ export type TOrderPayload = {
     country?: string
   }
   status: string
-  timestamp: string
+  timestamp: number
   totalAmount: number
   totalQuantity: number
   tip: number
   taxes: number
   promoCode: string
+}
+export type TStore = {
+  id: string
+  name: string
+}
+export type TProductPayload = {
+  name: string
+  description: string
+  category: string
+  imageUrl?: string
+  price: number
+  quantity: number
+  rating: number
+  options?: string
+  stores: TStore[]
+  createdAt: number
+  status: string
 }

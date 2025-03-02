@@ -10,12 +10,14 @@ import {
   Divider,
   Typography,
 } from '@mui/material'
-import {useRouter} from 'next/navigation'
+import {AdminPanelSettings, Home} from '@mui/icons-material'
+import {useRouter, usePathname} from 'next/navigation'
 import LogoutIcon from '@mui/icons-material/Logout'
-import {useDispatch} from 'react-redux'
-import {resetUser} from '@/redux/user/userSlice'
+import {useDispatch, useSelector} from 'react-redux'
+import {resetUser, selectUserRoles} from '@/redux/user/userSlice'
 import {theme} from '@/theme'
 import {Logout} from '@/libs/firebase'
+import {RootState} from '@/redux'
 
 const paperXs = {
   overflow: 'visible',
@@ -47,6 +49,9 @@ const paperXs = {
 
 const UserMenu = () => {
   const router = useRouter()
+  const pathName = usePathname()
+  const appState = useSelector((state: RootState) => state)
+  const useRoles = selectUserRoles(appState)
   const dispatch = useDispatch()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -59,6 +64,9 @@ const UserMenu = () => {
   const handleLogout = async () => {
     const isLoggedOut = await Logout()
     if (isLoggedOut) {
+      if (pathName.includes('admin')) {
+        router.replace('/')
+      }
       dispatch(resetUser())
     }
     handleClose()
@@ -67,6 +75,36 @@ const UserMenu = () => {
   const onClickProfile = () => {
     router.push('/profile')
     handleClose()
+  }
+
+  const renderAdminMenuItem = () => {
+    if (useRoles?.includes('Admin') && pathName.includes('admin')) {
+      return (
+        <>
+          <MenuItem onClick={() => router.replace('/')}>
+            <ListItemIcon>
+              <Home fontSize="small" />
+            </ListItemIcon>
+            <Text>Home</Text>
+          </MenuItem>
+          <Divider />
+        </>
+      )
+    } else if (useRoles?.includes('Admin') && !pathName.includes('admin')) {
+      return (
+        <>
+          <MenuItem onClick={() => router.push('/admin')}>
+            <ListItemIcon>
+              <AdminPanelSettings fontSize="small" />
+            </ListItemIcon>
+            <Text>Admin</Text>
+          </MenuItem>
+          <Divider />
+        </>
+      )
+    } else {
+      return null
+    }
   }
 
   return (
@@ -88,6 +126,7 @@ const UserMenu = () => {
         }}
         transformOrigin={{horizontal: 'right', vertical: 'top'}}
         anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}>
+        {renderAdminMenuItem()}
         <MenuItem onClick={onClickProfile}>
           <Avatar /> <Text>Profile</Text>
         </MenuItem>
