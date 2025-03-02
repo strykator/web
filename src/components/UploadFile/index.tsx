@@ -115,13 +115,13 @@ export default function UploadFile({
         </>
       ) : (
         <>
-          <Instruction hasFile={!!selectedFile?.name}>
+          <Instruction hasFile={!!selectedFile}>
             Drag and Drop File Here
           </Instruction>
-          <Instruction hasFile={!!selectedFile?.name}>
+          <Instruction hasFile={!!selectedFile}>
             or Click Icon to Browse
           </Instruction>
-          <Instruction hasFile={!!selectedFile?.name}>Max 5 MB</Instruction>
+          <Instruction hasFile={!!selectedFile}>Max 5 MB</Instruction>
         </>
       )}
       {error && <Error>{error}</Error>}
